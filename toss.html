@@ -1,0 +1,150 @@
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Match Toss</title>
+  <link rel="stylesheet" href="toss.css?v=17">
+</head>
+<body>
+  <div class="stadium-lights">
+    <div class="beam left"></div>
+    <div class="beam center"></div>
+    <div class="beam right"></div>
+  </div>
+  <div class="field-glow"></div>
+
+  <div class="page">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">🏏</div>
+        <div class="title">
+          <h1>Match Toss</h1>
+          <p>Tour match toss loaded from your selected schedule</p>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; position:relative; z-index:3;">
+        <a class="back-btn" href="index.html">← Tour Setup</a>
+        <div class="match-pill" id="matchType">Loading Match...</div>
+      </div>
+    </header>
+
+    <main class="main-grid">
+      <section class="card team-card">
+        <div class="team-head">
+          <div class="team-name">
+            <h2 id="teamAName">Team A</h2>
+            <p id="teamASub">User Team</p>
+          </div>
+          <div class="team-badge" id="teamABadge">A</div>
+        </div>
+        <div class="power-meter"><div class="power-fill" id="teamAPower"></div></div>
+        <div class="team-stats">
+          <div class="stat"><b id="teamABat">0</b><span>Bat</span></div>
+          <div class="stat"><b id="teamABowl">0</b><span>Bowl</span></div>
+          <div class="stat"><b id="teamAField">0</b><span>Field</span></div>
+        </div>
+        <div class="captain-box"><small>Captain</small><strong id="teamACaptain">Captain</strong></div>
+        <div class="team-info-box venue-inside-team">
+            <div class="team-info-head">
+                <span>Pitch & Stadium</span>
+                <b>🏟️</b>
+            </div>
+
+            <h3 id="pitchTitle">Dry Batting Surface</h3>
+            <p id="pitchText">Good for batting first. Spin may become stronger later.</p>
+
+            <div class="venue-divider"></div>
+
+            <h3 id="stadiumName">Melbourne Cricket Ground, Melbourne</h3>
+            <p id="stadiumText">Home venue. Chasing may depend on dew and pitch pace.</p>
+
+            <div class="mini-tags compact-tags">
+                <span class="tag gold" id="pitchBounce">Bounce: Medium</span>
+                <span class="tag green" id="pitchAssist">Assist: Spin Late</span>
+                <span class="tag" id="stadiumCapacity">Capacity 25,000+</span>
+                <span class="tag green" id="stadiumCrowd">Crowd: Loud</span>
+            </div>
+        </div>
+      </section>
+
+      <section class="card toss-center">
+        <div class="toss-top-row  toss-title-centered">
+          <div>
+            <div class="section-label">Toss Call</div>
+          </div>
+        </div>
+
+        <div class="coin-area" id="coinArea">
+          <div class="coin-stage"></div>
+          <div class="energy-ring"></div>
+          <div class="energy-ring ring-two"></div>
+          <canvas id="coinCanvas" width="325" height="325" aria-label="Animated cricket toss coin"></canvas>
+        </div>
+
+        <div>
+          <div class="choice-row" id="choiceRow">
+            <button id="headsBtn" onclick="selectCall('Heads')" class="active">Heads</button>
+            <button id="tailsBtn" onclick="selectCall('Tails')">Tails</button>
+          </div>
+
+          <button class="toss-btn" id="flipBtn" onclick="doToss()">Flip Toss</button>
+
+          <button
+            class="toss-btn continue-btn"
+            id="continueBtn"
+            onclick="goToMatchCenter()"
+            style="display: none;"
+          >
+            Continue to Match Center
+          </button>
+
+          <div class="decision-row" id="decisionRow">
+            <button onclick="chooseDecision('Bat')">Bat First</button>
+            <button onclick="chooseDecision('Bowl')">Bowl First</button>
+          </div>
+          <div class="result-box flash-result" id="resultBox" style="margin-top: 10px;">
+            <h3 id="resultTitle">Choose Heads or Tails</h3>
+            <p id="resultText">Pick your toss call, then flip the coin.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card team-card">
+        <div class="team-head">
+          <div class="team-name">
+            <h2 id="teamBName">Team B</h2>
+            <p id="teamBSub">Computer Team</p>
+          </div>
+          <div class="team-badge away" id="teamBBadge">B</div>
+        </div>
+        <div class="power-meter"><div class="power-fill away-fill" id="teamBPower"></div></div>
+        <div class="team-stats">
+          <div class="stat"><b id="teamBBat">0</b><span>Bat</span></div>
+          <div class="stat"><b id="teamBBowl">0</b><span>Bowl</span></div>
+          <div class="stat"><b id="teamBField">0</b><span>Field</span></div>
+        </div>
+        <div class="captain-box"><small>Captain</small><strong id="teamBCaptain">Captain</strong></div>
+        <div class="team-info-box weather-inside-team">
+            <div class="team-info-head">
+                <span>Weather</span>
+                <b>⛅</b>
+            </div>
+
+            <h3 id="weatherTitle">Partly Cloudy • 28°C</h3>
+            <p id="weatherText">Good match conditions.</p>
+
+            <div class="mini-tags compact-tags">
+                <span class="tag blue" id="weatherWind">Wind 12 km/h</span>
+                <span class="tag" id="weatherHumidity">Humidity 54%</span>
+            </div>
+        
+        </div>
+
+      </section>
+    </main>
+
+
+  </div>
+  <script src="toss.js?v=17"></script>
+
+
+</body></html>

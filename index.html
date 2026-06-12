@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cricket Tour Setup - JSON Ready</title>
+  <link rel="stylesheet" href="tour.css?v=1049" />
+</head>
+<body class="app-loading main-page">
+  <main class="page">
+    <section class="hero">
+      <div>
+        <h1 class="main-hero-title">Cricket <span>Tour Setup</span></h1>
+      </div>
+
+      <div class="hero-tools">
+        <div class="database-row">
+          <div class="database-pill" id="databaseCount">Looking for JSON...</div>
+
+          <button 
+            type="button" 
+            class="secondary compact page-link" 
+            onclick="window.location.href='player-database.html'"
+          >
+            Open Player Database
+          </button>
+        </div>
+
+        <div class="data-source" id="dataSource">
+          Put data/players.json inside this frontend folder.
+        </div>
+
+        <input 
+          type="file" 
+          id="jsonFileInput" 
+          accept="application/json,.json" 
+          hidden 
+          onchange="handleJsonUpload(event)"
+        >
+      </div>
+    </section>
+
+    <nav class="steps" aria-label="Tour setup steps">
+      <span class="step active" id="stepSetup">1. Teams & Series</span>
+      <span class="step" id="stepSummary">2. Tour Summary</span>
+      <span class="step" id="stepSquad">3. Select Format Squad</span>
+    </nav>
+
+    <section class="screen active" id="setupScreen">
+      <div class="team-grid">
+        <article class="team-card" id="userTeamCard">
+          <div class="team-card-inner">
+            <div class="team-label">User Team</div>
+
+            <div class="logo-frame">
+              <img id="userLogo" alt="User team official cricket logo">
+              <div class="logo-fallback" id="userFallback"></div>
+            </div>
+
+            <h2 id="userTeamName">Choose Team</h2>
+            <p id="userTeamDetails">Select your national team for the tour.</p>
+            <select id="userTeamSelect"></select>
+            <div class="team-stats" id="userTeamStats"></div>
+          </div>
+        </article>
+
+        <div class="vs-card"><span>VS</span></div>
+
+        <article class="team-card"  id="computerTeamCard">
+          <div class="team-card-inner">
+            <div class="team-label">Computer Team</div>
+
+            <div class="logo-frame">
+              <img id="computerLogo" alt="Computer team official cricket logo">
+              <div class="logo-fallback" id="computerFallback"></div>
+            </div>
+
+            <h2 id="computerTeamName">Choose Team</h2>
+            <p id="computerTeamDetails">Select the computer opponent.</p>
+            <select id="computerTeamSelect"></select>
+            <div class="team-stats" id="computerTeamStats"></div>
+          </div>
+        </article>
+      </div>
+
+      <section class="panel series-panel">
+        <h2>Series Creator</h2>
+
+        <div class="series-grid series-counter-grid">
+          <input type="hidden" id="tests" value="0">
+          <input type="hidden" id="odis" value="3">
+          <input type="hidden" id="t20s" value="1">
+
+          <div class="counter-card test-counter">
+            <div class="counter-top">
+              <span>Test</span>
+              <small>Long Format</small>
+            </div>
+
+            <div class="counter-control">
+              <button type="button" onclick="changeSeriesCount('tests', -1)">−</button>
+              <strong id="testsCount">0</strong>
+              <button type="button" onclick="changeSeriesCount('tests', 1)">+</button>
+            </div>
+
+            <div class="counter-bottom" id="testsLabel">No Tests</div>
+          </div>
+
+          <div class="counter-card odi-counter">
+            <div class="counter-top">
+              <span>ODI</span>
+              <small>One-Day</small>
+            </div>
+
+            <div class="counter-control">
+              <button type="button" onclick="changeSeriesCount('odis', -1)">−</button>
+              <strong id="odisCount">3</strong>
+              <button type="button" onclick="changeSeriesCount('odis', 1)">+</button>
+            </div>
+
+            <div class="counter-bottom" id="odisLabel">3 ODIs</div>
+          </div>
+
+          <div class="counter-card t20-counter">
+            <div class="counter-top">
+              <span>T20</span>
+              <small>Fast Format</small>
+            </div>
+
+            <div class="counter-control">
+              <button type="button" onclick="changeSeriesCount('t20s', -1)">−</button>
+              <strong id="t20sCount">1</strong>
+              <button type="button" onclick="changeSeriesCount('t20s', 1)">+</button>
+            </div>
+
+            <div class="counter-bottom" id="t20sLabel">1 T20</div>
+          </div>
+
+          <div class="series-create-card">
+            <div>
+              <span class="series-preview-label">Tour Preview</span>
+              <strong id="seriesPreviewText">0 Test • 3 ODI • 1 T20</strong>
+              <small id="seriesTotalText">4 total matches</small>
+            </div>
+
+            <button type="button" onclick="createSeries()">Create Series</button>
+          </div>
+
+          <div id="setupMsg" class="message error"></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="screen" id="squadScreen">
+      <button type="button" onclick="testComputerSquadPick()">
+        Test Computer Squad Pick
+      </button>
+
+      <pre id="computerSquadTestOut"></pre>
+      <div class="topline">
+        <div>
+          <h2 id="formatSquadTitle">Select Format Squad</h2>
+        </div>
+
+        <button class="secondary" onclick="showScreen('setup')">Back to Setup</button>
+      </div>
+
+      <section class="panel">
+        <div class="squad-layout">
+          <aside class="side-panel">
+            <h3>Squad Rules</h3>
+            <div class="chip-list">
+              <div class="chip" id="selectedChip"><span>Selected</span><b>0</b></div>
+              <div class="chip warn"><span>Minimum</span><b>12</b></div>
+              <div class="chip good"><span>Maximum</span><b>18</b></div>
+              <div class="chip" id="availableChip"><span>Available</span><b>0</b></div>
+            </div>
+
+            <div class="filters">
+              <input type="text" id="searchBox" placeholder="Search player..." oninput="renderPlayerTable()">
+
+              <select id="roleFilter" onchange="renderPlayerTable()">
+                <option value="all">All roles</option>
+                <option value="batsman">Batsmen</option>
+                <option value="bowler">Bowlers</option>
+                <option value="all-rounder">All-rounders</option>
+                <option value="wicket-keeper">Wicket-keepers</option>
+              </select>
+
+              <button type="button" class="auto-user-squad-btn" onclick="autoPickUserSquad()">
+                Auto Pick Squad
+              </button>
+            </div>
+
+            <div class="actions">
+              <button id="summaryBtn" onclick="finishSquad()" disabled>Save Squad</button>
+              <button class="secondary" onclick="clearSquad()">Clear</button>
+            </div>
+
+            <div id="squadMsg" class="message error"></div>
+          </aside>
+
+          <div class="table-card">
+            <table class="squad-table">
+              <thead>
+                <tr>
+                  <th class="select-cell">Pick</th>
+
+                  <th>
+                    <button class="squad-sort-btn" data-squad-sort="name">
+                      Player <span class="squad-sort-icon">↕</span>
+                    </button>
+                  </th>
+
+                  <th>
+                    <button class="squad-sort-btn" data-squad-sort="role">
+                      Role <span class="squad-sort-icon">↕</span>
+                    </button>
+                  </th>
+
+                  <th>
+                    <button class="squad-sort-btn" data-squad-sort="batting">
+                      Bat <span class="squad-sort-icon">↕</span>
+                    </button>
+                  </th>
+
+                  <th>
+                    <button class="squad-sort-btn" data-squad-sort="bowling">
+                      Bowl <span class="squad-sort-icon">↕</span>
+                    </button>
+                  </th>
+
+                  <th>
+                    <button class="squad-sort-btn" data-squad-sort="fielding">
+                      Field <span class="squad-sort-icon">↕</span>
+                    </button>
+                  </th>
+
+                  <th>
+                    <button class="squad-sort-btn" data-squad-sort="stamina">
+                      Stamina <span class="squad-sort-icon">↕</span>
+                    </button>
+                  </th>
+
+                  <th>
+                    <button class="squad-sort-btn" data-squad-sort="fitness">
+                      Fitness <span class="squad-sort-icon">↕</span>
+                    </button>
+                  </th>
+
+                  <th>
+                    <button class="squad-sort-btn" data-squad-sort="batStyle">
+                      Bat Style <span class="squad-sort-icon">↕</span>
+                    </button>
+                  </th>
+
+                  <th>
+                    <button class="squad-sort-btn" data-squad-sort="bowlStyle">
+                      Bowl Style <span class="squad-sort-icon">↕</span>
+                    </button>
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody id="playersTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="screen" id="summaryScreen">
+      <div class="schedule-page-header">
+        <div>
+          <h2>Tour Schedule</h2>
+          <p id="scheduleSubTitle">Generated tour fixtures from your selected teams and formats.</p>
+        </div>
+
+        <div class="schedule-actions">
+          <button class="secondary" onclick="showScreen('setup')">Back to setup</button>
+          <button onclick="copyJson()">Copy Tour JSON</button>
+          <button class="secondary" onclick="resetAll()">Start Over</button>
+        </div>
+      </div>
+
+      <div class="tour-overview-card schedule-overview-outside">
+        <div>
+          <span class="overview-label">Tour</span>
+          <h3 id="tourName">Tour Name</h3>
+        </div>
+
+        <div class="tour-overview-stats">
+          <span id="tourTeamSummary">Teams</span>
+          <span id="tourMatchSummary">Matches</span>
+          <span id="tourSquadSummary">Squads</span>
+        </div>
+      </div>
+
+      <section class="schedule-shell">
+        <div id="scheduleList" class="schedule-list"></div>
+
+        <details class="json-details">
+          <summary>Saved Tour JSON</summary>
+          <pre id="jsonOut"></pre>
+        </details>
+
+        <div id="copyMsg" class="message"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="tour.js?v=1049"></script>
+</body>
+</html>

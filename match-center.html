@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Match Center</title>
+</head>
+<body>
+  <h1>Match Center</h1>
+  <p>The toss result has been saved.</p>
+
+  <button type="button" onclick="simulateMatchResultAndReturn()">
+    Test Simulate Result
+  </button>
+
+  <pre id="out"></pre>
+
+  <script>
+    const TOUR_STORAGE_KEY = "cricketTourSetupSave_v1";
+
+    function readJSON(key, fallback = null) {
+      try {
+        return JSON.parse(localStorage.getItem(key)) || fallback;
+      } catch (error) {
+        console.error("Could not read", key, error);
+        return fallback;
+      }
+    }
+
+    function writeJSON(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function getFullTeamNames(currentMatch) {
+      const title = String(currentMatch?.match?.title || "");
+
+      let titleTeamA = "";
+      let titleTeamB = "";
+
+      if (title.includes(" vs ")) {
+        const mainPart = title.split(",")[0];
+        const parts = mainPart.split(" vs ");
+        titleTeamA = parts[0]?.trim() || "";
+        titleTeamB = parts[1]?.trim() || "";
+      }
+
+      return {
+        userTeam:
+          currentMatch?.userTeam ||
+          currentMatch?.teamA ||
+          titleTeamA ||
+          "Team A",
+
+        computerTeam:
+          currentMatch?.computerTeam ||
+          currentMatch?.teamB ||
+          titleTeamB ||
+          "Team B"
+      };
+    }
+
+    function buildFakeResult(currentMatch) {
+      const teams = getFullTeamNames(currentMatch);
+      const winner = Math.random() < 0.5 ? teams.userTeam : teams.computerTeam;
+
+      const wonByWickets = Math.random() < 0.5;
+
+      let marginText = "";
+
+      if (wonByWickets) {
+        const wickets = Math.floor(Math.random() * 8) + 1;
+        marginText = `${wickets} wicket${wickets === 1 ? "" : "s"}`;
+      } else {
+        const runs = Math.floor(Math.random() * 190) + 10;
+        marginText = `${runs} run${runs === 1 ? "" : "s"}`;
+      }
+
+      return {
+        winner,
+        marginText,
+        resultText: `${winner} won by ${marginText}`,
+        simulated: true,
+        savedAt: new Date().toISOString()
+      };
+    }
+
+    function simulateMatchResultAndReturn() {
+      const currentMatch = readJSON("currentTourMatch", null);
+      const tourSave = readJSON(TOUR_STORAGE_KEY, null);
+
+      if (!currentMatch) {
+        alert("No current match found.");
+        return;
+      }
+
+      if (!tourSave) {
+        alert("No saved tour found.");
+        return;
+      }
+
+      const matchIndex = Number(
+        currentMatch.matchIndex ??
+        currentMatch.match?.matchIndex ??
+        tourSave.tourProgress?.activeMatchIndex ??
+        0
+      );
+
+      const result = buildFakeResult(currentMatch);
+
+      if (!tourSave.tourProgress) {
+        tourSave.tourProgress = {};
+      }
+
+      if (!Array.isArray(tourSave.tourProgress.completedMatchIndexes)) {
+        tourSave.tourProgress.completedMatchIndexes = [];
+      }
+
+      if (!tourSave.tourProgress.completedMatchIndexes.includes(matchIndex)) {
+        tourSave.tourProgress.completedMatchIndexes.push(matchIndex);
+      }
+
+      if (!tourSave.tourProgress.matchResults) {
+        tourSave.tourProgress.matchResults = {};
+      }
+
+      tourSave.tourProgress.matchResults[String(matchIndex)] = {
+        matchIndex,
+        title: currentMatch.match?.title || "",
+        format: currentMatch.format || currentMatch.match?.format || "",
+        resultText: result.resultText,
+        winner: result.winner,
+        marginText: result.marginText,
+        simulated: true,
+        savedAt: result.savedAt
+      };
+
+      tourSave.tourProgress.activeMatchIndex = null;
+      tourSave.currentScreen = "summary";
+
+      currentMatch.result = {
+        matchIndex,
+        ...result
+      };
+
+      writeJSON("currentTourMatch", currentMatch);
+      writeJSON(TOUR_STORAGE_KEY, tourSave);
+
+      alert(result.resultText);
+
+      window.location.href = "index.html";
+    }
+
+    function renderDebug() {
+      document.getElementById("out").textContent = JSON.stringify({
+        currentTourMatch: readJSON("currentTourMatch"),
+        currentTossResult: readJSON("currentTossResult"),
+        tourSave: readJSON(TOUR_STORAGE_KEY)
+      }, null, 2);
+    }
+
+    renderDebug();
+  </script>
+</body>
+</html>

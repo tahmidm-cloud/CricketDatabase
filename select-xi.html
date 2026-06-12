@@ -1,0 +1,2120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Select XI</title>
+
+  <style>
+    :root {
+      --bg: #061018;
+      --panel: #101820;
+      --panel-2: #17212b;
+      --line: rgba(255, 255, 255, 0.12);
+      --text: #eef7f3;
+      --muted: #8ca4ad;
+      --green: #22c55e;
+      --blue: #38bdf8;
+      --gold: #f6c453;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.38);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(34, 197, 94, 0.16), transparent 28%),
+        radial-gradient(circle at 80% 0%, rgba(56, 189, 248, 0.12), transparent 30%),
+        linear-gradient(135deg, #030a0f, #061823 52%, #03100b);
+    }
+
+    .page {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 18px;
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 14px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(90deg, rgba(34, 197, 94, 0.10), transparent 38%, rgba(246, 196, 83, 0.09)),
+        rgba(13, 27, 37, 0.86);
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--green), #0ea5e9);
+      color: #00140a;
+      font-weight: 950;
+      font-size: 22px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    .title h1 {
+      font-size: clamp(1.35rem, 3vw, 2rem);
+      letter-spacing: -0.04em;
+    }
+
+    .title p {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-top: 3px;
+      font-weight: 700;
+    }
+
+    .back-btn {
+      border: 1px solid rgba(126, 231, 135, 0.45);
+      background: rgba(34, 197, 94, 0.12);
+      color: var(--green);
+      border-radius: 14px;
+      padding: 11px 13px;
+      font-weight: 950;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background: rgba(34, 197, 94, 0.22);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.065), transparent),
+        rgba(9, 22, 33, 0.86);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .team-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .team-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .team-name h2 {
+      font-size: 1.55rem;
+      line-height: 1;
+    }
+
+    .team-name p {
+      color: var(--muted);
+      font-size: 0.83rem;
+      margin-top: 5px;
+      font-weight: 800;
+    }
+
+    .badge {
+      width: 58px;
+      height: 58px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--green), #d9f99d);
+      color: #041017;
+      font-weight: 950;
+      font-size: 1.2rem;
+    }
+
+    .badge.away {
+      background: linear-gradient(135deg, var(--gold), #ef4444);
+    }
+
+    .mini-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .mini-stat {
+      padding: 10px 8px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .mini-stat b {
+      display: block;
+      font-size: 1.1rem;
+    }
+
+    .mini-stat span {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
+    .captain-box {
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(34, 197, 94, 0.10);
+      border: 1px solid rgba(34, 197, 94, 0.18);
+    }
+
+    .captain-box small {
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 800;
+    }
+
+    .captain-box strong {
+      color: var(--green);
+    }
+
+    .center-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      text-align: center;
+    }
+
+    .match-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      align-self: center;
+      padding: 9px 13px;
+      border: 1px solid rgba(246, 196, 83, 0.32);
+      border-radius: 999px;
+      background: rgba(246, 196, 83, 0.12);
+      color: var(--gold);
+      font-weight: 950;
+      font-size: 0.85rem;
+    }
+
+    .dummy-box {
+      border: 1px dashed rgba(255, 255, 255, 0.20);
+      border-radius: 18px;
+      padding: 22px;
+      background: rgba(255, 255, 255, 0.045);
+      display: grid;
+      gap: 10px;
+    }
+
+    .dummy-box h2 {
+      color: var(--green);
+      font-size: 1.6rem;
+      letter-spacing: -0.04em;
+    }
+
+    .dummy-box p {
+      color: var(--muted);
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    .xi-placeholder {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .slot {
+      height: 34px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid var(--line);
+      color: #cbd5e1;
+      font-size: 0.78rem;
+      font-weight: 850;
+    }
+
+    .start-btn {
+      width: 100%;
+      height: 48px;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--green), #16a34a);
+      color: #02120a;
+      font-size: 1rem;
+      font-weight: 1000;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(34, 197, 94, 0.22);
+    }
+
+    .start-btn:hover {
+      transform: translateY(-1px);
+      background: #7ee787;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 750;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 920px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    /* =========================================================
+   SELECT XI DRAG DROP PAGE
+    ========================================================= */
+
+    .xi-page-layout {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px;
+    }
+
+    .xi-control-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    }
+
+    .xi-control-card h2 {
+    margin: 8px 0 4px;
+    font-size: 1.45rem;
+    color: var(--text);
+    }
+
+    .xi-control-card p {
+    color: var(--muted);
+    font-size: 0.86rem;
+    font-weight: 700;
+    }
+
+    .xi-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    }
+
+    .xi-box {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    }
+
+    .xi-box-head {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    }
+
+    .xi-box-head h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    }
+
+    .xi-box-head p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+    }
+
+    .xi-count {
+    min-width: 74px;
+    text-align: center;
+    padding: 8px 11px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.28);
+    color: var(--green);
+    font-weight: 950;
+    }
+
+    .xi-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: grid;
+    gap: 8px;
+    padding-right: 4px;
+    }
+
+    .selected-xi-list {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    align-content: start;
+    }
+
+    .bench-xi-list {
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    align-content: start;
+    }
+
+    .xi-player-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid var(--line);
+    cursor: grab;
+    }
+
+    .xi-player-card:active {
+    cursor: grabbing;
+    }
+
+    .xi-player-card.dragging {
+    opacity: 0.45;
+    }
+
+    .xi-rank {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--green);
+    font-weight: 950;
+    }
+
+    .xi-player-main strong {
+    display: block;
+    font-size: 0.92rem;
+    }
+
+    .xi-player-main span {
+    display: block;
+    color: var(--muted);
+    font-size: 0.76rem;
+    margin-top: 3px;
+    font-weight: 750;
+    }
+
+    .xi-player-rating {
+    text-align: right;
+    display: grid;
+    gap: 3px;
+    font-size: 0.72rem;
+    color: #cbd5e1;
+    font-weight: 850;
+    }
+
+    .xi-warning {
+    color: #f6c453;
+    }
+
+    .start-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    }
+
+    @media (max-width: 900px) {
+    .xi-control-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .xi-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .xi-actions button {
+        width: 100%;
+    }
+    }
+
+
+    /* =========================================================
+   SELECT XI TWO-COLUMN NO-SCROLL LAYOUT
+========================================================= */
+
+    html,
+    body {
+    height: 100%;
+    overflow: hidden;
+    }
+
+    .select-xi-page {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 14px;
+    }
+
+    /* Top header */
+    .xi-topbar-new {
+    min-height: 92px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background:
+        linear-gradient(90deg, rgba(34, 197, 94, 0.10), transparent 38%, rgba(246, 196, 83, 0.09)),
+        rgba(13, 27, 37, 0.88);
+    box-shadow: var(--shadow);
+    }
+
+    .xi-header-left {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    }
+
+    .xi-header-center {
+    text-align: center;
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    }
+
+    .xi-header-center h1 {
+    font-size: clamp(1.55rem, 3vw, 2.25rem);
+    letter-spacing: -0.055em;
+    line-height: 1;
+    }
+
+    .xi-header-center .match-pill {
+    max-width: 420px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    }
+
+    .xi-header-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    }
+
+    .xi-header-right .start-btn {
+    width: auto;
+    min-width: 170px;
+    padding: 0 18px;
+    }
+
+    /* Main two-column layout */
+    .xi-two-column-layout {
+    min-height: 0;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 14px;
+    }
+
+    .xi-box {
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    }
+
+    .xi-box-head {
+    flex: 0 0 auto;
+    }
+
+    .xi-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 6px;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-content: start;
+    gap: 9px;
+    }
+
+    /* Make player rows feel like a scorecard list */
+    .selected-xi-list,
+    .bench-xi-list {
+    grid-template-columns: 1fr !important;
+    }
+
+    .xi-player-card {
+    min-height: 58px;
+    border-radius: 18px;
+    cursor: grab;
+    }
+
+    .xi-rank {
+    width: 38px;
+    height: 38px;
+    border-radius: 13px;
+    }
+
+    .xi-player-main strong {
+    font-size: 0.96rem;
+    }
+
+    .xi-player-main span {
+    font-size: 0.78rem;
+    }
+
+    .xi-player-rating {
+    min-width: 74px;
+    }
+
+    /* Better scrollbars inside boxes only */
+    .xi-list::-webkit-scrollbar {
+    width: 8px;
+    }
+
+    .xi-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 999px;
+    }
+
+    .xi-list::-webkit-scrollbar-thumb {
+    background: rgba(34, 197, 94, 0.40);
+    border-radius: 999px;
+    }
+
+    .xi-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(34, 197, 94, 0.65);
+    }
+
+    /* Disable old layout pieces if any remain */
+    .topbar,
+    .xi-control-card,
+    .xi-page-layout {
+    display: none !important;
+    }
+
+    /* But keep the new layout visible */
+    .select-xi-page .xi-topbar-new,
+    .select-xi-page .xi-two-column-layout {
+    display: grid !important;
+    }
+
+    /* Responsive fallback */
+    @media (max-width: 900px) {
+    body {
+        overflow: auto;
+    }
+
+    .select-xi-page {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    .xi-topbar-new {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .xi-header-left,
+    .xi-header-right {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .xi-two-column-layout {
+        grid-template-columns: 1fr;
+        overflow: visible;
+    }
+
+    .xi-box {
+        min-height: 360px;
+    }
+
+    .xi-header-right .start-btn {
+        width: 100%;
+    }
+    }
+
+    /* =========================================================
+   PLAYER OPTION POPUP
+    ========================================================= */
+
+    .player-option-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, 0.62);
+    backdrop-filter: blur(6px);
+    }
+
+    .player-option-modal.hidden {
+    display: none;
+    }
+
+    .player-option-box {
+    width: min(420px, 92vw);
+    border-radius: 24px;
+    padding: 20px;
+    background:
+        radial-gradient(circle at 90% 0%, rgba(34, 197, 94, 0.16), transparent 34%),
+        linear-gradient(180deg, rgba(23, 33, 43, 0.98), rgba(9, 22, 33, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 28px 90px rgba(0, 0, 0, 0.55);
+    position: relative;
+    }
+
+    .player-option-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    }
+
+    .player-option-box h2 {
+    margin: 0;
+    color: var(--green);
+    font-size: 1.5rem;
+    letter-spacing: -0.04em;
+    }
+
+    .player-option-box p {
+    margin: 6px 0 16px;
+    color: var(--muted);
+    font-weight: 800;
+    }
+
+    .player-option-actions {
+    display: grid;
+    gap: 10px;
+    }
+
+    .player-option-actions button {
+    height: 46px;
+    border-radius: 16px;
+    border: 1px solid rgba(126, 231, 135, 0.35);
+    background: rgba(34, 197, 94, 0.12);
+    color: var(--text);
+    font-weight: 1000;
+    }
+
+    .player-option-actions button:hover {
+    background: rgba(34, 197, 94, 0.22);
+    }
+
+    /* Prominent C / WK badges beside player name */
+
+    /* =========================================================
+   CIRCLE CAPTAIN / WK BADGES - Alternative
+    ========================================================= */
+
+    /* =========================================================
+  /* =========================================================
+   PERFECTLY CENTERED C / WK BADGES
+   Replace old .xi-role-tag CSS with this
+    ========================================================= */
+
+    .xi-player-name-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: nowrap;
+    min-width: 0;
+    }
+
+    .xi-player-name-row strong {
+    line-height: 1.15;
+    min-width: 0;
+    }
+
+    /* Shared badge base */
+    .xi-role-tag {
+    flex: 0 0 auto;
+
+    height: 22px;
+    min-width: 26px;
+    padding: 0 7px;
+
+    display: inline-grid;
+    place-items: center;
+
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 1000;
+    line-height: 22px;
+
+    text-align: center;
+    vertical-align: middle;
+
+    box-shadow: none;
+    transform: translateY(0);
+    }
+
+    /* Captain badge */
+    .xi-role-tag.captain {
+    background: rgba(246, 196, 83, 0.18);
+    border: 1px solid rgba(246, 196, 83, 0.65);
+    color: #f6c453;
+    }
+
+    /* Wicketkeeper badge */
+    .xi-role-tag.keeper {
+    min-width: 34px;
+    background: rgba(56, 189, 248, 0.16);
+    border: 1px solid rgba(56, 189, 248, 0.62);
+    color: #38bdf8;
+    }
+
+
+        /* Stronger C / WK badge colors only */
+
+    .xi-role-tag.captain {
+    background: #ffd60a !important;
+    border: 1px solid #fff3b0 !important;
+    color: #1a1200 !important;
+    }
+
+    .xi-role-tag.keeper {
+    background: #00b4d8 !important;
+    border: 1px solid #90e0ef !important;
+    color: #001219 !important;
+    }
+
+    /* Slightly stronger when inside selected XI */
+
+    .selected-xi-list .xi-role-tag.captain {
+    background: #ffb703 !important;
+    border-color: #ffd166 !important;
+    color: #160a00 !important;
+    }
+
+    .selected-xi-list .xi-role-tag.keeper {
+    background: #0096c7 !important;
+    border-color: #48cae4 !important;
+    color: #ffffff !important;
+    }
+
+    /* =========================================================
+   SELECT XI COLOR REFRESH + START MATCH EMPHASIS
+   Paste at bottom of select-xi.html style section
+    ========================================================= */
+
+    /* Less green, more navy/gold premium tone */
+    :root {
+    --bg: #07111c;
+    --panel: #0f1b2a;
+    --panel-2: #142235;
+    --line: rgba(255, 255, 255, 0.13);
+    --text: #eef7f3;
+    --muted: #9fb3c1;
+    --green: #22c55e;
+    --blue: #38bdf8;
+    --gold: #f6c453;
+    --orange: #fb923c;
+    --shadow: 0 18px 45px rgba(0, 0, 0, 0.38);
+    }
+
+    /* Background: cooler stadium look */
+    body {
+    background:
+        radial-gradient(circle at 18% 0%, rgba(56, 189, 248, 0.16), transparent 30%),
+        radial-gradient(circle at 82% 0%, rgba(246, 196, 83, 0.12), transparent 30%),
+        linear-gradient(135deg, #030712, #071827 52%, #06111f) !important;
+    }
+
+    /* Header less green */
+    .xi-topbar-new {
+    background:
+        linear-gradient(90deg, rgba(56, 189, 248, 0.12), transparent 42%, rgba(246, 196, 83, 0.12)),
+        rgba(10, 22, 35, 0.92) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    }
+
+    /* Center title */
+    .xi-header-center h1 {
+    color: #f8fafc !important;
+    }
+
+    .xi-header-center .match-pill {
+    background: rgba(246, 196, 83, 0.13) !important;
+    border-color: rgba(246, 196, 83, 0.35) !important;
+    color: #f6c453 !important;
+    }
+
+    /* Normal action buttons should be cooler blue/gray */
+    .back-btn {
+    background: rgba(15, 35, 55, 0.92) !important;
+    border: 1px solid rgba(96, 165, 250, 0.28) !important;
+    color: #cfe8ff !important;
+    box-shadow: none !important;
+    }
+
+    .back-btn:hover {
+    background: rgba(37, 99, 235, 0.22) !important;
+    border-color: rgba(96, 165, 250, 0.55) !important;
+    color: white !important;
+    }
+
+    /* Selected XI and Bench cards: more blue/navy, less green */
+    .card {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.065), transparent),
+        rgba(9, 22, 36, 0.92) !important;
+    border-color: rgba(255, 255, 255, 0.13) !important;
+    }
+
+    .xi-box-head h2 {
+    color: #f8fafc !important;
+    }
+
+    .xi-box-head p {
+    color: #9fb3c1 !important;
+    }
+
+    /* Counts use gold/blue instead of green */
+    .xi-count {
+    background: rgba(246, 196, 83, 0.12) !important;
+    border: 1px solid rgba(246, 196, 83, 0.34) !important;
+    color: #f6c453 !important;
+    }
+
+    /* Player cards cooler */
+    .xi-player-card {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.035)),
+        rgba(15, 32, 50, 0.84) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+
+    .xi-player-card:hover {
+    border-color: rgba(56, 189, 248, 0.38) !important;
+    background:
+        linear-gradient(180deg, rgba(56, 189, 248, 0.10), rgba(255, 255, 255, 0.035)),
+        rgba(15, 32, 50, 0.92) !important;
+    }
+
+    /* Rank boxes blue/gold instead of green */
+    .xi-rank {
+    background: rgba(56, 189, 248, 0.14) !important;
+    border: 1px solid rgba(56, 189, 248, 0.28) !important;
+    color: #38bdf8 !important;
+    }
+
+    .selected-xi-list .xi-rank {
+    background: rgba(246, 196, 83, 0.14) !important;
+    border-color: rgba(246, 196, 83, 0.34) !important;
+    color: #f6c453 !important;
+    }
+
+    /* Player name less neon green */
+    .xi-player-main strong {
+    color: #f8fafc !important;
+    }
+
+    .xi-player-main span {
+    color: #9fb3c1 !important;
+    }
+
+    /* START MATCH: make this the main button */
+    .start-btn,
+    .xi-header-right .start-btn {
+    min-width: 190px !important;
+    height: 50px !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(255, 237, 213, 0.70) !important;
+    background:
+        linear-gradient(135deg, #facc15, #fb923c, #f97316) !important;
+    color: #1c0a00 !important;
+    font-size: 1rem !important;
+    font-weight: 1000 !important;
+    letter-spacing: 0.02em !important;
+    box-shadow:
+        0 16px 34px rgba(249, 115, 22, 0.36),
+        0 0 0 4px rgba(251, 191, 36, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+    }
+
+    .start-btn:hover,
+    .xi-header-right .start-btn:hover {
+    background:
+        linear-gradient(135deg, #fde047, #fb923c, #ea580c) !important;
+    color: #130600 !important;
+    border-color: rgba(255, 237, 213, 0.95) !important;
+    box-shadow:
+        0 18px 38px rgba(249, 115, 22, 0.48),
+        0 0 0 5px rgba(251, 191, 36, 0.16) !important;
+    }
+
+    .start-btn::after {
+    content: " →";
+    font-weight: 1000;
+    }
+
+    .start-btn:disabled {
+    background: rgba(100, 116, 139, 0.35) !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: none !important;
+    }
+
+    .start-btn:disabled::after {
+    content: "";
+    }
+
+    /* Scrollbar now blue/gold */
+    .xi-list::-webkit-scrollbar-thumb {
+    background: rgba(56, 189, 248, 0.38) !important;
+    }
+
+    .xi-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(246, 196, 83, 0.55) !important;
+    }
+    </style>
+</head>
+
+<body>
+  <div class="page select-xi-page">
+    <header class="xi-topbar-new">
+      <div class="xi-header-left">
+        <button class="back-btn" onclick="goBackToSummary()">← Tour Summary</button>
+        <button class="back-btn" onclick="testAutoPickCaptainOnly()">Test Auto Captain</button> 
+        <button class="back-btn" onclick="autoPickBestXI()">Auto Pick XI</button>
+        <button class="back-btn" onclick="testAutoPickComputerCaptainOnly()">Test Computer Captain</button>
+      </div>
+
+      <div class="xi-header-center">
+        <h1>Select Playing XI</h1>
+        <div class="match-pill" id="matchType">Match</div>
+      </div>
+
+      <div class="xi-header-right">
+        <button class="start-btn" id="startMatchBtn" onclick="startMatchFromXI()">Start Match</button>
+      </div>
+    </header>
+
+    <main class="xi-two-column-layout">
+      <section class="card xi-box selected-xi-box">
+        <div class="xi-box-head">
+          <div>
+            <h2>Selected XI</h2>
+            <p>Drag inside this box to set batting order.</p>
+          </div>
+
+          <div class="xi-count" id="selectedCount">0 / 11</div>
+        </div>
+
+        <div
+          class="xi-list selected-xi-list"
+          id="selectedXiList"
+          ondragover="allowDrop(event)"
+          ondrop="handleListDrop(event, 'selected')"
+        ></div>
+      </section>
+
+      <section class="card xi-box bench-xi-box">
+        <div class="xi-box-head">
+          <div>
+            <h2>Bench / Squad</h2>
+            <p>Drag a player onto the XI to replace someone.</p>
+          </div>
+
+          <div class="xi-count" id="benchCount">0</div>
+        </div>
+
+        <div
+          class="xi-list bench-xi-list"
+          id="benchList"
+          ondragover="allowDrop(event)"
+          ondrop="handleListDrop(event, 'bench')"
+        ></div>
+      </section>
+    </main>
+  </div>
+  <div id="playerOptionModal" class="player-option-modal hidden">
+    <div class="player-option-box">
+        <button class="player-option-close" onclick="closePlayerOptionModal()">×</button>
+
+        <h2 id="optionPlayerName">Player Name</h2>
+        <p id="optionPlayerInfo">Role info</p>
+
+        <div class="player-option-actions">
+        <button onclick="makeSelectedPlayerCaptain()">Make Captain</button>
+        <button onclick="makeSelectedPlayerWicketkeeper()">Set Wicketkeeper</button>
+        </div>
+    </div>
+    </div>
+
+    <script>
+    let currentMatch = null;
+    let selectedXI = [];
+    let benchPlayers = [];
+    let draggedInfo = null;
+
+    let selectedOptionPlayer = null;
+    let selectedOptionListName = null;
+    let selectedOptionIndex = null;
+
+    let captainPlayerId = null;
+    let wicketkeeperPlayerId = null;
+    let didDragPlayer = false;
+
+    function getStoredTourMatch() {
+        const raw = localStorage.getItem("currentTourMatch");
+
+        if (!raw) return null;
+
+        try {
+        return JSON.parse(raw);
+        } catch (error) {
+        console.error("Could not read currentTourMatch:", error);
+        return null;
+        }
+    }
+
+    function getCurrentTourMatch() {
+        return getStoredTourMatch();
+    }
+
+    function getPlayerKey(player) {
+        return String(player?.id || player?.playerId || player?.name || player?.fullName);
+    }
+
+    function getPlayerName(player) {
+        return player?.name || player?.fullName || "Unknown Player";
+    }
+
+    function getRoleGroup(player) {
+        const role = String(player?.role || "").toLowerCase();
+        const keeping = Number(player?.attributes?.fielding?.keeping) || 0;
+
+        if (role.includes("wicket") || role.includes("keeper") || role.includes("wk") || keeping >= 14) {
+        return "wicketkeeper";
+        }
+
+        if (role.includes("all-rounder") || role.includes("all rounder") || role.includes("allrounder")) {
+        return "all-rounder";
+        }
+
+        if (role.includes("bowler")) {
+        return "bowler";
+        }
+
+        return "batsman";
+    }
+
+    function getBat(player) {
+        return Number(player?.attributes?.overall?.batting_overall) || 0;
+    }
+
+    function getBowl(player) {
+        return Number(player?.attributes?.overall?.bowling_overall) || 0;
+    }
+
+    function getField(player) {
+        const f = player?.attributes?.fielding || {};
+
+        const values = [
+        Number(f.catching) || 0,
+        Number(f.reflexes) || 0,
+        Number(f.groundFielding) || 0,
+        Number(f.throwPower) || 0,
+        Number(f.throwAccuracy) || 0
+        ];
+
+        return Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
+    }
+
+    function getKeeping(player) {
+        return Number(player?.attributes?.fielding?.keeping) || 0;
+    }
+
+    function getPlayerScore(player) {
+        const group = getRoleGroup(player);
+        const bat = getBat(player);
+        const bowl = getBowl(player);
+        const field = getField(player);
+        const keeping = getKeeping(player);
+
+        if (group === "wicketkeeper") {
+        return bat * 5 + keeping * 3 + field;
+        }
+
+        if (group === "all-rounder") {
+        return Math.max(bat, bowl) * 4 + Math.min(bat, bowl) * 3 + field;
+        }
+
+        if (group === "bowler") {
+        return bowl * 5 + field;
+        }
+
+        return bat * 5 + field;
+    }
+
+    function safeCaptainNumber(value, fallback = 0) {
+    const numberValue = Number(value);
+    return Number.isFinite(numberValue) ? numberValue : fallback;
+}
+
+    function getCaptainAttribute(player, key, fallback = 0) {
+        return safeCaptainNumber(
+            player?.attributes?.mental?.[key] ??
+            player?.mental?.[key] ??
+            player?.[key],
+            fallback
+        );
+    }
+
+    function getLeadership(player) {
+        return getCaptainAttribute(player, "leadership", 0);
+    }
+
+    function getTemperament(player) {
+        return getCaptainAttribute(player, "temperament", 0);
+    }
+
+    function getJudgement(player) {
+        return getCaptainAttribute(player, "judgement", 0);
+    }
+
+    function getCaptainScore(player) {
+        const leadership = getLeadership(player);
+        const temperament = getTemperament(player);
+        const judgement = getJudgement(player);
+        const playerScore = safeCaptainNumber(getPlayerScore(player), 0);
+
+        const role = String(getRoleGroup(player) || "").toLowerCase();
+
+        let roleBonus = 0;
+
+        if (role.includes("all-rounder") || role.includes("all rounder")) {
+            roleBonus += 4;
+        }
+
+        if (role.includes("batsman") || role.includes("batter")) {
+            roleBonus += 2;
+        }
+
+        if (role.includes("wicket")) {
+            roleBonus += 1;
+        }
+
+        return (
+            leadership * 4 +
+            temperament * 1.5 +
+            judgement * 1.5 +
+            playerScore * 0.25 +
+            roleBonus
+        );
+    }
+
+    function pickDefaultCaptain(players) {
+        if (!Array.isArray(players) || players.length === 0) {
+            return null;
+        }
+
+        return [...players].sort((a, b) => {
+            const scoreDiff = getCaptainScore(b) - getCaptainScore(a);
+
+            if (scoreDiff !== 0) {
+                return scoreDiff;
+            }
+
+            return safeCaptainNumber(getPlayerScore(b), 0) - safeCaptainNumber(getPlayerScore(a), 0);
+        })[0];
+    }
+    
+    function addBest(result, used, pool, amount, scoreFunction) {
+        const ranked = pool
+        .filter(player => !used.has(getPlayerKey(player)))
+        .sort((a, b) => scoreFunction(b) - scoreFunction(a));
+
+        for (const player of ranked) {
+        if (amount <= 0) break;
+
+        result.push(player);
+        used.add(getPlayerKey(player));
+        amount--;
+        }
+    }
+
+    function sortBattingOrder(players) {
+        return [...players].sort((a, b) => {
+        const posA = Number(a.primaryBattingPosition);
+        const posB = Number(b.primaryBattingPosition);
+
+        const estimatedA = Number.isFinite(posA) && posA > 0 ? posA : estimateBattingPosition(a);
+        const estimatedB = Number.isFinite(posB) && posB > 0 ? posB : estimateBattingPosition(b);
+
+        if (estimatedA !== estimatedB) {
+            return estimatedA - estimatedB;
+        }
+
+        return getBat(b) - getBat(a);
+        });
+    }
+
+    function estimateBattingPosition(player) {
+        const group = getRoleGroup(player);
+
+        if (group === "batsman") return 3;
+        if (group === "wicketkeeper") return 6;
+        if (group === "all-rounder") return 7;
+        return 10;
+    }
+
+    function pickDefaultXI(squad) {
+        const players = Array.isArray(squad) ? squad : [];
+
+        const result = [];
+        const used = new Set();
+
+        const wicketkeepers = players.filter(player => getRoleGroup(player) === "wicketkeeper");
+        const batsmen = players.filter(player => getRoleGroup(player) === "batsman");
+        const allrounders = players.filter(player => getRoleGroup(player) === "all-rounder");
+        const bowlers = players.filter(player => getRoleGroup(player) === "bowler");
+
+        addBest(result, used, wicketkeepers, 1, player => getBat(player) * 5 + getKeeping(player) * 3);
+        addBest(result, used, batsmen, 5, player => getBat(player) * 5 + getField(player));
+        addBest(result, used, allrounders, 2, player => getPlayerScore(player));
+        addBest(result, used, bowlers, 3, player => getBowl(player) * 5 + getField(player));
+
+        const remaining = players
+        .filter(player => !used.has(getPlayerKey(player)))
+        .sort((a, b) => getPlayerScore(b) - getPlayerScore(a));
+
+        for (const player of remaining) {
+        if (result.length >= 11) break;
+        result.push(player);
+        used.add(getPlayerKey(player));
+        }
+
+        return sortBattingOrder(result.slice(0, 11));
+    }
+
+    function getTourSave() {
+        const raw = localStorage.getItem("cricketTourSetupSave_v1");
+
+        if (!raw) return null;
+
+        try {
+            return JSON.parse(raw);
+        } catch (error) {
+            console.error("Could not read saved tour:", error);
+            return null;
+        }
+        }
+
+    function getFormatKey(format) {
+        const text = String(format || "").toLowerCase();
+
+        if (text.includes("test")) return "Test";
+        if (text.includes("odi")) return "ODI";
+        return "T20";
+    }
+
+
+    function buildFreshMatchTitle(oldTitle, userTeam, computerTeam, formatKey) {
+        const text = String(oldTitle || "");
+
+        let suffix = "";
+
+        if (text.includes(",")) {
+            suffix = "," + text.split(",").slice(1).join(",");
+        } else {
+            suffix = `, 1st ${formatKey === "T20" ? "T20I" : formatKey}`;
+        }
+
+        return `${userTeam} vs ${computerTeam}${suffix}`;
+    }
+
+    function syncCurrentMatchIdentity(matchData, tourSave, formatKey) {
+        if (!matchData) return matchData;
+
+        /*
+            IMPORTANT:
+            currentTourMatch is the fresh object made by tour.js.
+            tourSave may be stale until the user goes back to Tour Summary.
+            So currentMatch teams must win first.
+        */
+        const userTeam =
+            matchData.userTeam ||
+            matchData.teamA ||
+            tourSave?.userTeam ||
+            "Team A";
+
+        const computerTeam =
+            matchData.computerTeam ||
+            matchData.teamB ||
+            tourSave?.computerTeam ||
+            "Team B";
+
+        const freshTitle = buildFreshMatchTitle(
+            matchData.match?.title,
+            userTeam,
+            computerTeam,
+            formatKey
+        );
+
+        return {
+            ...matchData,
+
+            userTeam,
+            computerTeam,
+            teamA: userTeam,
+            teamB: computerTeam,
+
+            match: {
+            ...(matchData.match || {}),
+            format: formatKey,
+            title: freshTitle
+            }
+        };
+    }
+
+    function getMatchingFormatSquad(tourSave, matchData, formatKey) {
+        if (!tourSave || !matchData) return null;
+
+        const currentUserTeam =
+            matchData.userTeam ||
+            matchData.teamA ||
+            "";
+
+        const currentComputerTeam =
+            matchData.computerTeam ||
+            matchData.teamB ||
+            "";
+
+        /*
+            Only trust tourSave.formatSquads if tourSave belongs to the same teams.
+            If not, use currentTourMatch.userSquad/currentTourMatch.computerSquad.
+        */
+        const teamsMatch =
+            (!currentUserTeam || tourSave.userTeam === currentUserTeam) &&
+            (!currentComputerTeam || tourSave.computerTeam === currentComputerTeam);
+
+        if (!teamsMatch) return null;
+
+        return tourSave.formatSquads?.[formatKey] || null;
+        }
+
+    function loadPage() {
+        // Always reload fresh data from localStorage.
+        currentMatch = getCurrentTourMatch();
+        if (!currentMatch) {
+            document.getElementById("matchType").textContent = "No match loaded";
+            return;
+        }
+
+
+
+        const tourSave = getTourSave();
+
+        const formatKey = getFormatKey(
+            currentMatch.format ||
+            currentMatch.match?.format ||
+            "ODI"
+        );
+        currentMatch = syncCurrentMatchIdentity(currentMatch, tourSave, formatKey);
+
+
+        captainPlayerId = 
+            currentMatch.captainPlayerId ||
+            (currentMatch.captain ? getPlayerKey(currentMatch.captain) : null);
+
+        wicketkeeperPlayerId =
+            currentMatch.wicketkeeperPlayerId ||
+            (currentMatch.wicketkeeper ? getPlayerKey(currentMatch.wicketkeeper) : null);
+        
+        const latestFormatSquad = getMatchingFormatSquad(tourSave, currentMatch, formatKey);
+        // Important:
+        // Use the newest format squad from cricketTourSetupSave_v1.
+        // Only fall back to currentMatch.userSquad if nothing else exists.
+        const squad = Array.isArray(latestFormatSquad?.userSquad)
+            ? latestFormatSquad.userSquad
+            : Array.isArray(currentMatch.userSquad)
+            ? currentMatch.userSquad
+            : [];
+
+        const computerSquad = Array.isArray(latestFormatSquad?.computerSquad)
+            ? latestFormatSquad.computerSquad
+            : Array.isArray(currentMatch.computerSquad)
+            ? currentMatch.computerSquad
+            : [];
+
+        currentMatch.format = formatKey;
+        currentMatch.userSquad = squad;
+        currentMatch.computerSquad = computerSquad;
+
+        // Reset selected XI from the newest 18-player squad.
+        // This prevents old XI from staying after squad changes.
+        selectedXI = pickDefaultXI(squad);
+
+        const selectedKeys = new Set(selectedXI.map(getPlayerKey));
+
+        if (!captainPlayerId || !selectedKeys.has(captainPlayerId)) {
+            const defaultCaptain = pickDefaultCaptain(selectedXI);
+            captainPlayerId = defaultCaptain ? getPlayerKey(defaultCaptain) : null;
+        }
+
+        if (!wicketkeeperPlayerId || !selectedKeys.has(wicketkeeperPlayerId)) {
+            const keeper = selectedXI.find(player => getRoleGroup(player) === "wicketkeeper");
+            wicketkeeperPlayerId = keeper ? getPlayerKey(keeper) : null;
+        }
+
+        benchPlayers = squad.filter(player => !selectedKeys.has(getPlayerKey(player)));
+
+        document.getElementById("matchType").textContent =
+            `${currentMatch.match?.format || formatKey} • ${currentMatch.match?.title || "Tour Match"}`;
+        
+            
+        saveDraftXI();
+        renderXIPage();
+        }
+
+    function renderXIPage() {
+        const selectedList = document.getElementById("selectedXiList");
+        const benchList = document.getElementById("benchList");
+
+        selectedList.innerHTML = selectedXI.map((player, index) => {
+        return renderPlayerCard(player, "selected", index);
+        }).join("");
+
+        benchList.innerHTML = benchPlayers.map((player, index) => {
+        return renderPlayerCard(player, "bench", index);
+        }).join("");
+
+        document.getElementById("selectedCount").textContent = `${selectedXI.length} / 11`;
+        document.getElementById("benchCount").textContent = `${benchPlayers.length}`;
+
+        const startBtn = document.getElementById("startMatchBtn");
+
+        if (startBtn) {
+        startBtn.disabled = selectedXI.length !== 11;
+        }
+    }
+
+    function renderPlayerCard(player, listName, index) {
+        const playerId = getPlayerKey(player);
+
+        const rankHtml = listName === "selected"
+            ? `<div class="xi-rank">${index + 1}</div>`
+            : `<div class="xi-rank">+</div>`;
+
+        const role = getRoleGroup(player);
+
+        const captainTag = playerId === captainPlayerId
+            ? `<span class="xi-role-tag captain">C</span>`
+            : "";
+
+        const keeperTag = playerId === wicketkeeperPlayerId
+            ? `<span class="xi-role-tag keeper">WK</span>`
+            : "";
+
+        const nameTags = `${captainTag}${keeperTag}`;
+
+        return `
+            <div
+            class="xi-player-card"
+            draggable="true"
+            data-list="${listName}"
+            data-index="${index}"
+            onclick="handlePlayerCardClick(event, '${listName}', ${index})"
+            ondragstart="handleDragStart(event, '${listName}', ${index})"
+            ondragend="handleDragEnd(event)"
+            ondragover="allowDrop(event)"
+            ondrop="handleCardDrop(event, '${listName}', ${index})"
+            >
+            ${rankHtml}
+
+            <div class="xi-player-main">
+                <div class="xi-player-name-row">
+                    <strong>${getPlayerName(player)}</strong>
+                    ${nameTags}
+                </div>
+
+                <span>${role} • ${player.battingHand || "-"} hand bat • ${player.bowlingStyle || "Does Not Bowl"}</span>
+            </div>
+
+            <div class="xi-player-rating">
+                <div>Bat ${getBat(player)}</div>
+                <div>Bowl ${getBowl(player)}</div>
+            </div>
+            </div>
+        `;
+    }
+
+
+
+    function handlePlayerCardClick(event, listName, index) {
+        if (didDragPlayer) return;
+
+        const list = getList(listName);
+        const player = list[index];
+
+        if (!player) return;
+
+        selectedOptionPlayer = player;
+        selectedOptionListName = listName;
+        selectedOptionIndex = index;
+
+        document.getElementById("optionPlayerName").textContent = getPlayerName(player);
+        document.getElementById("optionPlayerInfo").textContent =
+            `${getRoleGroup(player)} • Bat ${getBat(player)} • Bowl ${getBowl(player)} • Field ${getField(player)}`;
+
+        const modal = document.getElementById("playerOptionModal");
+        modal.classList.remove("hidden");
+    }
+
+    function closePlayerOptionModal() {
+        const modal = document.getElementById("playerOptionModal");
+        modal.classList.add("hidden");
+
+        selectedOptionPlayer = null;
+        selectedOptionListName = null;
+        selectedOptionIndex = null;
+    }
+
+    function makeSelectedPlayerCaptain() {
+        if (!selectedOptionPlayer) return;
+
+        if (selectedOptionListName !== "selected") {
+            alert("Captain must be in the selected XI.");
+            return;
+        }
+
+        captainPlayerId = getPlayerKey(selectedOptionPlayer);
+
+        saveDraftXI();
+        renderXIPage();
+        closePlayerOptionModal();
+    }
+
+    function makeSelectedPlayerWicketkeeper() {
+        if (!selectedOptionPlayer) return;
+
+        if (selectedOptionListName !== "selected") {
+            alert("Wicketkeeper must be in the selected XI.");
+            return;
+        }
+
+        wicketkeeperPlayerId = getPlayerKey(selectedOptionPlayer);
+
+        saveDraftXI();
+        renderXIPage();
+        closePlayerOptionModal();
+    }
+   
+    function handleDragStart(event, listName, index) {
+        didDragPlayer = true;
+
+        draggedInfo = {
+            listName,
+            index
+        };
+
+        event.currentTarget.classList.add("dragging");
+        event.dataTransfer.effectAllowed = "move";
+    }
+
+    function handleDragEnd(event) {
+        event.currentTarget.classList.remove("dragging");
+
+        setTimeout(() => {
+            didDragPlayer = false;
+        }, 80);
+    }
+
+    function allowDrop(event) {
+        event.preventDefault();
+    }
+
+    function handleCardDrop(event, targetListName, targetIndex) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (!draggedInfo) return;
+
+        const fromListName = draggedInfo.listName;
+        const fromIndex = draggedInfo.index;
+
+        if (fromListName === targetListName) {
+        reorderWithinSameList(targetListName, fromIndex, targetIndex);
+        } else {
+        swapBetweenLists(fromListName, fromIndex, targetListName, targetIndex);
+        }
+
+        draggedInfo = null;
+        saveDraftXI();
+        renderXIPage();
+    }
+
+    function handleListDrop(event, targetListName) {
+        event.preventDefault();
+
+        if (event.target.closest(".xi-player-card")) {
+        return;
+        }
+
+        if (!draggedInfo) return;
+
+        const fromListName = draggedInfo.listName;
+        const fromIndex = draggedInfo.index;
+
+        if (fromListName === targetListName) {
+        moveToEnd(targetListName, fromIndex);
+        } else {
+        moveBetweenLists(fromListName, fromIndex, targetListName);
+        }
+
+        draggedInfo = null;
+        saveDraftXI();
+        renderXIPage();
+    }
+
+    function getList(listName) {
+        return listName === "selected" ? selectedXI : benchPlayers;
+    }
+
+    function reorderWithinSameList(listName, fromIndex, targetIndex) {
+        const list = getList(listName);
+        const [movedPlayer] = list.splice(fromIndex, 1);
+        list.splice(targetIndex, 0, movedPlayer);
+    }
+
+    function moveToEnd(listName, fromIndex) {
+        const list = getList(listName);
+        const [movedPlayer] = list.splice(fromIndex, 1);
+        list.push(movedPlayer);
+    }
+
+    function swapBetweenLists(fromListName, fromIndex, targetListName, targetIndex) {
+        const fromList = getList(fromListName);
+        const targetList = getList(targetListName);
+
+        const fromPlayer = fromList[fromIndex];
+        const targetPlayer = targetList[targetIndex];
+
+        fromList[fromIndex] = targetPlayer;
+        targetList[targetIndex] = fromPlayer;
+    }
+
+    function moveBetweenLists(fromListName, fromIndex, targetListName) {
+        const fromList = getList(fromListName);
+        const targetList = getList(targetListName);
+
+        if (targetListName === "selected" && selectedXI.length >= 11) {
+        alert("Selected XI already has 11 players. Drop onto a selected player to swap.");
+        return;
+        }
+
+        const [movedPlayer] = fromList.splice(fromIndex, 1);
+        targetList.push(movedPlayer);
+    }
+
+    function autoPickBestXI() {
+        if (!currentMatch || !Array.isArray(currentMatch.userSquad)) {
+        alert("No user squad loaded.");
+        return;
+        }
+
+        selectedXI = pickDefaultXI(currentMatch.userSquad);
+
+        const selectedKeys = new Set(selectedXI.map(getPlayerKey));
+        benchPlayers = currentMatch.userSquad.filter(player => !selectedKeys.has(getPlayerKey(player)));
+
+        const defaultCaptain = pickDefaultCaptain(selectedXI);
+        captainPlayerId = defaultCaptain ? getPlayerKey(defaultCaptain) : null;
+
+        const keeper = selectedXI.find(player => getRoleGroup(player) === "wicketkeeper");
+        wicketkeeperPlayerId = keeper ? getPlayerKey(keeper) : null;
+
+        saveDraftXI();
+        renderXIPage();
+    }
+
+    function saveDraftXI() {
+        if (!currentMatch) return;
+
+        currentMatch.selectedUserXI = selectedXI;
+        currentMatch.userBench = benchPlayers;
+
+        currentMatch.captainPlayerId = captainPlayerId;
+        currentMatch.wicketkeeperPlayerId = wicketkeeperPlayerId;
+
+        currentMatch.captain =
+            selectedXI.find(player => getPlayerKey(player) === captainPlayerId) || null;
+
+        currentMatch.wicketkeeper =
+            selectedXI.find(player => getPlayerKey(player) === wicketkeeperPlayerId) || null;
+
+        currentMatch.battingOrder = selectedXI.map((player, index) => ({
+            position: index + 1,
+            playerId: getPlayerKey(player),
+            name: getPlayerName(player)
+        }));
+
+        localStorage.setItem("currentTourMatch", JSON.stringify(currentMatch));
+    }
+
+    function startMatchFromXI() {
+        if (!currentMatch) {
+            alert("No match loaded.");
+            return;
+        }
+
+        if (selectedXI.length !== 11) {
+            alert("You need exactly 11 players in the Selected XI.");
+            return;
+        }
+
+        const freshTourSave = getTourSave();
+        const freshCurrentMatch = getCurrentTourMatch();
+
+        const activeFormat = getFormatKey(
+            freshCurrentMatch?.format ||
+            freshCurrentMatch?.match?.format ||
+            currentMatch.format ||
+            currentMatch.match?.format ||
+            "ODI"
+        );
+
+        const activeMatchIndex = Number(
+            freshCurrentMatch?.matchIndex ??
+            currentMatch.matchIndex ??
+            0
+        );
+
+       
+       const freshFormatSquad = getMatchingFormatSquad(
+            freshTourSave,
+            freshCurrentMatch || currentMatch,
+            activeFormat
+            );
+
+            /*
+            Use matching tourSave squad only if valid.
+            Otherwise, use the squad already loaded into currentTourMatch.
+            */
+        const latestUserSquad = Array.isArray(freshFormatSquad?.userSquad)
+            ? freshFormatSquad.userSquad
+            : Array.isArray(freshCurrentMatch?.userSquad)
+            ? freshCurrentMatch.userSquad
+            : Array.isArray(currentMatch?.userSquad)
+            ? currentMatch.userSquad
+            : [];
+
+        const latestComputerSquad = Array.isArray(freshFormatSquad?.computerSquad)
+            ? freshFormatSquad.computerSquad
+            : Array.isArray(freshCurrentMatch?.computerSquad)
+            ? freshCurrentMatch.computerSquad
+            : Array.isArray(currentMatch?.computerSquad)
+            ? currentMatch.computerSquad
+            : [];
+
+        if (latestUserSquad.length < 11 || latestComputerSquad.length < 11) {
+            alert("Could not find enough players for this match. Go back to Tour Summary and select the format squad again.");
+            return;
+        } 
+
+
+
+        const latestUserKeys = new Set(latestUserSquad.map(getPlayerKey));
+        const selectedStillValid = selectedXI.every(player => latestUserKeys.has(getPlayerKey(player)));
+
+        if (!selectedStillValid) {
+            alert("Your selected XI used an older squad. The page will reload with the newest squad.");
+            loadPage();
+            return;
+        }
+
+        const selectedComputerXI = pickDefaultXI(latestComputerSquad);
+        const computerCaptain = pickDefaultCaptain(selectedComputerXI);
+        const computerCaptainPlayerId = computerCaptain ? getPlayerKey(computerCaptain) : null;
+
+        currentMatch = {
+            ...(freshCurrentMatch || currentMatch),
+
+            matchIndex: activeMatchIndex,
+            format: activeFormat,
+
+            userSquad: latestUserSquad,
+            computerSquad: latestComputerSquad,
+
+            selectedUserXI: selectedXI,
+            userBench: benchPlayers,
+
+            selectedComputerXI: selectedComputerXI,
+
+            computerCaptainPlayerId: computerCaptainPlayerId,
+            computerCaptain: computerCaptain,
+
+            battingOrder: selectedXI.map((player, index) => ({
+                position: index + 1,
+                playerId: getPlayerKey(player),
+                name: getPlayerName(player)
+            })),
+
+            computerBattingOrder: selectedComputerXI.map((player, index) => ({
+                position: index + 1,
+                playerId: getPlayerKey(player),
+                name: getPlayerName(player)
+            })),
+
+            xiConfirmed: true,
+            xiConfirmedAt: new Date().toISOString()
+        };
+
+        /* Important: rewrite teams and match title using the newest saved tour */
+        currentMatch = syncCurrentMatchIdentity(currentMatch, freshTourSave, activeFormat);
+
+        currentMatch.captainPlayerId = captainPlayerId;
+        currentMatch.wicketkeeperPlayerId = wicketkeeperPlayerId;
+
+        currentMatch.captain =
+            selectedXI.find(player => getPlayerKey(player) === captainPlayerId) || null;
+
+        currentMatch.wicketkeeper =
+            selectedXI.find(player => getPlayerKey(player) === wicketkeeperPlayerId) || null;
+
+        localStorage.setItem("currentTourMatch", JSON.stringify(currentMatch));
+
+        localStorage.removeItem("currentTossResult");
+        window.location.href = `toss.html?v=${Date.now()}`;
+    }
+
+    function goBackToSummary() {
+        window.location.href = "index.html";
+    }
+
+    let xiPageLoadedOnce = false;
+
+    function testAutoPickCaptainOnly() {
+        if (!currentMatch) {
+            currentMatch = getCurrentTourMatch();
+        }
+
+        if (!currentMatch) {
+            alert("No current match loaded.");
+            return;
+        }
+
+        let testXI = [];
+
+        if (Array.isArray(selectedXI) && selectedXI.length > 0) {
+            testXI = selectedXI;
+        } else if (Array.isArray(currentMatch.selectedUserXI) && currentMatch.selectedUserXI.length > 0) {
+            testXI = currentMatch.selectedUserXI;
+        } else if (Array.isArray(currentMatch.userSquad) && currentMatch.userSquad.length >= 11) {
+            testXI = pickDefaultXI(currentMatch.userSquad);
+            selectedXI = testXI;
+
+            const selectedKeys = new Set(selectedXI.map(getPlayerKey));
+            benchPlayers = currentMatch.userSquad.filter(player => !selectedKeys.has(getPlayerKey(player)));
+        }
+
+        if (!testXI.length) {
+            alert("No XI found to test captain picker.");
+            return;
+        }
+
+        const ranked = [...testXI]
+            .map(player => {
+                return {
+                    player,
+                    name: getPlayerName(player),
+                    role: getRoleGroup(player),
+                    leadership: getLeadership(player),
+                    temperament: getTemperament(player),
+                    judgement: getJudgement(player),
+                    captainScore: Math.round(safeCaptainNumber(getCaptainScore(player), 0) * 100) / 100
+                };
+            })
+            .sort((a, b) => b.captainScore - a.captainScore);
+
+        const picked = ranked[0]?.player || null;
+
+        if (!picked) {
+            alert("Captain picker failed.");
+            return;
+        }
+
+        captainPlayerId = getPlayerKey(picked);
+
+        currentMatch.captainPlayerId = captainPlayerId;
+        currentMatch.captain = picked;
+
+        saveDraftXI();
+        renderXIPage();
+
+        console.table(
+            ranked.map((row, index) => ({
+                rank: index + 1,
+                name: row.name,
+                role: row.role,
+                leadership: row.leadership,
+                temperament: row.temperament,
+                judgement: row.judgement,
+                playerScore: row.playerScore,
+                captainScore: row.captainScore
+            }))
+        );
+
+        alert(
+            "AUTO CAPTAIN TEST\n\n" +
+            "Picked: " + getPlayerName(picked) + "\n" +
+            "Captain Score: " + ranked[0].captainScore + "\n" +
+            "Leadership: " + ranked[0].leadership + "\n" +
+            "Temperament: " + ranked[0].temperament + "\n" +
+            "Judgement: " + ranked[0].judgement + "\n\n" +
+            "Full ranking printed in console."
+        );
+    }
+
+    function testAutoPickComputerCaptainOnly() {
+        if (!currentMatch) {
+            currentMatch = getCurrentTourMatch();
+        }
+
+        if (!currentMatch) {
+            alert("No current match loaded.");
+            return;
+        }
+
+        let computerXI = [];
+
+        if (Array.isArray(currentMatch.selectedComputerXI) && currentMatch.selectedComputerXI.length > 0) {
+            computerXI = currentMatch.selectedComputerXI;
+        } else if (Array.isArray(currentMatch.computerSquad) && currentMatch.computerSquad.length >= 11) {
+            computerXI = pickDefaultXI(currentMatch.computerSquad);
+            currentMatch.selectedComputerXI = computerXI;
+        }
+
+        if (!computerXI.length) {
+            alert("No computer XI found to test captain picker.");
+            return;
+        }
+
+        const ranked = [...computerXI]
+            .map(player => ({
+                player,
+                name: getPlayerName(player),
+                role: getRoleGroup(player),
+                leadership: getLeadership(player),
+                temperament: getTemperament(player),
+                judgement: getJudgement(player),
+                playerScore: Math.round(safeCaptainNumber(getPlayerScore(player), 0)),
+                captainScore: Math.round(safeCaptainNumber(getCaptainScore(player), 0) * 100) / 100
+            }))
+            .sort((a, b) => b.captainScore - a.captainScore);
+
+        const picked = ranked[0]?.player || null;
+
+        if (!picked) {
+            alert("Computer captain picker failed.");
+            return;
+        }
+
+        currentMatch.computerCaptainPlayerId = getPlayerKey(picked);
+        currentMatch.computerCaptain = picked;
+
+        localStorage.setItem("currentTourMatch", JSON.stringify(currentMatch));
+
+        console.table(
+            ranked.map((row, index) => ({
+                rank: index + 1,
+                name: row.name,
+                role: row.role,
+                leadership: row.leadership,
+                temperament: row.temperament,
+                judgement: row.judgement,
+                playerScore: row.playerScore,
+                captainScore: row.captainScore
+            }))
+        );
+
+        alert(
+            "AUTO COMPUTER CAPTAIN TEST\n\n" +
+            "Picked: " + getPlayerName(picked) + "\n" +
+            "Captain Score: " + ranked[0].captainScore + "\n" +
+            "Leadership: " + ranked[0].leadership + "\n" +
+            "Temperament: " + ranked[0].temperament + "\n" +
+            "Judgement: " + ranked[0].judgement + "\n\n" +
+            "Full ranking printed in console."
+        );
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+    xiPageLoadedOnce = true;
+    loadPage();
+    });
+
+    window.addEventListener("pageshow", (event) => {
+    if (event.persisted || xiPageLoadedOnce) {
+        loadPage();
+    }
+    });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Cricket Player Database</title>
+  <link rel="stylesheet" href="database.css?v=1010">
+</head>
+<body>
+  <div class="page">
+    <header class="top-bar">
+      <div class="database-top-actions">
+        <button type="button" class="back-main-btn" onclick="window.location.href='index.html'">
+          ← Back to Main Menu
+        </button>
+        <h1>Player Database</h1>
+        <button type="button" class="download-json-btn" onclick="downloadEditedPlayersJson()">
+          Download Updated JSON
+        </button>
+      </div>
+
+      <div class="player-count">
+        <span id="playerCount">0</span> Players
+      </div>
+    </header>
+
+    <section class="controls">
+      <input type="text" id="searchInput" placeholder="Search player, nation, role, style...">
+
+      <select id="nationFilter">
+        <option value="all">All Nations</option>
+      </select>
+
+      <select id="roleFilter">
+        <option value="all">All Roles</option>
+      </select>
+
+      <button id="resetBtn">Reset</button>
+    </section>
+
+    <section class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th><button class="column-sort-btn" data-sort="name">Player <span class="sort-icon">↕</span></button></th>
+            <th><button class="column-sort-btn" data-sort="age">Age <span class="sort-icon">↕</span></button></th>
+            <th><button class="column-sort-btn" data-sort="nation">Nation <span class="sort-icon">↕</span></button></th>
+            <th><button class="column-sort-btn" data-sort="role">Role <span class="sort-icon">↕</span></button></th>
+            <th><button class="column-sort-btn" data-sort="style">Style <span class="sort-icon">↕</span></button></th>
+            <th><button class="column-sort-btn" data-sort="batStyle">Bat Style <span class="sort-icon">↕</span></button></th>
+            <th><button class="column-sort-btn" data-sort="bowlStyle">Bowl Style <span class="sort-icon">↕</span></button></th>
+            <th><button class="column-sort-btn" data-sort="fieldStyle">Field Style <span class="sort-icon">↕</span></button></th>
+          </tr>
+        </thead>
+
+        <tbody id="playerTableBody">
+          <tr>
+            <td colspan="8">Loading players...</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <div id="playerModal" class="modal hidden">
+    <div class="modal-box">
+      <button id="closeModalBtn" class="modal-close">×</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script src="app.js?v=1010"></script>
+
+
+</body></html>
