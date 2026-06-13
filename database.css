@@ -1348,3 +1348,20 @@ td {
     min-width: 760px;
   }
 }
+
+
+/* =========================================================
+   PLAYER POPUP FULL NAME LINE
+========================================================= */
+
+.player-profile-name-block {
+  min-width: 0;
+}
+
+.profile-full-name {
+  margin: 3px 0 0;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+}

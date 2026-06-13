@@ -1072,6 +1072,18 @@ function getDisplayPlayer(player) {
   };
 }
 
+function getPlayerFullNameForPopup(player) {
+  return (
+    player?.fullName ||
+    player?.full_name ||
+    player?.final_player_name ||
+    player?.player_info?.final_player_name ||
+    player?.name ||
+    "-"
+  );
+}
+
+
 function escapeHTML(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -1504,6 +1516,9 @@ function renderRealWorldStatsPanel(player) {
 
 function openPlayerModal(player) {
   const display = getDisplayPlayer(player);
+  const fullName = getPlayerFullNameForPopup(player);
+  const shouldShowFullName = fullName && fullName !== "-" && fullName !== display.name;
+
   const visibleSections = getVisibleSectionsByRole(display.role);
   const overallNumber = getPlayerOverall(player);
 
@@ -1516,19 +1531,45 @@ function openPlayerModal(player) {
   const fieldingAttributes = player.attributes?.fielding;
 
   let profileCardsHTML = "";
-  if (visibleSections.playstyles.includes("batting")) profileCardsHTML += renderProfileCard("Top Batting Playstyles", battingPlaystyles, "batting");
-  if (visibleSections.playstyles.includes("bowling")) profileCardsHTML += renderProfileCard("Top Bowling Playstyles", bowlingPlaystyles, "bowling");
-  if (visibleSections.playstyles.includes("fielding")) profileCardsHTML += renderProfileCard("Top Fielding Playstyles", fieldingPlaystyles, "fielding");
+
+  if (visibleSections.playstyles.includes("batting")) {
+    profileCardsHTML += renderProfileCard("Top Batting Playstyles", battingPlaystyles, "batting");
+  }
+
+  if (visibleSections.playstyles.includes("bowling")) {
+    profileCardsHTML += renderProfileCard("Top Bowling Playstyles", bowlingPlaystyles, "bowling");
+  }
+
+  if (visibleSections.playstyles.includes("fielding")) {
+    profileCardsHTML += renderProfileCard("Top Fielding Playstyles", fieldingPlaystyles, "fielding");
+  }
 
   let attributesHTML = "";
-  if (visibleSections.attributes.includes("batting")) attributesHTML += renderAttributeGroup("Batting", battingAttributes, "batting");
-  if (visibleSections.attributes.includes("bowling")) attributesHTML += renderAttributeGroup("Bowling", bowlingAttributes, "bowling");
-  if (visibleSections.attributes.includes("fielding")) attributesHTML += renderAttributeGroup("Fielding", fieldingAttributes, "fielding");
+
+  if (visibleSections.attributes.includes("batting")) {
+    attributesHTML += renderAttributeGroup("Batting", battingAttributes, "batting");
+  }
+
+  if (visibleSections.attributes.includes("bowling")) {
+    attributesHTML += renderAttributeGroup("Bowling", bowlingAttributes, "bowling");
+  }
+
+  if (visibleSections.attributes.includes("fielding")) {
+    attributesHTML += renderAttributeGroup("Fielding", fieldingAttributes, "fielding");
+  }
 
   modalContent.innerHTML = `
     <div class="player-profile-header">
       <div class="player-profile-title-row">
-        <h2>${escapeHTML(display.name)}</h2>
+        <div class="player-profile-name-block">
+          <h2>${escapeHTML(display.name)}</h2>
+
+          ${
+            shouldShowFullName
+              ? `<p class="profile-full-name">Full name: ${escapeHTML(fullName)}</p>`
+              : ""
+          }
+        </div>
 
         <div class="player-profile-actions">
           <button class="db-stats-toggle-btn" id="dbStatsToggleBtn" type="button">
@@ -1551,11 +1592,15 @@ function openPlayerModal(player) {
       </div>
     </div>
 
-    <div class="profile-grid" id="profileGridSection">${profileCardsHTML}</div>
+    <div class="profile-grid" id="profileGridSection">
+      ${profileCardsHTML}
+    </div>
 
     <div class="attributes-section" id="attributesSection">
       <h3>Attributes</h3>
-      <div class="attributes-grid">${attributesHTML}</div>
+      <div class="attributes-grid">
+        ${attributesHTML}
+      </div>
     </div>
 
     ${renderRealWorldStatsPanel(player)}
@@ -1584,12 +1629,17 @@ function openPlayerModal(player) {
 
   loadRealWorldStats().then(() => {
     const panel = document.getElementById("realWorldStatsPanel");
-    if (!panel || playerModal.classList.contains("hidden")) return;
+
+    if (!panel || playerModal.classList.contains("hidden")) {
+      return;
+    }
 
     const wasHidden = panel.classList.contains("hidden");
+
     panel.outerHTML = renderRealWorldStatsPanel(player);
 
     const updatedPanel = document.getElementById("realWorldStatsPanel");
+
     if (updatedPanel && !wasHidden) {
       updatedPanel.classList.remove("hidden");
     }
