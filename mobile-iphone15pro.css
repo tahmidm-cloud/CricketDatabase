@@ -1,0 +1,466 @@
+/* iPhone 15 Pro / modern phone calibration layer
+   Target viewport: 393 x 852 CSS px. Desktop layout stays untouched above 430px. */
+
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --phone-max: 430px;
+  --tap: 44px;
+  --app-height: calc(var(--app-vh, 1vh) * 100);
+}
+
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  touch-action: manipulation;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: rgba(126, 231, 135, 0.18);
+}
+
+button,
+.button,
+.back-btn,
+.page-link,
+.download-json-btn,
+.back-main-btn,
+.secondary,
+.danger,
+.compact {
+  min-height: var(--tap);
+}
+
+img,
+svg,
+canvas,
+video {
+  max-width: 100%;
+}
+
+@media (max-width: 430px) {
+  html,
+  body {
+    min-height: var(--app-height);
+  }
+
+  body {
+    font-size: 14px;
+    padding-left: var(--safe-left);
+    padding-right: var(--safe-right);
+  }
+
+  .page {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: var(--app-height) !important;
+    padding: calc(8px + var(--safe-top)) 8px calc(10px + var(--safe-bottom)) !important;
+    gap: 8px !important;
+  }
+
+  .topbar,
+  .top-bar,
+  .hero,
+  .controls,
+  .card,
+  .team-card,
+  .table-card,
+  .screen,
+  .setup-panel,
+  .summary-panel,
+  .main-grid,
+  .match-layout,
+  .scoreboard,
+  .control-panel,
+  .scroll-card {
+    border-radius: 14px !important;
+  }
+
+  .topbar,
+  .top-bar,
+  .database-top-actions,
+  .hero,
+  .hero-tools,
+  .database-row,
+  .top-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 9px !important;
+  }
+
+  .brand,
+  .title,
+  .team-line,
+  .team-head,
+  .score-top,
+  .section-title,
+  .team-info-head {
+    min-width: 0 !important;
+  }
+
+  .brand h1,
+  .title h1,
+  .top-bar h1,
+  .main-hero-title,
+  h1 {
+    font-size: clamp(20px, 6.2vw, 26px) !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.05em !important;
+    margin-bottom: 2px !important;
+  }
+
+  h2,
+  .team-name h2,
+  .screen h2 {
+    font-size: clamp(17px, 5vw, 21px) !important;
+    line-height: 1.1 !important;
+  }
+
+  h3 {
+    font-size: 14px !important;
+  }
+
+  p,
+  .brand p,
+  .title p,
+  .team-name p,
+  .data-source,
+  .section-title span {
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+  }
+
+  button,
+  .back-btn,
+  .page-link,
+  .download-json-btn,
+  .back-main-btn {
+    width: 100% !important;
+    min-height: var(--tap) !important;
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+    border-radius: 12px !important;
+    white-space: normal !important;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100% !important;
+    min-height: var(--tap) !important;
+    font-size: 16px !important; /* prevents iOS auto-zoom */
+    border-radius: 12px !important;
+  }
+
+  .steps {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+
+  .step {
+    min-height: 34px !important;
+    padding: 8px 10px !important;
+    font-size: 11px !important;
+  }
+
+  .team-grid,
+  .format-grid,
+  .fixture-grid,
+  .squad-grid,
+  .player-grid,
+  .main-grid,
+  .match-layout {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .logo-frame,
+  .team-badge,
+  .badge {
+    transform: scale(0.86);
+    transform-origin: center;
+  }
+
+  .screen,
+  .table-card,
+  .scroll-card,
+  .commentary-list,
+  .player-list,
+  .selected-list,
+  .available-list {
+    max-height: calc(var(--app-height) - 190px) !important;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 760px;
+  }
+
+  .table-card {
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Match Center: phone-first single-column layout */
+  body:has(.match-layout) {
+    overflow: hidden !important;
+  }
+
+  body:has(.match-layout) .page {
+    height: var(--app-height) !important;
+    min-height: var(--app-height) !important;
+    overflow: hidden !important;
+    display: grid !important;
+    grid-template-rows: auto 1fr !important;
+  }
+
+  body:has(.match-layout) .topbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 7px !important;
+    padding: 8px !important;
+    flex: 0 0 auto !important;
+  }
+
+  body:has(.match-layout) .top-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    padding: 0 !important;
+  }
+
+  body:has(.match-layout) .top-actions button {
+    min-height: 38px !important;
+    padding: 8px 6px !important;
+    font-size: 10.5px !important;
+  }
+
+  body:has(.match-layout) .match-layout {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(8px + var(--safe-bottom));
+  }
+
+  body:has(.match-layout) .left-stack,
+  body:has(.match-layout) .right-stack {
+    display: grid !important;
+    grid-template-rows: auto !important;
+    gap: 8px !important;
+    min-height: auto !important;
+  }
+
+  body:has(.match-layout) .team-card {
+    padding: 9px !important;
+  }
+
+  body:has(.match-layout) .score-small {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px !important;
+  }
+
+  body:has(.match-layout) .mini-stat {
+    padding: 7px 5px !important;
+  }
+
+  body:has(.match-layout) .center-main {
+    display: grid !important;
+    gap: 8px !important;
+  }
+
+  body:has(.match-layout) .scoreboard {
+    padding: 10px !important;
+  }
+
+  body:has(.match-layout) .score-main {
+    gap: 6px !important;
+  }
+
+  body:has(.match-layout) .runs {
+    font-size: clamp(42px, 16vw, 60px) !important;
+    line-height: 0.92 !important;
+  }
+
+  body:has(.match-layout) .overs,
+  body:has(.match-layout) .target-pill {
+    font-size: 11px !important;
+    padding: 6px 8px !important;
+  }
+
+  body:has(.match-layout) .run-rate-row,
+  body:has(.match-layout) .batter-strip {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+  }
+
+  body:has(.match-layout) .rr-box,
+  body:has(.match-layout) .player-live-card {
+    padding: 8px !important;
+    border-radius: 12px !important;
+  }
+
+  body:has(.match-layout) .player-live-card h3 {
+    font-size: 13px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  body:has(.match-layout) .field-view {
+    min-height: 210px !important;
+    height: 210px !important;
+    padding: 8px !important;
+  }
+
+  body:has(.match-layout) .oval {
+    width: min(330px, 96%) !important;
+    height: 188px !important;
+  }
+
+  body:has(.match-layout) .pitch {
+    width: 34px !important;
+    height: 110px !important;
+  }
+
+  body:has(.match-layout) .fielder {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 9px !important;
+  }
+
+  body:has(.match-layout) .control-panel {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    padding: 10px !important;
+  }
+
+  body:has(.match-layout) .ball-buttons {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+  }
+
+  body:has(.match-layout) .ball-buttons button {
+    min-height: 42px !important;
+  }
+
+  body:has(.match-layout) .scroll-card {
+    max-height: 250px !important;
+  }
+
+  body:has(.match-layout) .score-table th,
+  body:has(.match-layout) .score-table td {
+    padding: 7px 6px !important;
+    font-size: 11px !important;
+  }
+
+  body:has(.match-layout) .commentary-list {
+    max-height: 220px !important;
+  }
+
+  body:has(.match-layout) .debug-box {
+    display: none !important;
+  }
+
+  /* Toss page */
+  body:has(.stadium-lights) {
+    min-height: var(--app-height) !important;
+  }
+
+  body:has(.stadium-lights) .main-grid {
+    min-height: 0 !important;
+  }
+
+  body:has(.stadium-lights) .coin-stage,
+  body:has(.stadium-lights) .coin-card,
+  body:has(.stadium-lights) .toss-card {
+    max-width: 100% !important;
+  }
+
+  body:has(.stadium-lights) .coin,
+  body:has(.stadium-lights) .coin-shell {
+    transform: scale(0.82);
+    transform-origin: center;
+  }
+
+  /* Player database */
+  body:has(#playerTableBody) .page {
+    height: var(--app-height) !important;
+    display: grid !important;
+    grid-template-rows: auto auto 1fr !important;
+    overflow: hidden !important;
+  }
+
+  body:has(#playerTableBody) .controls {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 7px !important;
+    padding: 8px !important;
+  }
+
+  body:has(#playerTableBody) .table-card {
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: auto !important;
+  }
+
+  /* Select XI */
+  body:has(#selectedPlayers),
+  body:has(#availablePlayers) {
+    overflow: hidden !important;
+  }
+
+  body:has(#selectedPlayers) .page,
+  body:has(#availablePlayers) .page {
+    height: var(--app-height) !important;
+    overflow: hidden !important;
+  }
+
+  body:has(#selectedPlayers) .content,
+  body:has(#availablePlayers) .content,
+  body:has(#selectedPlayers) .main,
+  body:has(#availablePlayers) .main {
+    min-height: 0 !important;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 430px) and (orientation: landscape) {
+  .page {
+    padding: calc(5px + var(--safe-top)) 8px calc(5px + var(--safe-bottom)) !important;
+  }
+
+  body:has(.match-layout) .field-view {
+    height: 170px !important;
+    min-height: 170px !important;
+  }
+
+  body:has(.match-layout) .oval {
+    height: 150px !important;
+  }
+}

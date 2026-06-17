@@ -1,21 +1,876 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Match Center</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#061018" />
+  <title>Match Center V18 - Skill Visibility + Fatigue Ramp</title>
+
+  <style>
+    :root {
+      --bg: #061018;
+      --card: rgba(13, 22, 32, 0.92);
+      --card2: rgba(18, 30, 42, 0.96);
+      --line: rgba(148, 163, 184, 0.18);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --green: #7ee787;
+      --blue: #38bdf8;
+      --gold: #f6c453;
+      --red: #fb7185;
+      --purple: #c084fc;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(56, 189, 248, 0.16), transparent 30%),
+        radial-gradient(circle at 90% 8%, rgba(126, 231, 135, 0.14), transparent 26%),
+        linear-gradient(135deg, #03070c, #061018 42%, #0b1d18);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      overflow: hidden;
+    }
+
+    .page {
+      height: 100vh;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      background: rgba(8, 13, 20, 0.76);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: -0.05em;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      font-weight: 950;
+      border-radius: 999px;
+      padding: 10px 14px;
+      color: #041018;
+      background: linear-gradient(135deg, var(--green), #22c55e);
+      box-shadow: 0 12px 28px rgba(34, 197, 94, 0.18);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    button.secondary {
+      background: rgba(15, 23, 42, 0.96);
+      color: var(--text);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    button.danger {
+      background: linear-gradient(135deg, #fb7185, #ef4444);
+      color: white;
+    }
+
+    .match-layout {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(260px, 23%) minmax(420px, 54%) minmax(280px, 23%);
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .left-stack,
+    .right-stack {
+      display: grid;
+      gap: 12px;
+      min-height: 0;
+      grid-template-rows: auto 1fr;
+    }
+
+    .team-card {
+      padding: 14px;
+      background:
+        radial-gradient(circle at 90% 0%, rgba(56, 189, 248, 0.13), transparent 32%),
+        var(--card);
+    }
+
+    .team-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .team-name h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: -0.04em;
+    }
+
+    .team-name p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.3;
+    }
+
+    .badge {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      font-weight: 1000;
+      background: linear-gradient(135deg, #16324a, #07111c);
+      border: 1px solid rgba(56, 189, 248, 0.38);
+      color: var(--blue);
+      flex: 0 0 auto;
+    }
+
+    .score-small {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .mini-stat {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .mini-stat b {
+      display: block;
+      font-size: 18px;
+      color: var(--green);
+    }
+
+    .mini-stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      margin-top: 2px;
+    }
+
+    .current-bowler-box {
+      margin-top: 12px;
+      background: rgba(15, 23, 42, 0.70);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .current-bowler-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .current-bowler-box strong {
+      display: block;
+      margin-top: 4px;
+      color: var(--gold);
+      font-size: 14px;
+    }
+
+    .bowler-meter {
+      height: 8px;
+      margin: 9px 0 6px;
+      background: rgba(148, 163, 184, 0.16);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bowler-meter-fill {
+      height: 100%;
+      width: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #22c55e, #7ee787);
+      transition: width 0.25s ease;
+    }
+
+    .bowler-plan-box {
+      margin-top: 10px;
+      padding-top: 9px;
+      border-top: 1px solid var(--line);
+    }
+
+    .bowler-plan-box strong {
+      color: var(--blue);
+      line-height: 1.25;
+    }
+
+    .bowler-note {
+      margin-top: 5px;
+      color: var(--muted) !important;
+      font-size: 10px !important;
+      line-height: 1.3;
+      text-transform: none !important;
+      letter-spacing: 0 !important;
+    }
+
+    .center-main {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      min-height: 0;
+    }
+
+    .scoreboard {
+      padding: 16px;
+      background:
+        linear-gradient(135deg, rgba(126, 231, 135, 0.10), transparent 38%),
+        linear-gradient(180deg, rgba(17, 24, 39, 0.98), rgba(6, 10, 16, 0.98));
+      border-bottom: 1px solid var(--line);
+    }
+
+    .score-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .score-top span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .score-main {
+      margin-top: 6px;
+      display: flex;
+      align-items: end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .runs {
+      font-size: 58px;
+      line-height: 0.9;
+      font-weight: 1000;
+      letter-spacing: -0.08em;
+      color: #f8fafc;
+    }
+
+    .overs {
+      color: var(--muted);
+      font-size: 18px;
+      font-weight: 950;
+      padding-bottom: 5px;
+    }
+
+    .target-pill {
+      background: rgba(246, 196, 83, 0.13);
+      color: var(--gold);
+      border: 1px solid rgba(246, 196, 83, 0.3);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 1000;
+      white-space: nowrap;
+    }
+
+    .run-rate-row {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .rr-box {
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid var(--line);
+      padding: 10px;
+    }
+
+    .rr-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+
+    .rr-box b {
+      display: block;
+      margin-top: 4px;
+      font-size: 17px;
+      color: var(--text);
+    }
+
+    .batter-strip {
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .player-live-card {
+      background: var(--card2);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .player-live-card.striker {
+      border-color: rgba(126, 231, 135, 0.35);
+      box-shadow: inset 0 0 0 1px rgba(126, 231, 135, 0.08);
+    }
+
+    .player-live-card .label {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+    }
+
+    .player-live-card h3 {
+      margin: 6px 0 0;
+      font-size: 17px;
+    }
+
+    .player-live-card p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .field-view {
+      margin: 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(126, 231, 135, 0.18);
+      background:
+        radial-gradient(ellipse at center, rgba(34, 197, 94, 0.18), transparent 55%),
+        linear-gradient(135deg, rgba(10, 48, 31, 0.96), rgba(4, 12, 10, 0.96));
+      position: relative;
+      min-height: 245px;
+      overflow: hidden;
+    }
+
+    .oval {
+      position: absolute;
+      inset: 18px;
+      border: 2px solid rgba(126, 231, 135, 0.28);
+      border-radius: 50%;
+    }
+
+    .inner-ring {
+      position: absolute;
+      inset: 72px 105px;
+      border: 1px dashed rgba(255, 255, 255, 0.22);
+      border-radius: 50%;
+    }
+
+    .pitch {
+      position: absolute;
+      width: 70px;
+      height: 150px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 20px;
+      background: linear-gradient(180deg, #b6894a, #6f4b24);
+      box-shadow: 0 0 35px rgba(0,0,0,0.28);
+    }
+
+    .stump {
+      position: absolute;
+      width: 18px;
+      height: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.75);
+      border-radius: 999px;
+    }
+
+    .stump.top { top: calc(50% - 67px); }
+    .stump.bottom { top: calc(50% + 63px); }
+
+    .ball-path {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 150px;
+      height: 4px;
+      transform-origin: left center;
+      transform: rotate(-24deg);
+      background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0));
+      border-radius: 999px;
+      transition: transform 240ms ease, width 240ms ease;
+    }
+
+    .ball {
+      position: absolute;
+      left: calc(50% + 140px);
+      top: calc(50% - 63px);
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 18px rgba(239, 68, 68, 0.8);
+      transition: left 240ms ease, top 240ms ease;
+    }
+
+    .fielder {
+      position: absolute;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.58);
+    }
+
+    .f1 { left: 30%; top: 30%; }
+    .f2 { left: 66%; top: 25%; }
+    .f3 { left: 75%; top: 55%; }
+    .f4 { left: 46%; top: 75%; }
+    .f5 { left: 20%; top: 58%; }
+    .f6 { left: 58%; top: 62%; }
+    .f7 { left: 38%; top: 45%; }
+
+    .control-panel {
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      border-top: 1px solid var(--line);
+    }
+
+    .aggression {
+      display: grid;
+      gap: 8px;
+    }
+
+    .aggression label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 950;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #7ee787;
+    }
+
+    .ball-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .scroll-card {
+      min-height: 0;
+      overflow: auto;
+      padding: 12px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .section-title h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .section-title span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 950;
+    }
+
+    .score-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .score-table th,
+    .score-table td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 5px;
+      font-size: 12px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .score-table th:first-child,
+    .score-table td:first-child {
+      text-align: left;
+    }
+
+    .score-table th {
+      color: var(--blue);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .commentary-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .commentary-item {
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .commentary-item strong {
+      color: var(--gold);
+      font-size: 12px;
+    }
+
+    .commentary-item p {
+      margin: 5px 0 0;
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .over-timeline {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .ball-chip {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 1000;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--line);
+    }
+
+    .ball-chip.dot { color: #cbd5e1; }
+    .ball-chip.one, .ball-chip.two, .ball-chip.three { color: var(--green); }
+
+    .ball-chip.four {
+      background: rgba(56, 189, 248, 0.18);
+      color: #7dd3fc;
+      border-color: rgba(56, 189, 248, 0.35);
+    }
+
+    .ball-chip.six {
+      background: rgba(192, 132, 252, 0.18);
+      color: #d8b4fe;
+      border-color: rgba(192, 132, 252, 0.35);
+    }
+
+    .ball-chip.wicket {
+      background: rgba(251, 113, 133, 0.20);
+      color: #fecdd3;
+      border-color: rgba(251, 113, 133, 0.4);
+    }
+
+    .debug-box {
+      margin-top: 12px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .debug-box summary {
+      cursor: pointer;
+      padding: 10px;
+      font-size: 12px;
+      font-weight: 950;
+      color: var(--muted);
+    }
+
+    #out {
+      margin: 0;
+      max-height: 180px;
+      overflow: auto;
+      padding: 10px;
+      font-size: 11px;
+      color: #cbd5e1;
+    }
+
+    @media (max-width: 1050px) {
+      body { overflow: auto; }
+      .page { height: auto; min-height: 100vh; }
+      .match-layout { grid-template-columns: 1fr; }
+      .left-stack, .right-stack { grid-template-rows: auto; }
+      .field-view { min-height: 260px; }
+    }
+
+    @media (max-width: 650px) {
+      .topbar,
+      .score-top,
+      .control-panel {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      .batter-strip,
+      .run-rate-row {
+        grid-template-columns: 1fr;
+      }
+
+      .runs { font-size: 44px; }
+    }
+  </style>
+  <link rel="stylesheet" href="mobile-iphone15pro.css?v=1" />
 </head>
+
 <body>
-  <h1>Match Center</h1>
-  <p>The toss result has been saved.</p>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand">
+        <h1>Match Center</h1>
+        <p id="matchSubtitle">Loading match...</p>
+      </div>
 
-  <button type="button" onclick="simulateMatchResultAndReturn()">
-    Test Simulate Result
-  </button>
+      <div class="top-actions">
+        <button class="secondary" type="button" onclick="window.location.href='index.html'">← Tour Summary</button>
+        <button class="secondary" type="button" onclick="resetMatchCenterState()">Reset Match</button>
+        <button class="danger" type="button" onclick="simulateMatchResultAndReturn()">Save/Return Result</button>
+        <button class="secondary" type="button" onclick="run200SimTest()">Run 200 Sim</button>
+      </div>
+    </header>
 
-  <pre id="out"></pre>
+    <section class="match-layout">
+      <aside class="left-stack">
+        <article class="card team-card">
+          <div class="team-line">
+            <div class="team-name">
+              <h2 id="teamAName">Team A</h2>
+              <p id="teamASub">Batting first • Captain</p>
+            </div>
+            <div class="badge" id="teamABadge">A</div>
+          </div>
+
+          <div class="score-small">
+            <div class="mini-stat"><b id="teamABat">0</b><span>Bat</span></div>
+            <div class="mini-stat"><b id="teamABowl">0</b><span>Bowl</span></div>
+            <div class="mini-stat"><b id="teamAField">0</b><span>Field</span></div>
+          </div>
+        </article>
+
+        <article class="card scroll-card">
+          <div class="section-title">
+            <h3>Batting Card</h3>
+            <span id="battingCardStatus">Live</span>
+          </div>
+
+          <table class="score-table">
+            <thead>
+              <tr>
+                <th>Batter</th>
+                <th>R</th>
+                <th>B</th>
+                <th>4s</th>
+                <th>6s</th>
+                <th>SR</th>
+              </tr>
+            </thead>
+            <tbody id="battingTableBody"></tbody>
+          </table>
+
+          <details class="debug-box">
+            <summary>Debug Storage</summary>
+            <pre id="out"></pre>
+          </details>
+        </article>
+      </aside>
+
+      <section class="card center-main">
+        <div class="scoreboard">
+          <div class="score-top">
+            <div>
+              <span id="inningsLabel">1st Innings</span>
+              <div class="score-main">
+                <div class="runs" id="mainScore">0/0</div>
+                <div class="overs" id="mainOvers">0.0 overs</div>
+              </div>
+            </div>
+
+            <div class="target-pill" id="targetPill">Match Center Ready</div>
+          </div>
+
+          <div class="run-rate-row">
+            <div class="rr-box"><span>Run Rate</span><b id="runRate">0.00</b></div>
+            <div class="rr-box"><span>Format</span><b id="formatBox">Match</b></div>
+            <div class="rr-box"><span>Toss</span><b id="tossBox">Saved</b></div>
+            <div class="rr-box"><span>Partnership</span><b id="partnershipBox">0 off 0</b></div>
+          </div>
+        </div>
+
+        <div class="batter-strip">
+          <div class="player-live-card striker">
+            <div class="label">On Strike</div>
+            <h3 id="strikerName">Opening Batter</h3>
+            <p id="strikerInfo">0 runs • 0 balls • Confidence 50%</p>
+          </div>
+
+          <div class="player-live-card">
+            <div class="label">Non-Striker</div>
+            <h3 id="nonStrikerName">Opening Batter</h3>
+            <p id="nonStrikerInfo">0 runs • 0 balls • Confidence 50%</p>
+          </div>
+        </div>
+
+        <div class="field-view">
+          <div class="oval"></div>
+          <div class="inner-ring"></div>
+          <div class="pitch"></div>
+          <div class="stump top"></div>
+          <div class="stump bottom"></div>
+          <div class="ball-path" id="ballPath"></div>
+          <div class="ball" id="ballMarker"></div>
+
+          <div class="fielder f1"></div>
+          <div class="fielder f2"></div>
+          <div class="fielder f3"></div>
+          <div class="fielder f4"></div>
+          <div class="fielder f5"></div>
+          <div class="fielder f6"></div>
+          <div class="fielder f7"></div>
+        </div>
+
+        <div class="control-panel">
+          <div class="aggression">
+            <label for="aggression">Batting Aggression: <span id="aggressionValue">6</span> / 10</label>
+            <input id="aggression" type="range" min="1" max="10" value="6" oninput="document.getElementById('aggressionValue').textContent = this.value">
+          </div>
+
+          <div class="ball-buttons">
+            <button id="nextBallBtn" type="button" onclick="playNextBall()">Next Ball</button>
+            <button id="playOverBtn" class="secondary" type="button" onclick="playOver()">Play Over</button>
+            <button id="nextInningsBtn" class="secondary" type="button" onclick="startNextInnings()">Next Innings</button>
+            <button class="secondary" type="button" onclick="renderMatchCenter()">Refresh</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="right-stack">
+        <article class="card team-card">
+          <div class="team-line">
+            <div class="team-name">
+              <h2 id="teamBName">Team B</h2>
+              <p id="teamBSub">Bowling • Captain</p>
+            </div>
+            <div class="badge" id="teamBBadge">B</div>
+          </div>
+
+          <div class="score-small">
+            <div class="mini-stat"><b id="teamBBat">0</b><span>Bat</span></div>
+            <div class="mini-stat"><b id="teamBBowl">0</b><span>Bowl</span></div>
+            <div class="mini-stat"><b id="teamBField">0</b><span>Field</span></div>
+          </div>
+
+          <div class="current-bowler-box">
+            <span>Current Bowler</span>
+            <strong id="currentBowlerName">Bowler</strong>
+            <span id="currentBowlerFigures">0.0-0-0-0</span>
+
+            <div class="bowler-meter" title="Bowler stamina">
+              <div class="bowler-meter-fill" id="currentBowlerStaminaFill"></div>
+            </div>
+
+            <span id="currentBowlerStamina">Stamina: 100%</span>
+            <span id="currentBowlerLimit">Limit: -</span>
+
+            <div class="bowler-plan-box">
+              <span>Bowling Plan</span>
+              <strong id="openingBowlerPair">Opening pair: -</strong>
+              <span class="bowler-note" id="bowlingPlanText">No consecutive overs • format max enforced</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card scroll-card">
+          <div class="section-title">
+            <h3>Live Commentary</h3>
+            <span id="commentaryOverLabel">Over 0</span>
+          </div>
+
+          <div class="commentary-list" id="commentaryList"></div>
+          <div class="over-timeline" id="overTimeline"></div>
+        </article>
+      </aside>
+    </section>
+  </main>
 
   <script>
     const TOUR_STORAGE_KEY = "cricketTourSetupSave_v1";
+    const MATCH_CENTER_PREFIX = "cricketMatchCenterState_v1_";
+
+    let matchState = null;
+    let currentMatchCache = null;
 
     function readJSON(key, fallback = null) {
       try {
@@ -30,9 +885,27 @@
       localStorage.setItem(key, JSON.stringify(value));
     }
 
+    function text(id, value) {
+      const element = document.getElementById(id);
+      if (element) element.textContent = value;
+    }
+
+    function getMatchIndex(currentMatch) {
+      const tourSave = readJSON(TOUR_STORAGE_KEY, null);
+      return Number(
+        currentMatch?.matchIndex ??
+        currentMatch?.match?.matchIndex ??
+        tourSave?.tourProgress?.activeMatchIndex ??
+        0
+      );
+    }
+
+    function getMatchStateKey(currentMatch) {
+      return MATCH_CENTER_PREFIX + getMatchIndex(currentMatch);
+    }
+
     function getFullTeamNames(currentMatch) {
       const title = String(currentMatch?.match?.title || "");
-
       let titleTeamA = "";
       let titleTeamB = "";
 
@@ -44,34 +917,3030 @@
       }
 
       return {
-        userTeam:
-          currentMatch?.userTeam ||
-          currentMatch?.teamA ||
-          titleTeamA ||
-          "Team A",
-
-        computerTeam:
-          currentMatch?.computerTeam ||
-          currentMatch?.teamB ||
-          titleTeamB ||
-          "Team B"
+        userTeam: currentMatch?.userTeam || currentMatch?.teamA || titleTeamA || "Team A",
+        computerTeam: currentMatch?.computerTeam || currentMatch?.teamB || titleTeamB || "Team B"
       };
     }
 
-    function buildFakeResult(currentMatch) {
-      const teams = getFullTeamNames(currentMatch);
-      const winner = Math.random() < 0.5 ? teams.userTeam : teams.computerTeam;
+    function getTeamShortName(teamName) {
+      const special = {
+        Bangladesh: "BAN", India: "IND", Pakistan: "PAK", Australia: "AUS", England: "ENG",
+        "New Zealand": "NZ", "South Africa": "SA", "Sri Lanka": "SL", "West Indies": "WI",
+        Afghanistan: "AFG", Zimbabwe: "ZIM", Ireland: "IRE", Scotland: "SCO", Netherlands: "NED",
+        Nepal: "NEP", Oman: "OMA", Canada: "CAN", Namibia: "NAM", "United Arab Emirates": "UAE",
+        "United States of America": "USA"
+      };
 
-      const wonByWickets = Math.random() < 0.5;
+      if (special[teamName]) return special[teamName];
+
+      return String(teamName || "TEAM")
+        .split(/\s+/)
+        .map(word => word[0])
+        .join("")
+        .slice(0, 3)
+        .toUpperCase();
+    }
+
+    function getPlayerKey(player, fallback = "player") {
+      return String(
+        player?.id ??
+        player?.playerId ??
+        player?.player_id ??
+        player?.final_cricinfo_id ??
+        player?.cricinfo_id ??
+        player?.master_cricinfo_id ??
+        player?.name ??
+        player?.fullName ??
+        fallback
+      );
+    }
+
+    function getPlayerName(player) {
+      return (
+        player?.name ||
+        player?.fullName ||
+        player?.final_player_name ||
+        player?.final_short_name ||
+        player?.player_info?.final_player_name ||
+        player?.player_info?.final_short_name ||
+        "Player"
+      );
+    }
+
+    function average(numbers) {
+      const valid = numbers.filter(number => Number.isFinite(number));
+      if (!valid.length) return 0;
+      return valid.reduce((sum, number) => sum + number, 0) / valid.length;
+    }
+
+    function getTeamRatings(squad) {
+      const players = Array.isArray(squad) ? squad : [];
+      if (!players.length) return { bat: 0, bowl: 0, field: 0 };
+
+      const bat = average(players.map(player => Number(player?.attributes?.overall?.batting_overall) || 0));
+      const bowl = average(players.map(player => Number(player?.attributes?.overall?.bowling_overall) || 0));
+
+      const field = average(players.map(player => {
+        const fielding = player?.attributes?.fielding || {};
+        return average([
+          Number(fielding.catching) || 0,
+          Number(fielding.reflexes) || 0,
+          Number(fielding.groundFielding) || 0,
+          Number(fielding.throwPower) || 0,
+          Number(fielding.throwAccuracy) || 0
+        ]);
+      }));
+
+      return {
+        bat: Math.round(bat * 5),
+        bowl: Math.round(bowl * 5),
+        field: Math.round(field * 5)
+      };
+    }
+
+    function getCaptainName(currentMatch, squad, side) {
+      if (side === "user" && currentMatch?.captain) return getPlayerName(currentMatch.captain);
+      if (side === "computer" && currentMatch?.computerCaptain) return getPlayerName(currentMatch.computerCaptain);
+
+      if (Array.isArray(squad) && squad.length) {
+        const sorted = [...squad].sort((a, b) => {
+          const leadershipA = Number(a?.attributes?.mental?.leadership) || 0;
+          const leadershipB = Number(b?.attributes?.mental?.leadership) || 0;
+          const scoreA = Number(a?.attributes?.overall?.batting_overall) || Number(a?.attributes?.overall?.bowling_overall) || 0;
+          const scoreB = Number(b?.attributes?.overall?.batting_overall) || Number(b?.attributes?.overall?.bowling_overall) || 0;
+          return (leadershipB - leadershipA) || (scoreB - scoreA);
+        });
+
+        return getPlayerName(sorted[0]);
+      }
+
+      return "Captain";
+    }
+
+    function getBattingTeamFromToss(currentMatch, teams) {
+      const toss = readJSON("currentTossResult", null) || currentMatch?.toss || null;
+
+      if (!toss) {
+        return {
+          battingTeam: teams.userTeam,
+          bowlingTeam: teams.computerTeam,
+          battingSide: "user",
+          bowlingSide: "computer",
+          tossText: "Toss saved"
+        };
+      }
+
+      const winner = String(toss.winner || "");
+      const decision = String(toss.decision || "Bat");
+      const winnerIsUser = winner === teams.userTeam;
+      const winnerIsComputer = winner === teams.computerTeam;
+
+      if ((winnerIsUser && decision === "Bat") || (winnerIsComputer && decision === "Bowl")) {
+        return {
+          battingTeam: teams.userTeam,
+          bowlingTeam: teams.computerTeam,
+          battingSide: "user",
+          bowlingSide: "computer",
+          tossText: `${winner} chose ${decision}`
+        };
+      }
+
+      return {
+        battingTeam: teams.computerTeam,
+        bowlingTeam: teams.userTeam,
+        battingSide: "computer",
+        bowlingSide: "user",
+        tossText: `${winner} chose ${decision}`
+      };
+    }
+
+    function getSelectedXI(currentMatch, side) {
+      if (side === "user") return currentMatch?.selectedUserXI || currentMatch?.userSquad || [];
+      return currentMatch?.selectedComputerXI || currentMatch?.computerSquad || [];
+    }
+
+    function getFormatMaxOvers(format) {
+      const key = String(format || "").toLowerCase();
+      if (key.includes("t20")) return 20;
+      if (key.includes("odi")) return 50;
+      if (key.includes("test")) return 90;
+      return 20;
+    }
+
+    function ballsToOvers(balls) {
+      const total = Number(balls) || 0;
+      return `${Math.floor(total / 6)}.${total % 6}`;
+    }
+
+    function ballsToDeliveryLabel(deliveryNumber) {
+      const delivery = Math.max(1, Number(deliveryNumber) || 1);
+      const over = Math.floor((delivery - 1) / 6);
+      const ball = ((delivery - 1) % 6) + 1;
+      return `${over}.${ball}`;
+    }
+
+    function oversDecimal(balls) {
+      const total = Number(balls) || 0;
+      if (!total) return 0;
+      return total / 6;
+    }
+
+    function getRunRate(runs, balls) {
+      const overs = oversDecimal(balls);
+      if (!overs) return "0.00";
+      return (runs / overs).toFixed(2);
+    }
+
+
+function getFormatKey(format) {
+  const key = String(format || "").trim().toLowerCase();
+  if (key.includes("test")) return "test";
+  if (key.includes("odi")) return "odi";
+  if (key.includes("t20")) return "t20";
+  return key || "t20";
+}
+
+function getBowlerMaxOvers(format) {
+  const key = getFormatKey(format);
+  if (key === "t20") return 4;
+  if (key === "odi") return 10;
+  if (key === "test") return null;
+  return 4;
+}
+
+function getBowlerMaxBalls(format) {
+  const maxOvers = getBowlerMaxOvers(format);
+  return maxOvers === null ? null : maxOvers * 6;
+}
+
+function getBowlerLimitText(stat) {
+  const maxOvers = stat?.maxOvers;
+  if (maxOvers === null || maxOvers === undefined) {
+    return `Limit: no strict max • ${ballsToOvers(stat?.balls || 0)} bowled`;
+  }
+
+  return `Limit: ${ballsToOvers(stat?.balls || 0)} / ${maxOvers}.0 overs`;
+}
+
+function getPlayerBowlingOverall(player) {
+  return Number(player?.attributes?.overall?.bowling_overall) || 0;
+}
+
+function getPlayerStaminaRating(player) {
+  const physical = player?.attributes?.physical || {};
+  return (
+    Number(physical.stamina) ||
+    Number(physical.endurance) ||
+    Number(physical.maxFitness) ||
+    10
+  );
+}
+
+function getInitialBowlerStamina(player) {
+  const raw = getPlayerStaminaRating(player);
+  return Math.max(45, Math.min(100, Math.round(raw * 5)));
+}
+
+function getBowlerDrainPerBall(player, format) {
+  const key = getFormatKey(format);
+  const staminaRating = Math.max(0, Math.min(20, getPlayerStaminaRating(player)));
+  const baseDrain = key === "test" ? 1.05 : key === "odi" ? 1.25 : 1.45;
+  return Math.max(0.55, Math.round((baseDrain - staminaRating * 0.025) * 100) / 100);
+}
+
+function isNoBowlingValue(value) {
+  const text = String(value ?? "").trim().toLowerCase();
+  return (
+    text === "" ||
+    text === "-" ||
+    text === "none" ||
+    text === "null" ||
+    text === "n/a" ||
+    text === "does not bowl"
+  );
+}
+
+function getBowlerCandidateTier(player) {
+  const role = String(player?.role || player?.playerRole || "").toLowerCase();
+  const bowlType = String(player?.bowlingType || player?.bowling_type || "").toLowerCase();
+  const bowlStyle = String(player?.bowlingStyle || player?.bowling_style || "").toLowerCase();
+  const bowlOverall = getPlayerBowlingOverall(player);
+
+  if (isNoBowlingValue(bowlType) && isNoBowlingValue(bowlStyle) && bowlOverall <= 0) {
+    return 0;
+  }
+
+  if (role.includes("bowler")) return 3;
+  if (role.includes("all")) return 2;
+
+  const hasRealStyle =
+    (!isNoBowlingValue(bowlType) && bowlType !== "batter") ||
+    !isNoBowlingValue(bowlStyle);
+
+  // Part-time bowlers only count if their bowling rating is actually meaningful.
+  if (hasRealStyle && bowlOverall >= 8) return 1;
+  if (bowlOverall >= 10) return 1;
+
+  return 0;
+}
+
+function isBowlerCandidate(player) {
+  return getBowlerCandidateTier(player) > 0;
+}
+
+function rankBowlers(bowlingXI) {
+  const players = Array.isArray(bowlingXI) ? bowlingXI : [];
+  const candidates = players.filter(isBowlerCandidate);
+  const pool = candidates.length ? candidates : players;
+
+  return [...pool].sort((a, b) => {
+    const aTier = getBowlerCandidateTier(a);
+    const bTier = getBowlerCandidateTier(b);
+
+    if (bTier !== aTier) return bTier - aTier;
+
+    const bowlDiff = getPlayerBowlingOverall(b) - getPlayerBowlingOverall(a);
+    if (bowlDiff !== 0) return bowlDiff;
+
+    return getPlayerStaminaRating(b) - getPlayerStaminaRating(a);
+  });
+}
+
+function pickOpeningBowlers(bowlingXI) {
+  const ranked = rankBowlers(bowlingXI);
+  const first = ranked[0] || null;
+  const firstKey = first ? getPlayerKey(first, "opening_1") : null;
+  const second = ranked.find(player => getPlayerKey(player, "opening_2") !== firstKey) || ranked[1] || null;
+
+  return {
+    first,
+    second
+  };
+}
+
+function pickOpeningBowler(bowlingXI) {
+  return pickOpeningBowlers(bowlingXI).first;
+}
+
+
+const COMPUTER_BOWLING_PATTERN = "ABABCDECDEABCDEDCEAB";
+const COMPUTER_BOWLING_PATTERN_DISPLAY = "ABABCDECDE ABCDEDCEAB";
+const COMPUTER_BOWLING_SLOTS = ["A", "B", "C", "D", "E"];
+
+function getUniquePlayerKey(player, fallback = "player") {
+  return getPlayerKey(player, fallback);
+}
+
+function getComputerPatternSlot(overIndex) {
+  if (!COMPUTER_BOWLING_PATTERN.length) return "A";
+  const safeIndex = Math.max(0, Number(overIndex) || 0);
+  return COMPUTER_BOWLING_PATTERN[safeIndex % COMPUTER_BOWLING_PATTERN.length];
+}
+
+function buildComputerBowlingPatternPlan(bowlingXI, format = "T20") {
+  const players = Array.isArray(bowlingXI) ? bowlingXI : [];
+  if (!players.length) return null;
+
+  const ranked = rankBowlers(players);
+  const selected = [];
+  const used = new Set();
+
+  [...ranked, ...players].forEach((player) => {
+    if (!player || selected.length >= COMPUTER_BOWLING_SLOTS.length) return;
+    const key = getUniquePlayerKey(player, `pattern_${selected.length}`);
+    if (used.has(key)) return;
+    used.add(key);
+    selected.push(player);
+  });
+
+  if (!selected.length) return null;
+
+  while (selected.length < COMPUTER_BOWLING_SLOTS.length) {
+    selected.push(selected[selected.length % Math.max(1, selected.length)]);
+  }
+
+  const bowlersBySlot = {};
+  const keysBySlot = {};
+  const namesBySlot = {};
+
+  COMPUTER_BOWLING_SLOTS.forEach((slot, index) => {
+    const player = selected[index];
+    const key = getUniquePlayerKey(player, `pattern_${slot}`);
+    bowlersBySlot[slot] = player;
+    keysBySlot[slot] = key;
+    namesBySlot[slot] = getPlayerName(player);
+  });
+
+  return {
+    enabled: true,
+    pattern: COMPUTER_BOWLING_PATTERN,
+    displayPattern: COMPUTER_BOWLING_PATTERN_DISPLAY,
+    slots: COMPUTER_BOWLING_SLOTS,
+    bowlersBySlot,
+    keysBySlot,
+    namesBySlot,
+    formatMaxOvers: getBowlerMaxOvers(format)
+  };
+}
+
+function getComputerPatternNamesText(plan = matchState?.bowlerPlan) {
+  const namesBySlot = plan?.computerPatternNames || plan?.namesBySlot || {};
+  return COMPUTER_BOWLING_SLOTS
+    .map(slot => `${slot}: ${namesBySlot[slot] || "-"}`)
+    .join(" • ");
+}
+
+function shouldUseComputerBowlingPattern() {
+  return !!(
+    matchState &&
+    matchState.bowlingSide === "computer" &&
+    matchState.bowlerPlan &&
+    matchState.bowlerPlan.computerPatternEnabled
+  );
+}
+
+function getComputerPatternBowlerForOver(overIndex, legalPool = null) {
+  if (!shouldUseComputerBowlingPattern()) return null;
+
+  const plan = matchState.bowlerPlan || {};
+  const keysBySlot = plan.computerPatternKeys || {};
+  const pool = Array.isArray(legalPool) ? legalPool : getBowlingXI();
+
+  for (let offset = 0; offset < COMPUTER_BOWLING_PATTERN.length; offset += 1) {
+    const slot = getComputerPatternSlot((Number(overIndex) || 0) + offset);
+    const wantedKey = keysBySlot[slot];
+    if (!wantedKey) continue;
+
+    const player = pool.find(candidate => getPlayerKey(candidate) === wantedKey);
+    if (player && canBowlerBowlNextOver(player, true)) {
+      return {
+        player,
+        slot,
+        patternOverIndex: (Number(overIndex) || 0) + offset,
+        usedFallbackSlot: offset > 0
+      };
+    }
+  }
+
+  return null;
+}
+
+    function createBatterStat(player) {
+      return {
+        key: getPlayerKey(player),
+        name: getPlayerName(player),
+        runs: 0,
+        balls: 0,
+        fours: 0,
+        sixes: 0,
+        out: false,
+        howOut: "",
+        confidence: 50,
+        lastConfidenceChange: 0,
+        fatigue: 0,
+        lastFatigueChange: 0
+      };
+    }
+
+    function createBowlerStat(player, format = matchState?.format || "T20") {
+      const maxOvers = getBowlerMaxOvers(format);
+      const maxBalls = getBowlerMaxBalls(format);
+
+      return {
+        key: getPlayerKey(player),
+        name: getPlayerName(player),
+        balls: 0,
+        maidens: 0,
+        runs: 0,
+        wickets: 0,
+        stamina: getInitialBowlerStamina(player),
+        fatigue: 0,
+        spellBalls: 0,
+        maxOvers,
+        maxBalls,
+        lastOverBowled: null
+      };
+    }
+
+    function createInitialMatchState(currentMatch) {
+      const teams = getFullTeamNames(currentMatch);
+      const format = currentMatch?.format || currentMatch?.match?.format || "Match";
+      const battingInfo = getBattingTeamFromToss(currentMatch, teams);
+      const battingXI = getSelectedXI(currentMatch, battingInfo.battingSide);
+      const bowlingXI = getSelectedXI(currentMatch, battingInfo.bowlingSide);
+      const computerPatternPlan = battingInfo.bowlingSide === "computer"
+        ? buildComputerBowlingPatternPlan(bowlingXI, format)
+        : null;
+      const openingBowlers = computerPatternPlan
+        ? {
+            first: computerPatternPlan.bowlersBySlot.A,
+            second: computerPatternPlan.bowlersBySlot.B
+          }
+        : pickOpeningBowlers(bowlingXI);
+      const openingBowler = openingBowlers.first;
+      const secondOpeningBowler = openingBowlers.second;
+
+      const striker = battingXI[0] || { name: "Opening Batter" };
+      const nonStriker = battingXI[1] || { name: "Opening Batter" };
+
+      const strikerKey = getPlayerKey(striker, "striker");
+      const nonStrikerKey = getPlayerKey(nonStriker, "nonStriker");
+      const bowlerKey = computerPatternPlan?.keysBySlot?.A || getPlayerKey(openingBowler, "bowler");
+      const secondBowlerKey = computerPatternPlan?.keysBySlot?.B || (secondOpeningBowler ? getPlayerKey(secondOpeningBowler, "bowler_2") : null);
+
+      const battingStats = {};
+      battingStats[strikerKey] = createBatterStat(striker);
+      battingStats[nonStrikerKey] = createBatterStat(nonStriker);
+
+      const bowlingStats = {};
+      bowlingStats[bowlerKey] = createBowlerStat(openingBowler || { name: "Bowler" }, format);
+
+      if (secondOpeningBowler && secondBowlerKey && !bowlingStats[secondBowlerKey]) {
+        bowlingStats[secondBowlerKey] = createBowlerStat(secondOpeningBowler, format);
+      }
+
+      if (computerPatternPlan) {
+        Object.entries(computerPatternPlan.bowlersBySlot).forEach(([slot, player]) => {
+          const key = computerPatternPlan.keysBySlot[slot];
+          if (player && key && !bowlingStats[key]) {
+            bowlingStats[key] = createBowlerStat(player, format);
+          }
+        });
+      }
+
+      return {
+        matchIndex: getMatchIndex(currentMatch),
+        format,
+        maxOvers: getFormatMaxOvers(format),
+        battingSide: battingInfo.battingSide,
+        bowlingSide: battingInfo.bowlingSide,
+        battingTeam: battingInfo.battingTeam,
+        bowlingTeam: battingInfo.bowlingTeam,
+        inningsNumber: 1,
+        target: null,
+        firstInnings: null,
+        secondInnings: null,
+        inningsScorecards: [],
+        awaitingNextInnings: false,
+        matchCompleted: false,
+        result: null,
+        runs: 0,
+        wickets: 0,
+        balls: 0,
+        strikerKey,
+        nonStrikerKey,
+        nextBatterIndex: 2,
+        currentBowlerKey: bowlerKey,
+        previousBowlerKey: null,
+        lastCompletedOverBowlerKey: null,
+        bowlerPlan: {
+          openingBowlerOneKey: bowlerKey,
+          openingBowlerTwoKey: secondBowlerKey,
+          openingBowlerOneName: getPlayerName(openingBowler || { name: "Bowler" }),
+          openingBowlerTwoName: secondOpeningBowler ? getPlayerName(secondOpeningBowler) : "-",
+          formatMaxOvers: getBowlerMaxOvers(format),
+          noConsecutiveOvers: true,
+          staminaEnabled: true,
+          computerPatternEnabled: !!computerPatternPlan,
+          computerPattern: computerPatternPlan?.pattern || null,
+          computerPatternDisplay: computerPatternPlan?.displayPattern || null,
+          computerPatternKeys: computerPatternPlan?.keysBySlot || null,
+          computerPatternNames: computerPatternPlan?.namesBySlot || null
+        },
+        overHistory: [],
+        battingStats,
+        bowlingStats,
+        partnershipRuns: 0,
+        partnershipBalls: 0,
+        currentOverBalls: [],
+        commentary: [
+          {
+            label: "0.0 • Match ready",
+            text: `${battingInfo.battingTeam} will bat first. ${getPlayerName(striker)} and ${getPlayerName(nonStriker)} are opening. ${getPlayerName(openingBowler || { name: "Bowler" })} will take the new ball.`
+          }
+        ],
+        completed: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function upgradeMatchState(saved, currentMatch) {
+      if (!saved || typeof saved !== "object") return saved;
+
+      const format = saved.format || currentMatch?.format || currentMatch?.match?.format || "Match";
+      saved.format = format;
+      saved.inningsNumber = Number(saved.inningsNumber) || 1;
+      saved.target = saved.target ?? null;
+      saved.firstInnings = saved.firstInnings || null;
+      saved.secondInnings = saved.secondInnings || null;
+      saved.inningsScorecards = Array.isArray(saved.inningsScorecards) ? saved.inningsScorecards : [];
+      saved.awaitingNextInnings = !!saved.awaitingNextInnings;
+      saved.matchCompleted = !!saved.matchCompleted;
+      saved.result = saved.result || null;
+
+      if (!saved.bowlingStats || typeof saved.bowlingStats !== "object") {
+        saved.bowlingStats = {};
+      }
+
+      if (!saved.battingStats || typeof saved.battingStats !== "object") {
+        saved.battingStats = {};
+      }
+
+      Object.keys(saved.battingStats).forEach((key) => {
+        const stat = saved.battingStats[key];
+        if (!stat || typeof stat !== "object") return;
+        stat.confidence = Number.isFinite(Number(stat.confidence)) ? Number(stat.confidence) : 50;
+        stat.lastConfidenceChange = Number.isFinite(Number(stat.lastConfidenceChange)) ? Number(stat.lastConfidenceChange) : 0;
+        stat.fatigue = Number.isFinite(Number(stat.fatigue)) ? Number(stat.fatigue) : 0;
+        stat.lastFatigueChange = Number.isFinite(Number(stat.lastFatigueChange)) ? Number(stat.lastFatigueChange) : 0;
+      });
+
+      const bowlingXI = getSelectedXI(currentMatch, saved.bowlingSide);
+      const computerPatternPlan = saved.bowlingSide === "computer"
+        ? buildComputerBowlingPatternPlan(bowlingXI, format)
+        : null;
+      const openingBowlers = computerPatternPlan
+        ? {
+            first: computerPatternPlan.bowlersBySlot.A,
+            second: computerPatternPlan.bowlersBySlot.B
+          }
+        : pickOpeningBowlers(bowlingXI);
+      const openerOneKey = computerPatternPlan?.keysBySlot?.A || saved.bowlerPlan?.openingBowlerOneKey || saved.currentBowlerKey || getPlayerKey(openingBowlers.first, "bowler");
+      const openerTwoKey = computerPatternPlan?.keysBySlot?.B || saved.bowlerPlan?.openingBowlerTwoKey || (openingBowlers.second ? getPlayerKey(openingBowlers.second, "bowler_2") : null);
+
+      saved.previousBowlerKey = saved.previousBowlerKey ?? null;
+      saved.lastCompletedOverBowlerKey = saved.lastCompletedOverBowlerKey ?? null;
+      saved.overHistory = Array.isArray(saved.overHistory) ? saved.overHistory : [];
+
+      saved.bowlerPlan = {
+        openingBowlerOneKey: openerOneKey,
+        openingBowlerTwoKey: openerTwoKey,
+        openingBowlerOneName: getPlayerName(openingBowlers.first || getBowlerByKey(openerOneKey) || { name: "Bowler" }),
+        openingBowlerTwoName: openingBowlers.second ? getPlayerName(openingBowlers.second) : "-",
+        formatMaxOvers: getBowlerMaxOvers(format),
+        noConsecutiveOvers: true,
+        staminaEnabled: true,
+        computerPatternEnabled: !!computerPatternPlan,
+        computerPattern: computerPatternPlan?.pattern || null,
+        computerPatternDisplay: computerPatternPlan?.displayPattern || null,
+        computerPatternKeys: computerPatternPlan?.keysBySlot || null,
+        computerPatternNames: computerPatternPlan?.namesBySlot || null
+      };
+
+      bowlingXI.forEach((player) => {
+        const key = getPlayerKey(player);
+        if (!saved.bowlingStats[key]) {
+          saved.bowlingStats[key] = createBowlerStat(player, format);
+        } else {
+          const stat = saved.bowlingStats[key];
+          stat.key = stat.key || key;
+          stat.name = stat.name || getPlayerName(player);
+          stat.balls = Number(stat.balls) || 0;
+          stat.maidens = Number(stat.maidens) || 0;
+          stat.runs = Number(stat.runs) || 0;
+          stat.wickets = Number(stat.wickets) || 0;
+          stat.stamina = Number.isFinite(Number(stat.stamina)) ? Number(stat.stamina) : getInitialBowlerStamina(player);
+          stat.fatigue = Number.isFinite(Number(stat.fatigue)) ? Number(stat.fatigue) : 0;
+          stat.maxOvers = getBowlerMaxOvers(format);
+          stat.maxBalls = getBowlerMaxBalls(format);
+          stat.lastOverBowled = stat.lastOverBowled ?? null;
+          stat.spellBalls = Number(stat.spellBalls) || 0;
+        }
+      });
+
+      if (!saved.currentBowlerKey) {
+        saved.currentBowlerKey = openerOneKey;
+      }
+
+      return saved;
+    }
+
+    function getOrCreateMatchState(currentMatch) {
+      const key = getMatchStateKey(currentMatch);
+      const saved = readJSON(key, null);
+
+      if (saved && Number(saved.matchIndex) === getMatchIndex(currentMatch)) {
+        const upgraded = upgradeMatchState(saved, currentMatch);
+        writeJSON(key, upgraded);
+        return upgraded;
+      }
+
+      const fresh = createInitialMatchState(currentMatch);
+      writeJSON(key, fresh);
+      return fresh;
+    }
+
+    function saveMatchState() {
+      if (!currentMatchCache || !matchState) return;
+      matchState.updatedAt = new Date().toISOString();
+      writeJSON(getMatchStateKey(currentMatchCache), matchState);
+    }
+
+    function resetMatchCenterState() {
+      const currentMatch = readJSON("currentTourMatch", null);
+      if (!currentMatch) return;
+
+      localStorage.removeItem(getMatchStateKey(currentMatch));
+      matchState = createInitialMatchState(currentMatch);
+      saveMatchState();
+      renderMatchCenter();
+    }
+
+    function getBattingXI() {
+      return getSelectedXI(currentMatchCache, matchState?.battingSide);
+    }
+
+    function getBowlingXI() {
+      return getSelectedXI(currentMatchCache, matchState?.bowlingSide);
+    }
+
+    function getBatterByKey(key) {
+      const xi = getBattingXI();
+      return xi.find(player => getPlayerKey(player) === String(key)) || null;
+    }
+
+    function getBowlerByKey(key) {
+      const xi = getBowlingXI();
+      return xi.find(player => getPlayerKey(player) === String(key)) || null;
+    }
+
+    function ensureBatterStat(key) {
+      if (!matchState.battingStats[key]) {
+        matchState.battingStats[key] = createBatterStat(getBatterByKey(key) || { name: key });
+      }
+
+      const stat = matchState.battingStats[key];
+      stat.confidence = Number.isFinite(Number(stat.confidence)) ? Number(stat.confidence) : 50;
+      stat.lastConfidenceChange = Number.isFinite(Number(stat.lastConfidenceChange)) ? Number(stat.lastConfidenceChange) : 0;
+
+      return stat;
+    }
+
+
+function ensureBowlerStat(key) {
+  if (!matchState.bowlingStats[key]) {
+    matchState.bowlingStats[key] = createBowlerStat(getBowlerByKey(key) || { name: key }, matchState.format);
+  }
+
+  const stat = matchState.bowlingStats[key];
+  const player = getBowlerByKey(key) || { name: stat.name || key };
+
+  stat.key = stat.key || key;
+  stat.name = stat.name || getPlayerName(player);
+  stat.stamina = Number.isFinite(Number(stat.stamina)) ? Number(stat.stamina) : getInitialBowlerStamina(player);
+  stat.fatigue = Number.isFinite(Number(stat.fatigue)) ? Number(stat.fatigue) : 0;
+  stat.maxOvers = getBowlerMaxOvers(matchState.format);
+  stat.maxBalls = getBowlerMaxBalls(matchState.format);
+  stat.lastOverBowled = stat.lastOverBowled ?? null;
+  stat.spellBalls = Number(stat.spellBalls) || 0;
+
+  return stat;
+}
+
+function switchStrike() {
+  const oldStriker = matchState.strikerKey;
+  matchState.strikerKey = matchState.nonStrikerKey;
+  matchState.nonStrikerKey = oldStriker;
+}
+
+function canBowlerBowlNextOver(player, excludeCurrent = true) {
+  if (!player || !matchState) return false;
+
+  const key = getPlayerKey(player);
+  const stat = ensureBowlerStat(key);
+
+  if (excludeCurrent && key === matchState.currentBowlerKey) return false;
+  if (stat.maxBalls !== null && stat.maxBalls !== undefined && stat.balls >= stat.maxBalls) return false;
+  if (Number(stat.stamina) <= 5) return false;
+
+  return true;
+}
+
+function getAvailableBowlersForNextOver(excludeCurrent = true) {
+  const bowlingXI = getBowlingXI();
+  const ranked = rankBowlers(bowlingXI);
+  return ranked.filter(player => canBowlerBowlNextOver(player, excludeCurrent));
+}
+
+function recordCompletedOverForBowler(bowlerKey) {
+  const overNumber = Math.floor(matchState.balls / 6);
+  const stat = ensureBowlerStat(bowlerKey);
+  stat.lastOverBowled = overNumber;
+
+  matchState.lastCompletedOverBowlerKey = bowlerKey;
+  matchState.overHistory.push({
+    over: overNumber,
+    bowlerKey,
+    bowlerName: stat.name,
+    balls: stat.balls,
+    stamina: Math.round(Number(stat.stamina) || 0)
+  });
+
+  matchState.overHistory = matchState.overHistory.slice(-30);
+}
+
+function chooseNextBowler() {
+  const completedOvers = Math.floor(matchState.balls / 6);
+  const currentKey = matchState.currentBowlerKey;
+  const preferredSecondKey = matchState.bowlerPlan?.openingBowlerTwoKey || null;
+
+  let legalPool = getAvailableBowlersForNextOver(true);
+
+  if (!legalPool.length) {
+    addCommentary(
+      ballsToOvers(matchState.balls),
+      "No legal bowler is available. All options are either tired, maxed out, or the previous-over bowler. Innings paused."
+    );
+    matchState.completed = true;
+    return false;
+  }
+
+  let next = null;
+  let patternChoice = null;
+
+  if (shouldUseComputerBowlingPattern()) {
+    patternChoice = getComputerPatternBowlerForOver(completedOvers, legalPool);
+    next = patternChoice?.player || null;
+  }
+
+  if (!next && completedOvers === 1 && preferredSecondKey) {
+    next = legalPool.find(player => getPlayerKey(player) === preferredSecondKey) || null;
+  }
+
+  if (!next) {
+    next = [...legalPool].sort((a, b) => {
+      const aKey = getPlayerKey(a);
+      const bKey = getPlayerKey(b);
+      const aStat = ensureBowlerStat(aKey);
+      const bStat = ensureBowlerStat(bKey);
+
+      const aBallsLeft = aStat.maxBalls === null || aStat.maxBalls === undefined ? 999 : Math.max(0, aStat.maxBalls - aStat.balls);
+      const bBallsLeft = bStat.maxBalls === null || bStat.maxBalls === undefined ? 999 : Math.max(0, bStat.maxBalls - bStat.balls);
+
+      const aScore = getPlayerBowlingOverall(a) * 3 + Number(aStat.stamina || 0) * 0.7 + aBallsLeft * 0.12 - aStat.balls * 0.08;
+      const bScore = getPlayerBowlingOverall(b) * 3 + Number(bStat.stamina || 0) * 0.7 + bBallsLeft * 0.12 - bStat.balls * 0.08;
+
+      return bScore - aScore;
+    })[0];
+  }
+
+  if (!next) return false;
+
+  matchState.previousBowlerKey = currentKey;
+  matchState.currentBowlerKey = getPlayerKey(next);
+  const nextBowlerStat = ensureBowlerStat(matchState.currentBowlerKey);
+  nextBowlerStat.spellBalls = 0;
+
+  if (patternChoice) {
+    matchState.currentBowlerPatternSlot = patternChoice.slot;
+    matchState.currentBowlerPatternFallback = !!patternChoice.usedFallbackSlot;
+  } else {
+    matchState.currentBowlerPatternSlot = null;
+    matchState.currentBowlerPatternFallback = false;
+  }
+
+  return true;
+}
+
+function getBowlerFatigueGainPerBall(player, stat, format) {
+  const key = getFormatKey(format);
+  const role = getRoleGroupForSkill(player);
+  const staminaRating = clampNumber(getPlayerStaminaRating(player), 0, 20);
+  const spellBall = (Number(stat?.spellBalls) || 0) + 1;
+
+  // V18: fatigue is spell fatigue, not 100 - stamina.
+  // This prevents the old 0% -> 20% jump on ball two when a player starts with 78–82 stamina.
+  let gain = key === "test" ? 0.82 : key === "odi" ? 1.05 : 1.34;
+  gain += Math.max(0, spellBall - 1) * (key === "test" ? 0.06 : key === "odi" ? 0.09 : 0.14);
+  if (spellBall >= 5) gain += key === "test" ? 0.10 : key === "odi" ? 0.16 : 0.24;
+
+  if (role === "bowler") gain *= 0.92;
+  else if (role === "allrounder") gain *= 1.00;
+  else gain *= 1.22; // emergency/part-time bowlers tire faster and lose control faster.
+
+  const fitnessRelief = clampNumber(1.20 - (staminaRating / 20) * 0.42, 0.78, 1.20);
+  gain *= fitnessRelief;
+
+  const oldBalls = Number(stat?.balls) || 0;
+  if (key === "t20" && oldBalls >= 18) gain += 0.14;
+  if (key === "odi" && oldBalls >= 36) gain += 0.10;
+  if (key === "test" && oldBalls >= 60) gain += 0.08;
+
+  return Math.round(clampNumber(gain, 0.45, key === "t20" ? 2.65 : 2.25) * 10) / 10;
+}
+
+function drainBowlerStamina(bowlerKey) {
+  const bowlerPlayer = getBowlerByKey(bowlerKey) || { name: bowlerKey };
+  const stat = ensureBowlerStat(bowlerKey);
+  const drain = getBowlerDrainPerBall(bowlerPlayer, matchState.format);
+  const fatigueGain = getBowlerFatigueGainPerBall(bowlerPlayer, stat, matchState.format);
+
+  stat.stamina = Math.max(0, Math.round((Number(stat.stamina || 0) - drain) * 100) / 100);
+  stat.spellBalls = (Number(stat.spellBalls) || 0) + 1;
+  stat.fatigue = Math.round(clampNumber((Number(stat.fatigue) || 0) + fatigueGain, 0, 100) * 10) / 10;
+  stat.lastFatigueChange = fatigueGain;
+
+  return stat.stamina;
+}
+
+    function classifyOutcome(outcome) {
+      if (outcome === "W") return "wicket";
+      if (outcome === 4) return "four";
+      if (outcome === 6) return "six";
+      if (outcome === 0) return "dot";
+      if (outcome === 1) return "one";
+      if (outcome === 2) return "two";
+      if (outcome === 3) return "three";
+      return "dot";
+    }
+
+
+    /* =========================================================
+       SKILL VS SKILL OUTCOME ENGINE
+       Randomness is only the final roll. The weights come from:
+       batter attributes vs bowler attributes + format + aggression + stamina.
+    ========================================================= */
+
+    const FORMAT_OUTCOME_WEIGHTS = {
+      // V14 base shape: wicket base is lower again. Strong bowlers create pressure first, not instant collapses.
+      // Skill, aggression, confidence, batter fatigue, and bowler fatigue still move these live.
+      test: { dot: 46, one: 31, two: 9,  three: 1.3, four: 8.4, six: 1.1, wicket: 3.5 },
+      odi:  { dot: 36, one: 35, two: 10, three: 1.4, four: 12.8, six: 3.1, wicket: 3.7 },
+      t20:  { dot: 30, one: 33, two: 8.7, three: 1,   four: 16,  six: 6.2, wicket: 4.7 }
+    };
+
+    /*
+      V20 clean console:
+      True = one compact line per manual ball.
+      Sim runs still suppress ball logs.
+    */
+    const DEBUG_SKILL_ENGINE = true;
+    let SIM_SUPPRESS_ENGINE_LOG = false;
+
+    function clampNumber(value, min, max) {
+      return Math.max(min, Math.min(max, Number(value) || 0));
+    }
+
+    function weightedAverage(items) {
+      let total = 0;
+      let weight = 0;
+
+      items.forEach(([value, itemWeight]) => {
+        const numberValue = Number(value);
+        const numberWeight = Number(itemWeight);
+
+        if (Number.isFinite(numberValue) && Number.isFinite(numberWeight) && numberWeight > 0) {
+          total += numberValue * numberWeight;
+          weight += numberWeight;
+        }
+      });
+
+      return weight > 0 ? total / weight : 0;
+    }
+
+    function scoreFromTwentyScale(value20) {
+      const safe = clampNumber(value20, 0, 20) / 20;
+      return 42 + Math.pow(safe, 1.18) * 56;
+    }
+
+    function attributeNumber(player, path, fallback = 0) {
+      const value = String(path).split('.').reduce((current, key) => {
+        if (current === null || current === undefined) return undefined;
+        return current[key];
+      }, player);
+
+      const numberValue = Number(value);
+      return Number.isFinite(numberValue) ? numberValue : fallback;
+    }
+
+    function getBowlerType(player) {
+      const type = String(player?.bowlingType || player?.bowling_type || '').toLowerCase();
+      const style = String(player?.bowlingStyle || player?.bowling_style || '').toLowerCase();
+
+      if (type.includes('spin')) return 'spin';
+      if (type.includes('pace') || type.includes('fast') || type.includes('medium')) return 'pace';
+
+      if (
+        style.includes('spin') ||
+        style.includes('break') ||
+        style.includes('orthodox') ||
+        style.includes('googly') ||
+        style.includes('leg') ||
+        style.includes('off') ||
+        style.includes('slow')
+      ) {
+        return 'spin';
+      }
+
+      if (
+        style.includes('fast') ||
+        style.includes('medium') ||
+        style.includes('seam') ||
+        style.includes('swing')
+      ) {
+        return 'pace';
+      }
+
+      return 'pace';
+    }
+
+
+    function getRoleGroupForSkill(player) {
+      const role = String(player?.role || player?.playerRole || player?.player_role || '').toLowerCase();
+
+      if (role.includes('all-rounder') || role.includes('all rounder') || role.includes('allrounder')) return 'allrounder';
+      if (role.includes('wicket') || role.includes('keeper')) return 'wicketkeeper';
+      if (role.includes('bowler') || role.includes('bowl')) return 'bowler';
+      if (role.includes('batsman') || role.includes('batter') || role.includes('bat')) return 'batter';
+
+      return 'unknown';
+    }
+
+    function getBattingRoleMultiplier(player) {
+      const role = getRoleGroupForSkill(player);
+
+      if (role === 'batter') return 1.00;
+      if (role === 'wicketkeeper') return 0.98;
+      if (role === 'allrounder') return 0.92;
+      if (role === 'bowler') return 0.68;
+
+      return 0.86;
+    }
+
+    function getBowlingRoleMultiplier(player) {
+      const role = getRoleGroupForSkill(player);
+
+      if (role === 'bowler') return 1.00;
+      if (role === 'allrounder') return 0.94;
+      if (role === 'batter') return 0.52;
+      if (role === 'wicketkeeper') return 0.42;
+
+      return 0.65;
+    }
+
+    function getBattingRoleCap(player) {
+      const role = getRoleGroupForSkill(player);
+      const battingOverall = attributeNumber(player, 'attributes.overall.batting_overall', 0);
+
+      // Dynamic caps stop every specialist batter from printing the same 98.
+      if (role === 'batter') return clampNumber(62 + battingOverall * 1.75, 78, 98);
+      if (role === 'wicketkeeper') return clampNumber(60 + battingOverall * 1.70, 76, 96);
+      if (role === 'allrounder') return clampNumber(56 + battingOverall * 1.55, 70, 91);
+
+      // Bowlers can bat if the JSON says they can, but their ceiling stays realistic.
+      if (role === 'bowler') return clampNumber(46 + battingOverall * 1.45, 54, 82);
+
+      return clampNumber(54 + battingOverall * 1.45, 62, 86);
+    }
+
+    function getBowlingRoleCap(player) {
+      const role = getRoleGroupForSkill(player);
+      const bowlingOverall = attributeNumber(player, 'attributes.overall.bowling_overall', 0);
+
+      if (role === 'bowler') return clampNumber(62 + bowlingOverall * 1.75, 78, 98);
+      if (role === 'allrounder') return clampNumber(58 + bowlingOverall * 1.60, 72, 92);
+
+      // Part-time bowlers are possible only as emergency/options, not frontline threats.
+      if (role === 'batter') return clampNumber(26 + bowlingOverall * 1.45, 30, 58);
+      if (role === 'wicketkeeper') return clampNumber(22 + bowlingOverall * 1.25, 26, 50);
+
+      return clampNumber(42 + bowlingOverall * 1.55, 50, 82);
+    }
+
+    function applyBattingRoleReality(score, player) {
+      const adjusted = score * getBattingRoleMultiplier(player);
+      return Math.round(Math.min(adjusted, getBattingRoleCap(player)) * 10) / 10;
+    }
+
+    function applyBowlingRoleReality(score, player) {
+      const adjusted = score * getBowlingRoleMultiplier(player);
+      return Math.round(Math.min(adjusted, getBowlingRoleCap(player)) * 10) / 10;
+    }
+
+    function getBatterConfidence(playerOrKey) {
+      if (!matchState || !matchState.battingStats) return 50;
+
+      const key = typeof playerOrKey === "string"
+        ? playerOrKey
+        : getPlayerKey(playerOrKey);
+
+      const stat = matchState.battingStats[key];
+      return clampNumber(stat?.confidence ?? 50, 10, 99);
+    }
+
+    function getBatterConfidenceAdjustment(playerOrKey, aggression) {
+      const confidence = getBatterConfidence(playerOrKey);
+      const agg = clampNumber(aggression, 1, 10);
+      const pressureMultiplier = agg >= 8 ? 0.25 : agg >= 6 ? 0.22 : agg <= 3 ? 0.15 : 0.19;
+
+      // V14: confidence has diminishing returns. 90–99 should feel hot, not superhuman.
+      const rawEdge = confidence - 50;
+      const sign = rawEdge < 0 ? -1 : 1;
+      const absEdge = Math.abs(rawEdge);
+      let effectiveEdge = 0;
+
+      if (absEdge <= 25) effectiveEdge = absEdge;
+      else if (absEdge <= 40) effectiveEdge = 25 + (absEdge - 25) * 0.55;
+      else effectiveEdge = 25 + 15 * 0.55 + (absEdge - 40) * 0.25;
+
+      return Math.round(sign * effectiveEdge * pressureMultiplier * 10) / 10;
+    }
+
+    function updateBatterConfidenceAfterOutcome(batterKey, outcome) {
+      const stat = ensureBatterStat(batterKey);
+      const before = clampNumber(stat.confidence ?? 50, 10, 99);
+      let change = 0;
+
+      if (outcome === "W") change = -18;
+      else if (outcome === 0) change = -1.2;
+      else if (outcome === 1) change = 0.7;
+      else if (outcome === 2) change = 1.4;
+      else if (outcome === 3) change = 1.9;
+      else if (outcome === 4) change = 3.6;
+      else if (outcome === 6) change = 4.9;
+
+      // New batters and tailenders should not instantly become superhuman.
+      if ((Number(stat.balls) || 0) < 6 && change > 0) change *= 0.70;
+
+      // V14: slow down confidence growth when already hot.
+      if (change > 0 && before >= 75) change *= 0.54;
+      if (change > 0 && before >= 88) change *= 0.32;
+      if (change > 0 && before >= 95) change *= 0.14;
+
+      stat.confidence = Math.round(clampNumber(before + change, 10, 96.5) * 10) / 10;
+      stat.lastConfidenceChange = Math.round((stat.confidence - before) * 10) / 10;
+
+      return stat.confidence;
+    }
+
+    function getBatterFatigue(playerOrKey) {
+      if (!matchState || !matchState.battingStats) return 0;
+
+      const key = typeof playerOrKey === "string"
+        ? playerOrKey
+        : getPlayerKey(playerOrKey);
+
+      const stat = matchState.battingStats[key];
+      return clampNumber(stat?.fatigue ?? 0, 0, 100);
+    }
+
+    function getBatterFatigueGainMultiplier(playerOrKey) {
+      const player = typeof playerOrKey === "string"
+        ? getBatterByKey(playerOrKey)
+        : playerOrKey;
+
+      const stamina = attributeNumber(player, 'attributes.physical.stamina', 10);
+      const fitness = attributeNumber(player, 'attributes.physical.fitness', 10);
+      const endurance = attributeNumber(player, 'attributes.physical.endurance', stamina || fitness || 10);
+      const physical20 = weightedAverage([
+        [stamina, 1.2],
+        [fitness, 1.0],
+        [endurance, 0.8]
+      ]);
+
+      // Higher physical score = slower fatigue gain. Poor fitness gets tired faster.
+      return clampNumber(1.18 - (physical20 / 20) * 0.42, 0.70, 1.18);
+    }
+
+    function getBatterFatigueAdjustment(playerOrKey) {
+      const fatigue = getBatterFatigue(playerOrKey);
+      const player = typeof playerOrKey === "string"
+        ? getBatterByKey(playerOrKey)
+        : playerOrKey;
+
+      const stamina = attributeNumber(player, 'attributes.physical.stamina', 10);
+      const fitness = attributeNumber(player, 'attributes.physical.fitness', 10);
+      const resistance = clampNumber((stamina + fitness) / 40, 0.45, 1.0);
+
+      // V14: fatigue is gentle early, then bites harder after 35 and very hard after 50.
+      let penalty = fatigue * 0.080;
+      if (fatigue > 35) penalty += (fatigue - 35) * 0.22;
+      if (fatigue > 50) penalty += (fatigue - 50) * 0.34;
+
+      penalty *= (1.12 - resistance * 0.22);
+
+      return Math.round(penalty * 10) / 10;
+    }
+
+    function updateBatterFatigueAfterOutcome(batterKey, outcome, aggression, isRunner = false) {
+      const stat = ensureBatterStat(batterKey);
+      const before = clampNumber(stat.fatigue ?? 0, 0, 100);
+      const agg = clampNumber(aggression, 1, 10);
+      const numericOutcome = Number(outcome);
+      let gain = isRunner ? 0.10 : 0.22;
+
+      if (outcome === "W") {
+        gain = 0;
+      } else if (numericOutcome === 0) {
+        gain += isRunner ? 0.04 : 0.18;
+      } else if (numericOutcome === 1) {
+        gain += isRunner ? 0.42 : 0.52;
+      } else if (numericOutcome === 2) {
+        gain += isRunner ? 0.82 : 1.00;
+      } else if (numericOutcome === 3) {
+        gain += isRunner ? 1.30 : 1.55;
+      } else if (numericOutcome === 4) {
+        gain += isRunner ? 0.04 : 0.46;
+      } else if (numericOutcome === 6) {
+        gain += isRunner ? 0.04 : 0.62;
+      }
+
+      // Higher aggression burns energy faster because the batter is forcing shots.
+      gain += Math.max(0, agg - 5) * 0.16;
+      if (agg <= 3) gain -= 0.06;
+
+      // Long innings fatigue starts to show.
+      const ballsFaced = Number(stat.balls) || 0;
+      if (!isRunner && ballsFaced >= 30) gain += 0.18;
+      if (!isRunner && ballsFaced >= 60) gain += 0.28;
+
+      gain *= getBatterFatigueGainMultiplier(batterKey);
+      gain = Math.max(0, gain);
+
+      stat.fatigue = Math.round(clampNumber(before + gain, 0, 100) * 10) / 10;
+      stat.lastFatigueChange = Math.round((stat.fatigue - before) * 10) / 10;
+
+      return stat.fatigue;
+    }
+
+    function getBowlerFatigueFromStat(stat) {
+      if (!stat) return 0;
+      if (Number.isFinite(Number(stat.fatigue))) return clampNumber(stat.fatigue, 0, 100);
+      return 0;
+    }
+
+    function getBowlerFatigueAdjustment(stat) {
+      const fatigue = getBowlerFatigueFromStat(stat);
+
+      // V18: spell fatigue now ramps gradually, so each fatigue point can matter without huge early jumps.
+      let penalty = fatigue * 0.050;
+      if (fatigue > 25) penalty += (fatigue - 25) * 0.085;
+      if (fatigue > 45) penalty += (fatigue - 45) * 0.140;
+
+      return Math.round(penalty * 10) / 10;
+    }
+
+    function getBatterSkillScore(batter, bowler, aggression) {
+      const agg = clampNumber(aggression, 1, 10);
+      const bowlerType = getBowlerType(bowler);
+
+      const battingOverall = attributeNumber(batter, 'attributes.overall.batting_overall', 0);
+      const technique = attributeNumber(batter, 'attributes.batting.technique', 0);
+      const timing = attributeNumber(batter, 'attributes.batting.timing', 0);
+      const placement = attributeNumber(batter, 'attributes.batting.placement', 0);
+      const footwork = attributeNumber(batter, 'attributes.batting.footwork', 0);
+      const range360 = attributeNumber(batter, 'attributes.batting.range360', 0);
+      const defensiveShots = attributeNumber(batter, 'attributes.batting.defensiveShots', 0);
+      const neutralShots = attributeNumber(batter, 'attributes.batting.neutralShots', 0);
+      const attackingShots = attributeNumber(batter, 'attributes.batting.attackingShots', 0);
+      const vsType = bowlerType === 'spin'
+        ? attributeNumber(batter, 'attributes.batting.vsSpin', 0)
+        : attributeNumber(batter, 'attributes.batting.vsPace', 0);
+      const creativity = attributeNumber(batter, 'attributes.batting.creativity', 0);
+      const concentration = attributeNumber(batter, 'attributes.mental.concentration', 0);
+      const judgement = attributeNumber(batter, 'attributes.mental.judgement', 0);
+      const mentalAggression = attributeNumber(batter, 'attributes.mental.aggression', 0);
+      const speed = attributeNumber(batter, 'attributes.physical.speed', 0);
+      const strength = attributeNumber(batter, 'attributes.physical.strength', 0);
+
+      const lowAgg = Math.max(0, 5 - agg);
+      const highAgg = Math.max(0, agg - 5);
+
+      const controlledSkill20 = weightedAverage([
+        [battingOverall, 2.30],
+        [technique, 1.35],
+        [timing, 1.20],
+        [placement, 1.00],
+        [footwork, 0.80],
+        [neutralShots, 0.65],
+        [defensiveShots, 0.75 + lowAgg * 0.10],
+        [vsType, 1.35],
+        [concentration, 0.85],
+        [judgement, 1.05]
+      ]);
+
+      const attackingSkill20 = weightedAverage([
+        [battingOverall, 1.25],
+        [timing, 1.05],
+        [attackingShots, 1.20 + highAgg * 0.10],
+        [range360, 0.75 + highAgg * 0.08],
+        [creativity, 0.80],
+        [strength, 0.55],
+        [mentalAggression, 0.45 + highAgg * 0.08],
+        [speed, 0.35]
+      ]);
+
+      const controlShare = clampNumber(0.72 - highAgg * 0.025 + lowAgg * 0.025, 0.58, 0.82);
+      const attackShare = 1 - controlShare;
+      const skill20 = controlledSkill20 * controlShare + attackingSkill20 * attackShare;
+
+      const baseScore = applyBattingRoleReality(scoreFromTwentyScale(skill20), batter);
+      const confidenceAdjustment = getBatterConfidenceAdjustment(batter, agg);
+      const fatiguePenalty = getBatterFatigueAdjustment(batter);
+
+      return Math.round(clampNumber(baseScore + confidenceAdjustment - fatiguePenalty, 10, getBattingRoleCap(batter)) * 10) / 10;
+    }
+
+    function getBowlerSkillScore(bowler) {
+      const bowlingOverall = attributeNumber(bowler, 'attributes.overall.bowling_overall', 0);
+      const accuracy = attributeNumber(bowler, 'attributes.bowling.accuracy', 0);
+      const bowlingSpeed = attributeNumber(bowler, 'attributes.bowling.bowlingSpeed', 0);
+      const swing = attributeNumber(bowler, 'attributes.bowling.swing', 0);
+      const turn = attributeNumber(bowler, 'attributes.bowling.turn', 0);
+      const flight = attributeNumber(bowler, 'attributes.bowling.flight', 0);
+      const variations = attributeNumber(bowler, 'attributes.bowling.variations', 0);
+      const intelligence = attributeNumber(bowler, 'attributes.bowling.intelligence', 0);
+      const defensiveBowling = attributeNumber(bowler, 'attributes.bowling.defensiveBowling', 0);
+      const neutralBowling = attributeNumber(bowler, 'attributes.bowling.neutralBowling', 0);
+      const attackingBowling = attributeNumber(bowler, 'attributes.bowling.attackingBowling', 0);
+      const temperament = attributeNumber(bowler, 'attributes.mental.temperament', 0);
+      const bowlerType = getBowlerType(bowler);
+
+      const styleSkill = bowlerType === 'spin'
+        ? weightedAverage([[turn, 1.05], [flight, 0.85], [variations, 0.65], [intelligence, 0.55]])
+        : weightedAverage([[bowlingSpeed, 0.85], [swing, 1.05], [variations, 0.65], [accuracy, 0.45]]);
+
+      const skill20 = weightedAverage([
+        [bowlingOverall, 2.35],
+        [accuracy, 1.35],
+        [styleSkill, 1.25],
+        [variations, 1.05],
+        [intelligence, 0.95],
+        [defensiveBowling, 0.70],
+        [neutralBowling, 0.55],
+        [attackingBowling, 0.80],
+        [temperament, 0.50]
+      ]);
+
+      const key = getPlayerKey(bowler);
+      const bowlerStat = matchState?.bowlingStats?.[key] || null;
+      const stamina = bowlerStat ? clampNumber(bowlerStat.stamina, 0, 100) : getInitialBowlerStamina(bowler);
+      const fatigue = getBowlerFatigueFromStat(bowlerStat);
+      const staminaMultiplier = 0.82 + stamina / 540;
+      const fatiguePenalty = getBowlerFatigueAdjustment(bowlerStat);
+
+      return Math.round(clampNumber(
+        applyBowlingRoleReality(scoreFromTwentyScale(skill20) * staminaMultiplier, bowler) - fatiguePenalty,
+        8,
+        getBowlingRoleCap(bowler)
+      ) * 10) / 10;
+    }
+
+
+
+    const ENGINE_VERSION = "V25 calibrated team-strength engine";
+    const TEAM_CALIBRATION = {
+      "Zimbabwe": { batting: 0.80, bowling: 0.20 },
+      "India": { batting: 0.10, bowling: -0.05 },
+      "Australia": { batting: 0.12, bowling: 0.82 },
+      "Bangladesh": { batting: 0.00, bowling: 0.55 },
+      "England": { batting: 0.18, bowling: 0.85 },
+      "Namibia": { batting: -0.20, bowling: -0.30 },
+      "Afghanistan": { batting: 0.25, bowling: 1.20 }
+    };
+
+    function getTeamCalibration(teamName, side) {
+      const name = String(teamName || '').trim();
+      const data = TEAM_CALIBRATION[name] || {};
+      return Number(data[side] || 0);
+    }
+
+    function getPrimaryPlaystyleName(player, category) {
+      const p = player || {};
+      const primary = p.primaryPlaystyle && typeof p.primaryPlaystyle === 'object' ? p.primaryPlaystyle : {};
+      if (primary[category]) return String(primary[category]);
+      const top = p.topPlaystyles && typeof p.topPlaystyles === 'object' ? p.topPlaystyles : {};
+      const arr = Array.isArray(top[category]) ? top[category] : [];
+      if (arr.length && arr[0] && arr[0].name) return String(arr[0].name);
+      return '';
+    }
+
+    function getTopPlaystyleRating(player, category, styleName = '') {
+      const p = player || {};
+      const style = String(styleName || '').toLowerCase();
+      const top = p.topPlaystyles && typeof p.topPlaystyles === 'object' ? p.topPlaystyles : {};
+      const arr = Array.isArray(top[category]) ? top[category] : [];
+      let best = 0;
+      arr.forEach((item) => {
+        if (!item || typeof item !== 'object') return;
+        const name = String(item.name || '');
+        const rating = Number(item.rating || 0);
+        if (!style || name.toLowerCase().includes(style) || style.includes(name.toLowerCase())) {
+          best = Math.max(best, rating);
+        }
+      });
+      return best;
+    }
+
+    function getDefaultBattingTier(player) {
+      const tactics = player?.tactics && typeof player.tactics === 'object' ? player.tactics : {};
+      return String(tactics.defaultBattingTier || '');
+    }
+
+    function getDefaultBowlingPlanText(player) {
+      const tactics = player?.tactics && typeof player.tactics === 'object' ? player.tactics : {};
+      const plans = tactics.defaultBowlingPlans && typeof tactics.defaultBowlingPlans === 'object' ? tactics.defaultBowlingPlans : {};
+      return `${plans.lineLength || ''} ${plans.variation || ''}`.trim();
+    }
+
+    function getBattingPlaystyleTags(player) {
+      const name = getPrimaryPlaystyleName(player, 'batting');
+      const tier = getDefaultBattingTier(player);
+      const text = `${name} ${tier}`.toLowerCase();
+      const rating = getTopPlaystyleRating(player, 'batting', name);
+      return {
+        name: name || tier || 'Unknown',
+        rating: Math.round(rating * 10) / 10,
+        isSlogger: text.includes('slogger') || text.includes('blitz'),
+        isAnchor: text.includes('anchor') || text.includes('wall') || text.includes('rotate'),
+        isBalanced: text.includes('balanced') || text.includes('cruise'),
+        isFinisher: text.includes('finisher'),
+        isRunner: text.includes('runner'),
+        isPinch: text.includes('pinch'),
+        isOpener: text.includes('opener'),
+        isTop: text.includes('top order'),
+        isMiddle: text.includes('middle order'),
+        isLower: text.includes('lower order')
+      };
+    }
+
+    function getBowlingPlaystyleTags(player) {
+      const name = getPrimaryPlaystyleName(player, 'bowling');
+      const plan = getDefaultBowlingPlanText(player);
+      const text = `${name} ${plan}`.toLowerCase();
+      const rating = getTopPlaystyleRating(player, 'bowling', name);
+      return {
+        name: name || plan || 'Unknown',
+        rating: Math.round(rating * 10) / 10,
+        isSwing: text.includes('swing') || text.includes('seam') || text.includes('attacking line'),
+        isHitdeck: text.includes('hit-the-deck') || text.includes('wide line') || text.includes('consistent accuracy'),
+        isShortball: text.includes('short-ball') || text.includes('short-pitched') || text.includes('bouncer'),
+        isDeath: text.includes('death') || text.includes('yorker') || text.includes('pace variation mix'),
+        isClassical: text.includes('classical') || text.includes('flight') || text.includes('loop'),
+        isFlat: text.includes('flat') || text.includes('flat & fast'),
+        isMystery: text.includes('mystery') || text.includes('turn candy'),
+        isContainment: text.includes('containment') || text.includes('defensive')
+      };
+    }
+
+    function applyV25PlaystylePhaseModifiers(weights, batter, bowler, formatKey, phase, agg, skillEdge, overNow) {
+      const bat = getBattingPlaystyleTags(batter);
+      const bowl = getBowlingPlaystyleTags(bowler);
+      const notes = [];
+      const capDelta = { boundary: 0, six: 0, wicketCap: 0, wicketFloor: 0 };
+      const attack = clampNumber((agg - 1) / 9, 0, 1);
+      const battingRatingScale = clampNumber((bat.rating || 55) / 85, 0.55, 1.20);
+      const bowlingRatingScale = clampNumber((bowl.rating || 55) / 85, 0.55, 1.20);
+      const isLimitedDeath = (formatKey === 't20' && phase === 'death') || (formatKey === 'odi' && phase === 'death');
+      const isPPOrNew = phase === 'powerplay' || phase === 'newBall';
+      const isMiddle = ['earlyMiddle', 'lateMiddle', 'middle', 'setup', 'oldBall'].includes(phase);
+
+      if (bat.isSlogger) {
+        weights.four *= 1.0 + 0.050 * battingRatingScale + 0.030 * attack;
+        weights.six *= 1.0 + 0.080 * battingRatingScale + 0.040 * attack;
+        weights.wicket *= 1.0 + 0.045 * attack;
+        weights.one *= 0.980;
+        capDelta.boundary += 0.55 * battingRatingScale;
+        capDelta.six += 0.30 * battingRatingScale;
+        capDelta.wicketFloor += 0.10 * attack;
+        notes.push('bat:slogger');
+      }
+      if (bat.isPinch && isPPOrNew) {
+        weights.four *= 1.10; weights.six *= 1.10; weights.wicket *= 1.08;
+        capDelta.boundary += 0.90; capDelta.six += 0.35;
+        notes.push('bat:pinch-pp');
+      }
+      if (bat.isFinisher && isLimitedDeath) {
+        weights.four *= 1.13; weights.six *= 1.16; weights.wicket *= 1.04; weights.dot *= 0.96;
+        capDelta.boundary += 1.20 * battingRatingScale; capDelta.six += 0.55 * battingRatingScale;
+        notes.push('bat:finisher-death');
+      }
+      if (bat.isAnchor) {
+        weights.one *= 1.060; weights.two *= 1.050; weights.wicket *= 0.925; weights.six *= 0.900;
+        if (formatKey === 'test') { weights.dot *= 1.035; weights.four *= 0.970; }
+        capDelta.wicketFloor -= 0.12 * battingRatingScale;
+        notes.push('bat:anchor');
+      }
+      if (bat.isBalanced) {
+        weights.one *= 1.035; weights.two *= 1.035; weights.wicket *= 0.975;
+        notes.push('bat:balanced');
+      }
+      if (bat.isRunner) {
+        weights.one *= 1.075; weights.two *= 1.080; weights.three *= 1.120; weights.six *= 0.820; weights.wicket *= 0.965;
+        capDelta.six -= 0.25;
+        notes.push('bat:runner');
+      }
+      if (bat.isOpener && isPPOrNew && ['t20', 'odi'].includes(formatKey)) {
+        weights.four *= 1.035; weights.wicket *= 1.010; capDelta.boundary += 0.25;
+        notes.push('bat:opener-pp');
+      }
+      if ((bat.isMiddle || bat.isLower) && isLimitedDeath && !bat.isRunner) {
+        weights.four *= 1.035; weights.six *= 1.040; capDelta.boundary += 0.35; capDelta.six += 0.18;
+        notes.push('bat:late-phase');
+      }
+
+      if (bowl.isSwing && isPPOrNew) {
+        weights.dot *= 1.060; weights.wicket *= 1.070; weights.four *= 0.950; weights.six *= 0.920;
+        capDelta.boundary -= 0.35 * bowlingRatingScale; capDelta.wicketCap += 0.20 * bowlingRatingScale; capDelta.wicketFloor += 0.15 * bowlingRatingScale;
+        notes.push('bowl:swing-newball');
+      }
+      if (bowl.isHitdeck && isMiddle) {
+        weights.dot *= 1.045; weights.wicket *= 1.040 + 0.020 * attack; weights.six *= 0.960;
+        capDelta.wicketCap += 0.12 * bowlingRatingScale;
+        notes.push('bowl:hitdeck-middle');
+      }
+      if (bowl.isShortball && attack >= 0.55) {
+        weights.wicket *= 1.055; weights.dot *= 1.020; weights.four *= 1.015; weights.six *= 1.010;
+        capDelta.wicketCap += 0.18 * bowlingRatingScale;
+        notes.push('bowl:shortball-vs-attack');
+      }
+      if (bowl.isDeath && isLimitedDeath) {
+        weights.dot *= 1.080; weights.one *= 1.025; weights.four *= 0.900; weights.six *= 0.870; weights.wicket *= 1.045;
+        capDelta.boundary -= 1.15 * bowlingRatingScale; capDelta.six -= 0.55 * bowlingRatingScale;
+        capDelta.wicketCap += 0.18 * bowlingRatingScale; capDelta.wicketFloor += 0.10 * bowlingRatingScale;
+        notes.push('bowl:death-specialist');
+      }
+      if (bowl.isContainment && isMiddle) {
+        weights.dot *= 1.050; weights.one *= 1.035; weights.four *= 0.900; weights.six *= 0.820; weights.wicket *= 0.985;
+        capDelta.boundary -= 0.80 * bowlingRatingScale; capDelta.six -= 0.35 * bowlingRatingScale;
+        notes.push('bowl:containment-middle');
+      }
+      if (bowl.isClassical && isMiddle) {
+        weights.dot *= 1.035; weights.one *= 1.030; weights.four *= 0.930; weights.six *= 0.890; weights.wicket *= 0.995;
+        capDelta.boundary -= 0.45 * bowlingRatingScale;
+        notes.push('bowl:classical-control');
+      }
+      if (bowl.isFlat && ['earlyMiddle', 'lateMiddle', 'middle'].includes(phase)) {
+        weights.one *= 1.040; weights.two *= 0.960; weights.four *= 0.940; weights.six *= 0.920;
+        capDelta.boundary -= 0.35 * bowlingRatingScale;
+        notes.push('bowl:flat-control');
+      }
+      if (bowl.isMystery) {
+        weights.mistimed = weights.mistimed || 0;
+        weights.dot *= 1.025; weights.wicket *= 1.055; weights.four *= 0.960;
+        capDelta.wicketFloor += 0.12 * bowlingRatingScale;
+        notes.push('bowl:mystery-risk');
+      }
+
+      return { battingStyle: bat.name, bowlingStyle: bowl.name, notes, capDelta };
+    }
+
+    function getRunningSkill(batter) {
+      return (
+        attributeNumber(batter, 'attributes.physical.speed', 0) * 0.55 +
+        attributeNumber(batter, 'attributes.physical.agility', 0) * 0.45 +
+        attributeNumber(batter, 'attributes.batting.placement', 0) * 0.30
+      );
+    }
+
+    function getWeightedOutcome(weights) {
+      const rollData = rollWeightedOutcomeWithDebug(weights);
+      return rollData.outcome;
+    }
+
+    function convertOutcomeKeyToValue(key) {
+      if (key === 'wicket') return 'W';
+      if (key === 'dot') return 0;
+      if (key === 'one') return 1;
+      if (key === 'two') return 2;
+      if (key === 'three') return 3;
+      if (key === 'four') return 4;
+      if (key === 'six') return 6;
+      return 0;
+    }
+
+    function rollWeightedOutcomeWithDebug(weights) {
+      const entries = Object.entries(weights).filter(([, value]) => Number(value) > 0);
+      const total = entries.reduce((sum, [, value]) => sum + Number(value), 0);
+      const originalRoll = Math.random() * total;
+      let remainingRoll = originalRoll;
+      let chosenKey = 'dot';
+
+      for (const [key, value] of entries) {
+        remainingRoll -= Number(value);
+        if (remainingRoll <= 0) {
+          chosenKey = key;
+          break;
+        }
+      }
+
+      return {
+        outcome: convertOutcomeKeyToValue(chosenKey),
+        chosenKey,
+        total: Math.round(total * 100) / 100,
+        roll: Math.round(originalRoll * 100) / 100,
+        entries: entries.map(([key, value]) => ({
+          outcome: key,
+          weight: Math.round(Number(value) * 100) / 100,
+          chance: total > 0 ? Math.round((Number(value) / total) * 10000) / 100 : 0
+        }))
+      };
+    }
+
+    function getSkillDebugRow(label, player, bowlerType = null) {
+      return {
+        side: label,
+        name: getPlayerName(player),
+        role: player?.role || '-',
+        roleGroup: getRoleGroupForSkill(player),
+        battingRoleMultiplier: getBattingRoleMultiplier(player),
+        bowlingRoleMultiplier: getBowlingRoleMultiplier(player),
+        battingRoleCap: getBattingRoleCap(player),
+        bowlingRoleCap: getBowlingRoleCap(player),
+        bowlerType: bowlerType || getBowlerType(player),
+        batOverall: attributeNumber(player, 'attributes.overall.batting_overall', 0),
+        bowlOverall: attributeNumber(player, 'attributes.overall.bowling_overall', 0),
+        technique: attributeNumber(player, 'attributes.batting.technique', 0),
+        timing: attributeNumber(player, 'attributes.batting.timing', 0),
+        placement: attributeNumber(player, 'attributes.batting.placement', 0),
+        footwork: attributeNumber(player, 'attributes.batting.footwork', 0),
+        defensiveShots: attributeNumber(player, 'attributes.batting.defensiveShots', 0),
+        attackingShots: attributeNumber(player, 'attributes.batting.attackingShots', 0),
+        vsPace: attributeNumber(player, 'attributes.batting.vsPace', 0),
+        vsSpin: attributeNumber(player, 'attributes.batting.vsSpin', 0),
+        accuracy: attributeNumber(player, 'attributes.bowling.accuracy', 0),
+        speed: attributeNumber(player, 'attributes.bowling.bowlingSpeed', 0),
+        swing: attributeNumber(player, 'attributes.bowling.swing', 0),
+        turn: attributeNumber(player, 'attributes.bowling.turn', 0),
+        variations: attributeNumber(player, 'attributes.bowling.variations', 0),
+        intelligence: attributeNumber(player, 'attributes.bowling.intelligence', 0),
+        concentration: attributeNumber(player, 'attributes.mental.concentration', 0),
+        judgement: attributeNumber(player, 'attributes.mental.judgement', 0),
+        temperament: attributeNumber(player, 'attributes.mental.temperament', 0),
+        staminaPhysical: attributeNumber(player, 'attributes.physical.stamina', 0)
+      };
+    }
+
+    function formatChanceLine(chances) {
+      const labelMap = {
+        dot: "0",
+        one: "1",
+        two: "2",
+        three: "3",
+        four: "4",
+        six: "6",
+        wicket: "W"
+      };
+
+      const order = ["dot", "one", "two", "three", "four", "six", "wicket"];
+
+      return order.map((key) => {
+        const row = chances.find(item => item.outcome === key);
+        const chance = row ? Number(row.chance).toFixed(1) : "0.0";
+        return `${labelMap[key]}:${chance}%`;
+      }).join(" | ");
+    }
+
+    function formatConsoleOutcome(contest) {
+      const key = contest?.chosenOutcome || "";
+      const value = contest?.outcome;
+
+      if (key === "dot") return "0";
+      if (key === "one") return "1";
+      if (key === "two") return "2";
+      if (key === "three") return "3";
+      if (key === "four") return "4";
+      if (key === "six") return "6";
+      if (key === "wicket") return "W";
+
+      if (value === 0) return "0";
+      if (value === 1) return "1";
+      if (value === 2) return "2";
+      if (value === 3) return "3";
+      if (value === 4) return "4";
+      if (value === 6) return "6";
+      if (value === "W" || value === "wicket") return "W";
+
+      return String(value ?? "-");
+    }
+
+    function getChosenOutcomeChance(rollEntries, chosenOutcome) {
+      const row = (rollEntries || []).find(item => item.outcome === chosenOutcome);
+      return row ? Number(row.chance || 0).toFixed(1) : "0.0";
+    }
+
+    function inferContactForChosenOutcome(contest) {
+      const chosenOutcome = contest?.chosenOutcome || "dot";
+      const contactMix = contest?.contactMix || {};
+
+      const outcomeProfiles = {
+        dot: { missed: 88, edged: 34, mistimed: 37, controlled: 27, middled: 5 },
+        one: { missed: 2, edged: 22, mistimed: 30, controlled: 47, middled: 16 },
+        two: { missed: 0, edged: 3, mistimed: 9, controlled: 15.5, middled: 8 },
+        three: { missed: 0, edged: 0, mistimed: 1, controlled: 2, middled: 1.5 },
+        four: { missed: 0, edged: 13, mistimed: 15, controlled: 7.8, middled: 47 },
+        six: { missed: 0, edged: 0, mistimed: 2.5, controlled: 0.5, middled: 21.5 },
+        wicket: { missed: 10, edged: 28, mistimed: 5.5, controlled: 1.2, middled: 1 }
+      };
+
+      const profile = outcomeProfiles[chosenOutcome] || outcomeProfiles.dot;
+      let bestContact = "controlled";
+      let bestScore = -1;
+
+      Object.keys(profile).forEach((contactKey) => {
+        const contactPct = Number(contactMix[contactKey] || 0);
+        const contributionScore = contactPct * Number(profile[contactKey] || 0);
+        if (contributionScore > bestScore) {
+          bestScore = contributionScore;
+          bestContact = contactKey;
+        }
+      });
+
+      return {
+        name: bestContact,
+        chance: Number(contactMix[bestContact] || 0).toFixed(1)
+      };
+    }
+
+    function printSkillContestToConsole(contest, batter, bowler, rollData) {
+      if (!DEBUG_SKILL_ENGINE || SIM_SUPPRESS_ENGINE_LOG) return;
+
+      const ballLabel = contest.ballLabel || ballsToDeliveryLabel((matchState?.balls || 0) + 1);
+      const outcomeLabel = formatConsoleOutcome(contest);
+      const chosenContact = inferContactForChosenOutcome(contest);
+      const outcomeChance = getChosenOutcomeChance(rollData.entries, contest.chosenOutcome);
+
+      console.log(
+        `Ball ${ballLabel} | Outcome: ${outcomeLabel} (${outcomeChance}%) | Contact: ${chosenContact.name} (${chosenContact.chance}%)`
+      );
+    }
+
+    function wicketsSafetyCap(formatKey, wickets, balls, batter, bowler) {
+      const batterRole = getRoleGroupForSkill(batter);
+      const bowlerRole = getRoleGroupForSkill(bowler);
+      const over = balls / 6;
+
+      let cap = formatKey === 'test' ? 7.8 : formatKey === 'odi' ? 8.8 : 9.6;
+
+      // Tailenders can still be exposed, but not to an arcade-level 17–20% wicket chance.
+      if (batterRole === 'bowler') cap += 1.0;
+      if (batterRole === 'allrounder') cap += 0.45;
+      if (bowlerRole === 'bowler') cap += 0.45;
+
+      // If a collapse is already happening early, soften wicket chance and move it into dots/singles.
+      if (formatKey === 't20' && wickets >= 3 && over < 8) cap -= 0.8;
+      if (formatKey === 't20' && wickets >= 4 && over < 10) cap -= 1.2;
+      if (formatKey === 't20' && wickets >= 6 && over < 15) cap -= 1.5;
+      if (formatKey === 't20' && wickets >= 8 && over < 18) cap -= 1.0;
+      if (formatKey === 'odi' && wickets >= 5 && over < 25) cap -= 1.2;
+
+      return clampNumber(cap, 6.4, 11.2);
+    }
+
+    function boundarySafetyCap(formatKey, aggression, wickets, balls, batter, bowler) {
+      const agg = clampNumber(aggression, 1, 10);
+      const batterRole = getRoleGroupForSkill(batter);
+      const bowlerRole = getRoleGroupForSkill(bowler);
+      const over = balls / 6;
+
+      /*
+        V18 skill visibility + fatigue ramp engine:
+        Bowler fatigue should leak runs, but not turn every tired over into a six-hitting arcade.
+        The cap is for combined 4 + 6 chance after all other adjustments.
+      */
+      let cap;
+      if (formatKey === 'test') {
+        cap = 9 + agg * 1.15;
+      } else if (formatKey === 'odi') {
+        cap = 15 + agg * 1.65;
+      } else {
+        cap = 17 + agg * 1.85;
+      }
+
+      // True death overs can be more aggressive, but only late in a T20 innings.
+      if (formatKey === 't20' && over >= 16) cap += 4.0;
+      if (formatKey === 't20' && over >= 18) cap += 2.5;
+      if (formatKey === 'odi' && over >= 40) cap += 3.5;
+
+      // Lower-order players can swing, but they should not get specialist-batter boundary caps.
+      if (batterRole === 'bowler') cap -= 8.0;
+      if (batterRole === 'allrounder') cap -= 3.0;
+      if (batterRole === 'wicketkeeper') cap += 1.0;
+
+      // More wickets down means less batting depth and less clean boundary hitting.
+      if (wickets >= 5) cap -= 2.0;
+      if (wickets >= 7) cap -= 3.0;
+      if (wickets >= 9) cap -= 2.0;
+
+      // Elite/real bowlers still reduce easy boundary hitting even if tired.
+      if (bowlerRole === 'bowler') cap -= 1.5;
+
+      return clampNumber(cap, formatKey === 't20' ? 12 : 7, formatKey === 't20' ? 34 : 30);
+    }
+
+    function applyBoundarySafetyCap(weights, formatKey, aggression, wickets, balls, batter, bowler) {
+      const total = Object.values(weights).reduce((sum, value) => sum + Math.max(0.10, Number(value) || 0), 0);
+      if (total <= 0) return { cap: 0, current: 0, removed: 0 };
+
+      const currentBoundaryWeight = Math.max(0.10, weights.four) + Math.max(0.10, weights.six);
+      const currentBoundaryChance = (currentBoundaryWeight / total) * 100;
+      const cap = boundarySafetyCap(formatKey, aggression, wickets, balls, batter, bowler);
+
+      if (currentBoundaryChance <= cap) {
+        return { cap: Math.round(cap * 10) / 10, current: Math.round(currentBoundaryChance * 10) / 10, removed: 0 };
+      }
+
+      const targetBoundaryWeight = (cap / 100) * (total - currentBoundaryWeight) / (1 - cap / 100);
+      const scale = targetBoundaryWeight / currentBoundaryWeight;
+      const oldFour = weights.four;
+      const oldSix = weights.six;
+
+      weights.four = Math.max(0.10, weights.four * scale);
+      weights.six = Math.max(0.10, weights.six * scale);
+
+      const removed = Math.max(0, (oldFour + oldSix) - (weights.four + weights.six));
+
+      // Move excess boundaries into cricket-realistic pressure/scoring.
+      weights.dot += removed * 0.30;
+      weights.one += removed * 0.48;
+      weights.two += removed * 0.18;
+      weights.three += removed * 0.04;
+
+      return {
+        cap: Math.round(cap * 10) / 10,
+        current: Math.round(currentBoundaryChance * 10) / 10,
+        removed: Math.round(removed * 10) / 10
+      };
+    }
+
+    function pickOutcome(aggression, batter = null, bowler = null) {
+      const agg = clampNumber(aggression, 1, 10);
+      const formatKey = getFormatKey(matchState?.format || 't20');
+      const strikerPlayer = batter || getBatterByKey(matchState?.strikerKey) || {};
+      const bowlerPlayer = bowler || getBowlerByKey(matchState?.currentBowlerKey) || {};
+
+      const batterScore = getBatterSkillScore(strikerPlayer, bowlerPlayer, agg);
+      const bowlerScore = getBowlerSkillScore(bowlerPlayer);
+      const skillEdge = clampNumber((batterScore - bowlerScore) / 10, -5, 5);
+
+      const bowlerStat = ensureBowlerStat(matchState.currentBowlerKey);
+      const stamina = clampNumber(bowlerStat.stamina, 0, 100);
+      const bowlerFatigue = getBowlerFatigueFromStat(bowlerStat);
+      const batterConfidence = getBatterConfidence(matchState.strikerKey);
+      const batterFatigue = getBatterFatigue(matchState.strikerKey);
+      const confidenceEdge = clampNumber((batterConfidence - 50) / 12, -4, 4);
+      const batterFatigueRate = clampNumber(batterFatigue / 100, 0, 1);
+      const bowlerFatigueRate = clampNumber(bowlerFatigue / 100, 0, 1);
+      const attackIndex = clampNumber((agg - 1) / 9, 0, 1);
+      const highAgg = Math.max(0, agg - 6);
+      const lowAgg = Math.max(0, 5 - agg);
+      const ballsNow = matchState?.balls || 0;
+      const overNow = ballsNow / 6;
+      const phase = formatKey === 't20'
+        ? (overNow < 6 ? 'powerplay' : overNow < 12 ? 'earlyMiddle' : overNow < 16 ? 'lateMiddle' : 'death')
+        : formatKey === 'odi'
+          ? (overNow < 10 ? 'powerplay' : overNow < 35 ? 'middle' : overNow < 40 ? 'setup' : 'death')
+          : (overNow < 20 ? 'newBall' : overNow < 60 ? 'middle' : overNow < 80 ? 'oldBall' : 'secondNewBall');
+
+      function normalizeLocal(obj) {
+        const clean = {};
+        Object.keys(obj).forEach((key) => clean[key] = Math.max(0.01, Number(obj[key]) || 0.01));
+        const total = Object.values(clean).reduce((sum, value) => sum + value, 0) || 1;
+        Object.keys(clean).forEach((key) => clean[key] = clean[key] / total);
+        return clean;
+      }
+
+      function totalWeightLocal(weights) {
+        return Object.values(weights).reduce((sum, value) => sum + Math.max(0.10, Number(value) || 0), 0) || 1;
+      }
+
+      function chanceLocal(weights, key) {
+        return Math.max(0.10, Number(weights[key]) || 0) / totalWeightLocal(weights) * 100;
+      }
+
+      function capCombinedChance(weights, keys, capPct) {
+        const cap = clampNumber(capPct, 1, 80);
+        const total = totalWeightLocal(weights);
+        const currentWeight = keys.reduce((sum, key) => sum + Math.max(0.10, Number(weights[key]) || 0), 0);
+        const currentPct = currentWeight / total * 100;
+        if (currentPct <= cap || currentWeight <= 0) {
+          return { cap: Math.round(cap * 10) / 10, current: Math.round(currentPct * 10) / 10, removed: 0 };
+        }
+        const nonTargetWeight = Math.max(0.10, total - currentWeight);
+        const desiredWeight = (cap / 100) * nonTargetWeight / Math.max(0.01, 1 - cap / 100);
+        const removed = Math.max(0, currentWeight - desiredWeight);
+        const scale = desiredWeight / currentWeight;
+        keys.forEach((key) => weights[key] = Math.max(0.10, Number(weights[key] || 0) * scale));
+        weights.dot += removed * (0.34 + attackIndex * 0.04);
+        weights.one += removed * (0.42 - attackIndex * 0.04);
+        weights.two += removed * 0.13;
+        weights.wicket += removed * (0.11 + attackIndex * 0.02);
+        return { cap: Math.round(cap * 10) / 10, current: Math.round(currentPct * 10) / 10, removed: Math.round(removed * 10) / 10 };
+      }
+
+      function raiseMinimumChance(weights, key, minPct, sourceKeys) {
+        const min = clampNumber(minPct, 0, 25);
+        const currentPct = chanceLocal(weights, key);
+        if (currentPct >= min) return { min: Math.round(min * 10) / 10, current: Math.round(currentPct * 10) / 10, added: 0 };
+        const total = totalWeightLocal(weights);
+        const currentWeight = Math.max(0.10, Number(weights[key]) || 0);
+        const desiredWeight = (min / 100) * (total - currentWeight) / Math.max(0.01, 1 - min / 100);
+        const needed = Math.max(0, desiredWeight - currentWeight);
+        let available = 0;
+        sourceKeys.forEach((source) => available += Math.max(0, Number(weights[source] || 0) - 0.10));
+        const added = Math.min(needed, available * 0.65);
+        if (added <= 0 || available <= 0) return { min: Math.round(min * 10) / 10, current: Math.round(currentPct * 10) / 10, added: 0 };
+        sourceKeys.forEach((source) => {
+          const room = Math.max(0, Number(weights[source] || 0) - 0.10);
+          weights[source] = Math.max(0.10, Number(weights[source] || 0) - added * (room / available));
+        });
+        weights[key] += added;
+        return { min: Math.round(min * 10) / 10, current: Math.round(currentPct * 10) / 10, added: Math.round(added * 10) / 10 };
+      }
+
+      // V18 layer 1: skill edge is visible in contact quality.
+      // A big batter edge creates more controlled/middled contact. A big bowler edge creates missed/edged/mistimed contact.
+      const positiveSkillEdge = Math.max(skillEdge, 0);
+      const negativeSkillEdge = Math.max(-skillEdge, 0);
+      const bowlerRoleForContest = getRoleGroupForSkill(bowlerPlayer);
+      const partTimeBowlerPressure = (bowlerRoleForContest === 'batter' || bowlerRoleForContest === 'wicketkeeper') ? 1 : bowlerRoleForContest === 'unknown' ? 0.55 : 0;
+      const weakBowlerEdge = clampNumber((55 - bowlerScore) / 10, 0, 3.8) + partTimeBowlerPressure;
+
+      const rawContact = {
+        missed: clampNumber(8 + negativeSkillEdge * 2.45 + attackIndex * 4.0 + batterFatigueRate * 8.0 - confidenceEdge * 1.2 - bowlerFatigueRate * 2.6 - positiveSkillEdge * 0.55 - weakBowlerEdge * 0.90, 1.5, 24),
+        edged: clampNumber(4 + negativeSkillEdge * 1.65 + attackIndex * 3.3 + batterFatigueRate * 4.0 - confidenceEdge * 0.8 - bowlerFatigueRate * 1.8 - positiveSkillEdge * 0.35 - weakBowlerEdge * 0.65, 0.9, 17),
+        mistimed: clampNumber(17 + attackIndex * 7.0 + batterFatigueRate * 12.0 + negativeSkillEdge * 1.35 - confidenceEdge * 0.8 - bowlerFatigueRate * 2.1 - positiveSkillEdge * 0.55 - weakBowlerEdge * 0.70, 7, 35),
+        controlled: clampNumber(44 + skillEdge * 2.90 + confidenceEdge * 2.35 - attackIndex * 6.6 - batterFatigueRate * 8.0 + bowlerFatigueRate * 1.3 + weakBowlerEdge * 1.55, 22, 62),
+        middled: clampNumber(10 + positiveSkillEdge * 2.75 + attackIndex * 7.2 + confidenceEdge * 1.35 - batterFatigueRate * 5.0 + bowlerFatigueRate * 1.6 + weakBowlerEdge * 2.05, 3.5, 34)
+      };
+      const contactMix = normalizeLocal(rawContact);
+
+      // V16 layer 2: contact quality becomes cricket outcomes.
+      const contactProfiles = {
+        missed: { dot: 88, one: 2, two: 0, three: 0, four: 0, six: 0, wicket: 10 },
+        edged: { dot: 34, one: 22, two: 3, three: 0, four: 13, six: 0, wicket: 28 },
+        mistimed: { dot: 37, one: 30, two: 9, three: 1, four: 15, six: 2.5, wicket: 5.5 },
+        controlled: { dot: 27, one: 47, two: 15.5, three: 2, four: 7.8, six: 0.5, wicket: 1.2 },
+        middled: { dot: 5, one: 16, two: 8, three: 1.5, four: 47, six: 21.5, wicket: 1.0 }
+      };
+
+      const weights = { dot: 0, one: 0, two: 0, three: 0, four: 0, six: 0, wicket: 0 };
+      Object.keys(contactMix).forEach((contactKey) => {
+        const profile = contactProfiles[contactKey];
+        Object.keys(profile).forEach((outcomeKey) => {
+          weights[outcomeKey] += profile[outcomeKey] * contactMix[contactKey];
+        });
+      });
+
+      // V21 layer 3: format and innings phase.
+      // ODI and Test cannot feel like stretched T20. They need their own tempo.
+      if (formatKey === 'test') {
+        weights.dot *= 1.36;
+        weights.one *= 1.14;
+        weights.two *= 0.88;
+        weights.three *= 0.72;
+        weights.four *= 0.58;
+        weights.six *= 0.18;
+        weights.wicket *= 0.64;
+      } else if (formatKey === 'odi') {
+        weights.dot *= 1.08;
+        weights.one *= 1.13;
+        weights.two *= 1.12;
+        weights.three *= 1.08;
+        weights.four *= 0.88;
+        weights.six *= 0.56;
+        weights.wicket *= 0.78;
+      } else {
+        weights.dot *= 0.98;
+        weights.one *= 1.02;
+      }
+
+      if (formatKey === 't20') {
+        if (phase === 'powerplay') {
+          weights.four *= 1.08; weights.six *= 1.03; weights.wicket *= 1.04;
+        } else if (phase === 'death') {
+          weights.dot *= 0.94; weights.one *= 0.96; weights.four *= 1.08; weights.six *= 1.08; weights.wicket *= 1.12;
+        }
+      } else if (formatKey === 'odi') {
+        if (phase === 'powerplay') {
+          weights.dot *= 1.03; weights.four *= 1.05; weights.six *= 0.95; weights.wicket *= 0.95;
+        } else if (phase === 'middle') {
+          weights.dot *= 1.04; weights.one *= 1.08; weights.two *= 1.08; weights.four *= 0.86; weights.six *= 0.72; weights.wicket *= 0.84;
+        } else if (phase === 'setup') {
+          weights.one *= 1.05; weights.two *= 1.08; weights.four *= 0.98; weights.six *= 0.88; weights.wicket *= 0.92;
+        } else if (phase === 'death') {
+          weights.dot *= 0.94; weights.one *= 0.96; weights.two *= 1.12; weights.four *= 1.16; weights.six *= 1.12; weights.wicket *= 1.05;
+        }
+      } else if (formatKey === 'test') {
+        if (phase === 'newBall') {
+          weights.dot *= 1.10; weights.four *= 0.92; weights.six *= 0.70; weights.wicket *= 1.16;
+        } else if (phase === 'middle') {
+          weights.one *= 1.07; weights.two *= 1.03; weights.wicket *= 0.88;
+        } else if (phase === 'oldBall') {
+          weights.dot *= 0.96; weights.one *= 1.08; weights.two *= 1.10; weights.four *= 1.08; weights.wicket *= 0.86;
+        } else if (phase === 'secondNewBall') {
+          weights.dot *= 1.08; weights.four *= 0.96; weights.wicket *= 1.12;
+        }
+      }
+
+      // V21 layer 4: aggression modifies shot selection by format.
+      weights.dot *= 1 - highAgg * 0.030 + lowAgg * 0.040;
+      weights.one *= 1 - highAgg * 0.025 + lowAgg * 0.060;
+      weights.two *= 1 + highAgg * 0.020 + lowAgg * 0.015;
+      weights.four *= 1 + highAgg * 0.070 - lowAgg * 0.080;
+      weights.six *= 1 + highAgg * 0.090 - lowAgg * 0.120;
+      weights.wicket *= 1 + highAgg * 0.045 - lowAgg * 0.060;
+
+      if (formatKey === 'test') {
+        weights.dot *= 1 + lowAgg * 0.035;
+        weights.one *= 1 + lowAgg * 0.025;
+        weights.four *= 1 - lowAgg * 0.045 + highAgg * 0.030;
+        weights.six *= 1 - lowAgg * 0.090 + highAgg * 0.045;
+        weights.wicket *= agg <= 5 ? 0.86 : 1 + highAgg * 0.055;
+      } else if (formatKey === 'odi') {
+        weights.one *= 1 + lowAgg * 0.025;
+        weights.two *= 1 + lowAgg * 0.020;
+        weights.four *= 1 - lowAgg * 0.035 + highAgg * 0.045;
+        weights.six *= 1 - lowAgg * 0.060 + highAgg * 0.055;
+        weights.wicket *= 1 + highAgg * 0.030 - lowAgg * 0.035;
+      }
+
+      // V16 layer 5: role reality. Tailenders can swing, but not with opener-level boundary caps.
+      const batterRole = getRoleGroupForSkill(strikerPlayer);
+      if (batterRole === 'bowler') {
+        weights.dot *= 1.10; weights.four *= 0.74; weights.six *= 0.55; weights.wicket *= 1.18;
+      } else if (batterRole === 'allrounder') {
+        weights.four *= 0.93; weights.six *= 0.88; weights.wicket *= 1.05;
+      } else if (batterRole === 'wicketkeeper') {
+        weights.four *= 1.02; weights.six *= 1.02;
+      }
+
+      // V18: part-time/non-bowlers should lose control without becoming automatic wicket-takers.
+      const bowlerRole = bowlerRoleForContest;
+      const partTimeLeak = clampNumber(weakBowlerEdge, 0, 4.5);
+      if (partTimeLeak > 0.15) {
+        weights.dot *= 1 - Math.min(0.24, partTimeLeak * 0.048);
+        weights.one += partTimeLeak * 1.55;
+        weights.two += partTimeLeak * 0.88;
+        weights.four += partTimeLeak * (batterRole === 'bowler' ? 0.38 : 1.05);
+        weights.six += partTimeLeak * (agg >= 8 ? 0.35 : 0.18);
+        weights.wicket *= 1 - Math.min(0.40, partTimeLeak * 0.082);
+      }
+
+      // V25: playstyle labels and team-strength calibration shape the same raw skill contest.
+      const playstyleInfo = applyV25PlaystylePhaseModifiers(weights, strikerPlayer, bowlerPlayer, formatKey, phase, agg, skillEdge, overNow);
+
+      const positiveSkillPressure = Math.max(0, skillEdge - 0.15);
+      const negativeSkillPressure = Math.max(0, -skillEdge - 0.15);
+      const eliteBowlerPressure = clampNumber((bowlerScore - 74) / 12, 0, 2.2);
+      const weakBowlingPressure = clampNumber((70 - bowlerScore) / 13, 0, 2.4) + clampNumber(weakBowlerEdge / 2.2, 0, 1.5);
+      const phaseAttackMultiplier = formatKey === 't20' && phase === 'death' ? 1.18 : formatKey === 'odi' && phase === 'death' ? 1.12 : formatKey === 'test' ? 0.62 : 1.0;
+      weights.four *= clampNumber(1 + (0.062 * positiveSkillPressure + 0.100 * weakBowlingPressure - 0.056 * negativeSkillPressure - 0.110 * eliteBowlerPressure) * phaseAttackMultiplier, 0.58, 1.62);
+      weights.six *= clampNumber(1 + (0.068 * positiveSkillPressure + 0.125 * weakBowlingPressure - 0.070 * negativeSkillPressure - 0.110 * eliteBowlerPressure) * phaseAttackMultiplier, 0.52, 1.58);
+      weights.wicket *= clampNumber(1 + (0.068 * negativeSkillPressure + 0.110 * eliteBowlerPressure - 0.044 * positiveSkillPressure - 0.072 * weakBowlingPressure), 0.56, 1.62);
+      weights.dot *= clampNumber(1 + (0.045 * negativeSkillPressure + 0.060 * eliteBowlerPressure - 0.025 * positiveSkillPressure - 0.045 * weakBowlingPressure), 0.76, 1.30);
+      weights.one *= clampNumber(1 + (0.036 * positiveSkillPressure + 0.045 * weakBowlingPressure - 0.018 * eliteBowlerPressure), 0.82, 1.22);
+      weights.two *= clampNumber(1 + (0.030 * positiveSkillPressure + 0.055 * weakBowlingPressure - 0.025 * eliteBowlerPressure), 0.78, 1.28);
+
+      const battingTeamStrength = getTeamCalibration(matchState?.battingTeam, 'batting');
+      const bowlingTeamStrength = getTeamCalibration(matchState?.bowlingTeam, 'bowling');
+      const teamNet = battingTeamStrength - bowlingTeamStrength;
+      const teamPhaseMult = formatKey === 't20' && phase === 'death' ? 1.10 : formatKey === 'test' ? 0.70 : 1.0;
+      const teamNudge = teamNet * teamPhaseMult;
+      if (Math.abs(teamNudge) > 0.01) {
+        weights.four *= clampNumber(1 + teamNudge * 0.040, 0.88, 1.13);
+        weights.six *= clampNumber(1 + teamNudge * 0.032, 0.90, 1.11);
+        weights.wicket *= clampNumber(1 - teamNudge * 0.048, 0.86, 1.16);
+        weights.dot *= clampNumber(1 - teamNudge * 0.020, 0.92, 1.08);
+        weights.one *= clampNumber(1 + teamNudge * 0.016, 0.94, 1.06);
+        weights.two *= clampNumber(1 + teamNudge * 0.024, 0.92, 1.08);
+      }
+
+      const v25SkillCapDelta = {
+        boundary: (1.18 * positiveSkillPressure + 1.95 * weakBowlingPressure - 1.05 * negativeSkillPressure - 1.62 * eliteBowlerPressure) * phaseAttackMultiplier,
+        six: (0.34 * positiveSkillPressure + 0.78 * weakBowlingPressure - 0.34 * negativeSkillPressure - 0.60 * eliteBowlerPressure) * phaseAttackMultiplier,
+        wicketCap: (0.70 * negativeSkillPressure + 1.05 * eliteBowlerPressure - 0.34 * positiveSkillPressure - 0.52 * weakBowlingPressure) * (formatKey === 'test' ? 0.80 : 1.0),
+        wicketFloor: (0.44 * negativeSkillPressure + 0.78 * eliteBowlerPressure - 0.24 * positiveSkillPressure - 0.34 * weakBowlingPressure) * (formatKey === 'test' ? 0.75 : 1.0)
+      };
+      const v25TeamCapDelta = {
+        boundary: teamNudge * 1.30,
+        six: teamNudge * 0.42,
+        wicketCap: -teamNudge * 0.72,
+        wicketFloor: -teamNudge * 0.54
+      };
+
+      // V16 fatigue tuning. Tired bowlers leak mostly rotation first; very tired batters lose clean boundaries.
+      const lateBatterFatigue = Math.max(0, batterFatigue - 35) / 10;
+      const extremeBatterFatigue = Math.max(0, batterFatigue - 50) / 10;
+      const lateBowlerFatigue = Math.max(0, bowlerFatigue - 30) / 10;
+      weights.dot += lateBatterFatigue * 0.65 + extremeBatterFatigue * 0.85;
+      weights.one += lateBowlerFatigue * 0.38;
+      weights.two += lateBowlerFatigue * 0.16 - lateBatterFatigue * 0.22;
+      weights.four += lateBowlerFatigue * 0.06 - lateBatterFatigue * 0.55 - extremeBatterFatigue * 0.70;
+      weights.six += lateBowlerFatigue * 0.02 - lateBatterFatigue * 0.48 - extremeBatterFatigue * 0.70;
+      weights.wicket += lateBatterFatigue * 0.24 + extremeBatterFatigue * 0.34 - lateBowlerFatigue * 0.18;
+
+      // Collapse guard: wickets slow down if the innings is already falling apart.
+      const inningsWickets = matchState?.wickets || 0;
+      let collapseSoftener = 0;
+      if (formatKey === 't20') {
+        if (inningsWickets >= 3 && overNow < 8) collapseSoftener += 0.18;
+        if (inningsWickets >= 5 && overNow < 13) collapseSoftener += 0.28;
+        if (inningsWickets >= 7 && overNow < 17) collapseSoftener += 0.24;
+      } else if (formatKey === 'odi') {
+        if (inningsWickets >= 4 && overNow < 25) collapseSoftener += 0.16;
+        if (inningsWickets >= 6 && overNow < 35) collapseSoftener += 0.20;
+        if (inningsWickets >= 8 && overNow < 45) collapseSoftener += 0.16;
+      } else if (formatKey === 'test') {
+        if (inningsWickets >= 3 && overNow < 25) collapseSoftener += 0.12;
+        if (inningsWickets >= 5 && overNow < 55) collapseSoftener += 0.16;
+        if (inningsWickets >= 7 && overNow < 80) collapseSoftener += 0.14;
+      }
+      if (collapseSoftener > 0) {
+        const removed = Math.max(0, weights.wicket) * clampNumber(collapseSoftener, 0, formatKey === 't20' ? 0.40 : 0.32);
+        weights.wicket -= removed;
+        weights.dot += removed * 0.58;
+        weights.one += removed * 0.32;
+        weights.two += removed * 0.10;
+      }
+
+      // Safety caps: this is what stops aggression 10 and tired bowlers becoming arcade cricket.
+      let boundaryCap = formatKey === 'test' ? 4.2 + agg * 0.55 + highAgg * 0.18 : formatKey === 'odi' ? 10.0 + agg * 0.95 + highAgg * 0.50 : 11.5 + agg * 1.45 + highAgg * 1.05;
+      if (formatKey === 't20' && overNow >= 16) boundaryCap += 2.5;
+      if (formatKey === 't20' && overNow >= 18) boundaryCap += 1.0;
+      if (formatKey === 'odi' && phase === 'powerplay') boundaryCap += 0.8;
+      if (formatKey === 'odi' && phase === 'setup') boundaryCap += 1.2;
+      if (formatKey === 'odi' && phase === 'death') boundaryCap += 4.0;
+      if (formatKey === 'test' && phase === 'oldBall') boundaryCap += 1.1;
+      if (formatKey === 'test' && phase === 'secondNewBall') boundaryCap += 0.3;
+      if (batterRole === 'bowler') boundaryCap -= 6.0;
+      if (partTimeLeak > 0.15) boundaryCap += clampNumber(1.5 + partTimeLeak * 1.25 + positiveSkillEdge * 0.45, 1.5, 7.0);
+      if (batterRole === 'allrounder') boundaryCap -= 2.0;
+      if (inningsWickets >= 5) boundaryCap -= 1.4;
+      if (inningsWickets >= 7) boundaryCap -= 2.0;
+      if (inningsWickets >= 9) boundaryCap -= 1.6;
+      boundaryCap += playstyleInfo.capDelta.boundary + v25SkillCapDelta.boundary + v25TeamCapDelta.boundary;
+      boundaryCap = clampNumber(boundaryCap, formatKey === 't20' ? 10 : formatKey === 'odi' ? 8.2 : 3.2, formatKey === 't20' ? 36 : formatKey === 'odi' ? 29 : 13.2);
+      const boundaryCapInfo = capCombinedChance(weights, ['four', 'six'], boundaryCap);
+
+      let sixCap = formatKey === 'test' ? 0.15 + agg * 0.12 + highAgg * 0.05 : formatKey === 'odi' ? 0.80 + agg * 0.28 + highAgg * 0.18 : 2.0 + agg * 0.55 + highAgg * 0.35;
+      if (formatKey === 't20' && overNow >= 16) sixCap += 0.8;
+      if (formatKey === 't20' && overNow >= 18) sixCap += 0.4;
+      if (formatKey === 'odi' && phase === 'death') sixCap += 1.2;
+      if (formatKey === 'odi' && phase === 'setup') sixCap += 0.35;
+      if (formatKey === 'test' && phase === 'oldBall') sixCap += 0.20;
+      if (batterRole === 'bowler') sixCap -= 3.0;
+      if (partTimeLeak > 0.15) sixCap += clampNumber(0.25 + partTimeLeak * 0.28, 0.25, 1.6);
+      if (batterRole === 'allrounder') sixCap -= 0.8;
+      if (inningsWickets >= 7) sixCap -= 0.8;
+      sixCap += playstyleInfo.capDelta.six + v25SkillCapDelta.six + v25TeamCapDelta.six;
+      sixCap = clampNumber(sixCap, formatKey === 't20' ? 0.9 : formatKey === 'odi' ? 0.35 : 0.12, formatKey === 't20' ? 12.8 : formatKey === 'odi' ? 7.4 : 2.6);
+      const sixCapInfo = capCombinedChance(weights, ['six'], sixCap);
+
+      let wicketCap = formatKey === 'test' ? 2.8 + attackIndex * 0.9 : formatKey === 'odi' ? 4.0 + attackIndex * 1.4 : 4.3 + attackIndex * 2.8;
+      if (batterRole === 'bowler') wicketCap += 0.9;
+      if (bowlerRole === 'bowler') wicketCap += 0.3;
+      if (partTimeLeak > 0.15) wicketCap -= clampNumber(0.5 + partTimeLeak * 0.22, 0.5, 1.8);
+      if (formatKey === 't20' && phase === 'death') wicketCap += 0.5;
+      if (formatKey === 'odi' && phase === 'death') wicketCap += 0.6;
+      if (formatKey === 'test' && phase === 'newBall') wicketCap += 0.8;
+      if (formatKey === 'test' && phase === 'secondNewBall') wicketCap += 0.6;
+      if (formatKey === 't20' && inningsWickets >= 3 && overNow < 8) wicketCap -= 0.6;
+      if (formatKey === 't20' && inningsWickets >= 5 && overNow < 13) wicketCap -= 0.9;
+      if (formatKey === 't20' && inningsWickets >= 7 && overNow < 17) wicketCap -= 0.8;
+      wicketCap += playstyleInfo.capDelta.wicketCap + v25SkillCapDelta.wicketCap + v25TeamCapDelta.wicketCap;
+      wicketCap = clampNumber(wicketCap, formatKey === 't20' ? 2.2 : formatKey === 'odi' ? 1.7 : 1.2, formatKey === 't20' ? 10.4 : formatKey === 'odi' ? 7.5 : 5.6);
+      const wicketCapInfo = capCombinedChance(weights, ['wicket'], wicketCap);
+
+      let wicketFloor = formatKey === 't20' ? 1.8 + attackIndex * 2.8 : formatKey === 'odi' ? 1.0 + attackIndex * 1.5 : 0.55 + attackIndex * 0.85;
+      if (batterRole === 'bowler') wicketFloor += 0.9;
+      if (bowlerRole === 'bowler') wicketFloor += 0.25;
+      if (formatKey === 'odi' && phase === 'death') wicketFloor += 0.30;
+      if (formatKey === 'test' && (phase === 'newBall' || phase === 'secondNewBall')) wicketFloor += 0.25;
+      if (partTimeLeak > 0.15) wicketFloor -= clampNumber(0.4 + partTimeLeak * 0.18, 0.4, 1.4);
+      wicketFloor += Math.max(0, batterFatigue - 35) * 0.022;
+      wicketFloor += playstyleInfo.capDelta.wicketFloor + v25SkillCapDelta.wicketFloor + v25TeamCapDelta.wicketFloor;
+      wicketFloor = clampNumber(wicketFloor, formatKey === 'test' ? 0.20 : 0.40, formatKey === 't20' ? 7.4 : formatKey === 'odi' ? 5.8 : 3.4);
+      const wicketFloorInfo = raiseMinimumChance(weights, 'wicket', wicketFloor, ['four', 'six', 'dot', 'one']);
+
+      Object.keys(weights).forEach((key) => weights[key] = Math.max(0.10, Math.round(weights[key] * 100) / 100));
+      const rollData = rollWeightedOutcomeWithDebug(weights);
+
+      matchState.lastSkillContest = {
+        engineVersion: ENGINE_VERSION,
+        ballLabel: ballsToDeliveryLabel((matchState?.balls || 0) + 1),
+        batter: getPlayerName(strikerPlayer),
+        bowler: getPlayerName(bowlerPlayer),
+        format: formatKey,
+        phase,
+        aggression: agg,
+        aggressionProfile: agg <= 3 ? 'low risk / strike rotation' : agg <= 6 ? 'balanced contact' : 'attacking contact risk',
+        batterRoleGroup: getRoleGroupForSkill(strikerPlayer),
+        bowlerRoleGroup: bowlerRole,
+        battingPlaystyle: playstyleInfo.battingStyle,
+        bowlingPlaystyle: playstyleInfo.bowlingStyle,
+        playstyleNotes: playstyleInfo.notes,
+        v25TeamNet: Math.round(teamNet * 100) / 100,
+        partTimeLeak: Math.round(partTimeLeak * 10) / 10,
+        weakBowlerEdge: Math.round(weakBowlerEdge * 10) / 10,
+        batterRoleCap: Math.round(getBattingRoleCap(strikerPlayer) * 10) / 10,
+        bowlerRoleCap: Math.round(getBowlingRoleCap(bowlerPlayer) * 10) / 10,
+        batterScore: Math.round(batterScore * 10) / 10,
+        bowlerScore: Math.round(bowlerScore * 10) / 10,
+        batterConfidence: Math.round(batterConfidence * 10) / 10,
+        batterFatigue: Math.round(batterFatigue * 10) / 10,
+        confidenceEdge: Math.round(confidenceEdge * 10) / 10,
+        bowlerFatigue: Math.round(bowlerFatigue * 10) / 10,
+        fatigueEdge: Math.round((bowlerFatigue / 12) * 10) / 10,
+        batterFatigueEdge: Math.round((batterFatigue / 13) * 10) / 10,
+        skillEdge: Math.round(skillEdge * 10) / 10,
+        bowlerStamina: Math.round(stamina),
+        contactMix: Object.fromEntries(Object.entries(contactMix).map(([key, value]) => [key, Math.round(value * 1000) / 10])),
+        boundaryCap: boundaryCapInfo.cap,
+        boundaryChanceBeforeCap: boundaryCapInfo.current,
+        boundaryWeightRemoved: boundaryCapInfo.removed,
+        sixCap: sixCapInfo.cap,
+        sixChanceBeforeCap: sixCapInfo.current,
+        wicketCap: wicketCapInfo.cap,
+        wicketChanceBeforeCap: wicketCapInfo.current,
+        wicketFloor: wicketFloorInfo.min,
+        wicketFloorAdded: wicketFloorInfo.added,
+        weights,
+        roll: rollData.roll,
+        totalWeight: rollData.total,
+        chosenOutcome: rollData.chosenKey,
+        outcome: rollData.outcome,
+        chances: rollData.entries
+      };
+
+      printSkillContestToConsole(matchState.lastSkillContest, strikerPlayer, bowlerPlayer, rollData);
+      return rollData.outcome;
+    }
+
+    function getBallLabelBeforeDelivery() {
+      return ballsToDeliveryLabel(matchState.balls + 1);
+    }
+
+    function addCommentary(label, message) {
+      matchState.commentary.unshift({ label, text: message });
+      matchState.commentary = matchState.commentary.slice(0, 18);
+    }
+
+    function animateBallForOutcome(outcome) {
+      const path = document.getElementById("ballPath");
+      const ball = document.getElementById("ballMarker");
+      if (!path || !ball) return;
+
+      const angles = {
+        0: -90,
+        1: -45,
+        2: 25,
+        3: 70,
+        4: -18,
+        6: -138,
+        W: 180
+      };
+
+      const distances = {
+        0: 64,
+        1: 105,
+        2: 135,
+        3: 168,
+        4: 205,
+        6: 230,
+        W: 70
+      };
+
+      const angle = angles[outcome] ?? -24;
+      const distance = distances[outcome] ?? 130;
+      const rad = angle * Math.PI / 180;
+
+      path.style.transform = `rotate(${angle}deg)`;
+      path.style.width = `${distance}px`;
+
+      ball.style.left = `calc(50% + ${Math.cos(rad) * distance}px)`;
+      ball.style.top = `calc(50% + ${Math.sin(rad) * distance}px)`;
+    }
+
+    
+    function clonePlain(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function getInningsOrdinal(number) {
+      const n = Math.max(1, Number(number) || 1);
+      const mod100 = n % 100;
+      if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
+      const mod10 = n % 10;
+      if (mod10 === 1) return `${n}st`;
+      if (mod10 === 2) return `${n}nd`;
+      if (mod10 === 3) return `${n}rd`;
+      return `${n}th`;
+    }
+
+    function isTestFormat(format = matchState?.format || currentMatchCache?.format || currentMatchCache?.match?.format || "") {
+      return getFormatKey(format) === "test";
+    }
+
+    function getRequiredInningsCount(format = matchState?.format || "") {
+      return getFormatKey(format) === "test" ? 4 : 2;
+    }
+
+    function getScorecardsWithCurrent() {
+      const cards = Array.isArray(matchState?.inningsScorecards) ? clonePlain(matchState.inningsScorecards) : [];
+      const current = buildCurrentInningsSnapshot();
+      if (current) cards[(Number(current.inningsNumber) || 1) - 1] = current;
+      return cards.filter(Boolean).sort((a, b) => (Number(a.inningsNumber) || 0) - (Number(b.inningsNumber) || 0));
+    }
+
+    function getTotalRunsForSide(scorecards, side) {
+      return (Array.isArray(scorecards) ? scorecards : []).reduce((sum, card) => {
+        return sum + (card?.battingSide === side ? Number(card.runs) || 0 : 0);
+      }, 0);
+    }
+
+    function getTeamNameForSide(side) {
+      const teams = getFullTeamNames(currentMatchCache || readJSON("currentTourMatch", null) || {});
+      return side === "user" ? teams.userTeam : teams.computerTeam;
+    }
+
+    function getBallsRemainingInInnings() {
+      if (!matchState) return 0;
+      return Math.max(0, (Number(matchState.maxOvers) || 0) * 6 - (Number(matchState.balls) || 0));
+    }
+
+    function buildCurrentInningsSnapshot() {
+      if (!matchState) return null;
+      return {
+        inningsNumber: Number(matchState.inningsNumber) || 1,
+        battingTeam: matchState.battingTeam,
+        bowlingTeam: matchState.bowlingTeam,
+        battingSide: matchState.battingSide,
+        bowlingSide: matchState.bowlingSide,
+        runs: Number(matchState.runs) || 0,
+        wickets: Number(matchState.wickets) || 0,
+        balls: Number(matchState.balls) || 0,
+        overs: ballsToOvers(Number(matchState.balls) || 0),
+        runRate: getRunRate(Number(matchState.runs) || 0, Number(matchState.balls) || 0),
+        battingStats: clonePlain(matchState.battingStats || {}),
+        bowlingStats: clonePlain(matchState.bowlingStats || {}),
+        fallLabel: `${Number(matchState.runs) || 0}/${Number(matchState.wickets) || 0} (${ballsToOvers(Number(matchState.balls) || 0)})`,
+        completedAt: new Date().toISOString()
+      };
+    }
+
+    function getInningsScoreText(snapshot) {
+      if (!snapshot) return "";
+      return `${snapshot.battingTeam} ${snapshot.runs}/${snapshot.wickets} (${snapshot.overs})`;
+    }
+
+    function buildOpeningBowlingSetup(bowlingXI, bowlingSide, format) {
+      const computerPatternPlan = bowlingSide === "computer"
+        ? buildComputerBowlingPatternPlan(bowlingXI, format)
+        : null;
+      const openingBowlers = computerPatternPlan
+        ? {
+            first: computerPatternPlan.bowlersBySlot.A,
+            second: computerPatternPlan.bowlersBySlot.B
+          }
+        : pickOpeningBowlers(bowlingXI);
+      const openingBowler = openingBowlers.first || bowlingXI[0] || { name: "Bowler" };
+      const secondOpeningBowler = openingBowlers.second || null;
+      const bowlerKey = computerPatternPlan?.keysBySlot?.A || getPlayerKey(openingBowler, "bowler");
+      const secondBowlerKey = computerPatternPlan?.keysBySlot?.B || (secondOpeningBowler ? getPlayerKey(secondOpeningBowler, "bowler_2") : null);
+      const bowlingStats = {};
+      bowlingStats[bowlerKey] = createBowlerStat(openingBowler, format);
+      if (secondOpeningBowler && secondBowlerKey && !bowlingStats[secondBowlerKey]) {
+        bowlingStats[secondBowlerKey] = createBowlerStat(secondOpeningBowler, format);
+      }
+      if (computerPatternPlan) {
+        Object.entries(computerPatternPlan.bowlersBySlot).forEach(([slot, player]) => {
+          const key = computerPatternPlan.keysBySlot[slot];
+          if (player && key && !bowlingStats[key]) bowlingStats[key] = createBowlerStat(player, format);
+        });
+      }
+      return {
+        openingBowler,
+        secondOpeningBowler,
+        bowlerKey,
+        secondBowlerKey,
+        bowlingStats,
+        bowlerPlan: {
+          openingBowlerOneKey: bowlerKey,
+          openingBowlerTwoKey: secondBowlerKey,
+          openingBowlerOneName: getPlayerName(openingBowler || { name: "Bowler" }),
+          openingBowlerTwoName: secondOpeningBowler ? getPlayerName(secondOpeningBowler) : "-",
+          formatMaxOvers: getBowlerMaxOvers(format),
+          noConsecutiveOvers: true,
+          staminaEnabled: true,
+          computerPatternEnabled: !!computerPatternPlan,
+          computerPattern: computerPatternPlan?.pattern || null,
+          computerPatternDisplay: computerPatternPlan?.displayPattern || null,
+          computerPatternKeys: computerPatternPlan?.keysBySlot || null,
+          computerPatternNames: computerPatternPlan?.namesBySlot || null
+        }
+      };
+    }
+
+    function saveCompletedMatchToTour(currentMatch, result) {
+      if (!currentMatch || !result) return;
+      const tourSave = readJSON(TOUR_STORAGE_KEY, null);
+      const matchIndex = getMatchIndex(currentMatch);
+
+      currentMatch.result = { matchIndex, ...result };
+      writeJSON("currentTourMatch", currentMatch);
+
+      if (!tourSave) return;
+      if (!tourSave.tourProgress) tourSave.tourProgress = {};
+      if (!Array.isArray(tourSave.tourProgress.completedMatchIndexes)) tourSave.tourProgress.completedMatchIndexes = [];
+      if (!tourSave.tourProgress.completedMatchIndexes.includes(matchIndex)) {
+        tourSave.tourProgress.completedMatchIndexes.push(matchIndex);
+      }
+      if (!tourSave.tourProgress.matchResults) tourSave.tourProgress.matchResults = {};
+      tourSave.tourProgress.matchResults[String(matchIndex)] = {
+        matchIndex,
+        title: currentMatch.match?.title || "",
+        format: currentMatch.format || currentMatch.match?.format || "",
+        resultText: result.resultText,
+        winner: result.winner,
+        marginText: result.marginText,
+        scoreText: result.scoreText,
+        firstInnings: result.firstInnings,
+        secondInnings: result.secondInnings,
+        inningsScorecards: result.inningsScorecards || [],
+        simulated: false,
+        savedAt: result.savedAt
+      };
+      tourSave.tourProgress.activeMatchIndex = null;
+      tourSave.currentScreen = "summary";
+      writeJSON(TOUR_STORAGE_KEY, tourSave);
+    }
+
+    function completeLimitedOversMatchFromState(reason = "completed") {
+      const cards = getScorecardsWithCurrent();
+      const first = cards[0] || matchState.firstInnings || null;
+      const second = cards[1] || (matchState.inningsNumber === 2 ? buildCurrentInningsSnapshot() : matchState.secondInnings);
+
+      if (!first || !second) return null;
+
+      const firstRuns = Number(first.runs) || 0;
+      const secondRuns = Number(second.runs) || 0;
+      let winner = null;
+      let marginText = "Match tied";
+      let resultText = "Match tied";
+
+      if (secondRuns >= firstRuns + 1) {
+        winner = second.battingTeam;
+        const wicketsLeft = Math.max(0, 10 - (Number(second.wickets) || 0));
+        marginText = `${wicketsLeft} wicket${wicketsLeft === 1 ? "" : "s"}`;
+        resultText = `${winner} won by ${marginText}`;
+      } else if (secondRuns === firstRuns) {
+        resultText = `Match tied`;
+      } else {
+        winner = first.battingTeam;
+        const runMargin = Math.max(1, firstRuns - secondRuns);
+        marginText = `${runMargin} run${runMargin === 1 ? "" : "s"}`;
+        resultText = `${winner} won by ${marginText}`;
+      }
+
+      const result = {
+        winner,
+        marginText,
+        resultText,
+        reason,
+        firstInnings: first,
+        secondInnings: second,
+        inningsScorecards: [first, second],
+        scoreText: `${getInningsScoreText(first)}; ${getInningsScoreText(second)}`,
+        savedAt: new Date().toISOString()
+      };
+
+      matchState.firstInnings = first;
+      matchState.secondInnings = second;
+      matchState.inningsScorecards = [first, second];
+      matchState.result = result;
+      matchState.matchCompleted = true;
+      matchState.completed = true;
+      matchState.awaitingNextInnings = false;
+      addCommentary(ballsToOvers(matchState.balls), `${result.resultText}. ${result.scoreText}`);
+
+      if (currentMatchCache) saveCompletedMatchToTour(currentMatchCache, result);
+      return result;
+    }
+
+    function completeTestMatchFromState(reason = "completed") {
+      const cards = getScorecardsWithCurrent();
+      if (cards.length < 3 && Number(matchState.inningsNumber) < 4) return null;
+
+      const firstBatSide = cards[0]?.battingSide;
+      const secondBatSide = cards[0]?.bowlingSide;
+      const firstTeam = getTeamNameForSide(firstBatSide);
+      const secondTeam = getTeamNameForSide(secondBatSide);
+      const firstTotal = getTotalRunsForSide(cards, firstBatSide);
+      const secondTotal = getTotalRunsForSide(cards, secondBatSide);
+      const current = cards[cards.length - 1] || buildCurrentInningsSnapshot();
+      const inningsNo = Number(current?.inningsNumber || matchState.inningsNumber || 1);
+
+      let winner = null;
+      let marginText = "Match drawn";
+      let resultText = "Match drawn";
+      let isDraw = false;
+      let isTie = false;
+
+      if (inningsNo === 3 && firstTotal <= secondTotal) {
+        winner = secondTeam;
+        const runMargin = Math.max(1, secondTotal - firstTotal);
+        marginText = `an innings and ${runMargin} run${runMargin === 1 ? "" : "s"}`;
+        resultText = `${winner} won by ${marginText}`;
+      } else if (inningsNo >= 4) {
+        if (secondTotal > firstTotal) {
+          winner = secondTeam;
+          const wicketsLeft = Math.max(0, 10 - (Number(current?.wickets) || 0));
+          marginText = `${wicketsLeft} wicket${wicketsLeft === 1 ? "" : "s"}`;
+          resultText = `${winner} won by ${marginText}`;
+        } else if (secondTotal === firstTotal && Number(current?.wickets) >= 10) {
+          isTie = true;
+          marginText = "Match tied";
+          resultText = "Match tied";
+        } else if (Number(current?.wickets) >= 10) {
+          winner = firstTeam;
+          const runMargin = Math.max(1, firstTotal - secondTotal);
+          marginText = `${runMargin} run${runMargin === 1 ? "" : "s"}`;
+          resultText = `${winner} won by ${marginText}`;
+        } else {
+          isDraw = true;
+          resultText = `Match drawn`;
+        }
+      } else {
+        return null;
+      }
+
+      const scoreText = cards.map(getInningsScoreText).join("; ");
+      const result = {
+        winner,
+        marginText,
+        resultText,
+        reason,
+        isDraw,
+        isTie,
+        firstInnings: cards[0] || null,
+        secondInnings: cards[1] || null,
+        inningsScorecards: cards,
+        scoreText,
+        savedAt: new Date().toISOString()
+      };
+
+      matchState.firstInnings = cards[0] || null;
+      matchState.secondInnings = cards[1] || null;
+      matchState.inningsScorecards = cards;
+      matchState.result = result;
+      matchState.matchCompleted = true;
+      matchState.completed = true;
+      matchState.awaitingNextInnings = false;
+      addCommentary(ballsToOvers(matchState.balls), `${result.resultText}. ${result.scoreText}`);
+
+      if (currentMatchCache) saveCompletedMatchToTour(currentMatchCache, result);
+      return result;
+    }
+
+    function completeMatchFromState(reason = "completed") {
+      if (!matchState || matchState.matchCompleted) return matchState?.result || null;
+      return isTestFormat(matchState.format)
+        ? completeTestMatchFromState(reason)
+        : completeLimitedOversMatchFromState(reason);
+    }
+
+    function finishCurrentInningsIfNeeded() {
+      if (!matchState || matchState.matchCompleted) return false;
+      const maxBalls = (Number(matchState.maxOvers) || getFormatMaxOvers(matchState.format)) * 6;
+      if (matchState.balls < maxBalls && matchState.wickets < 10) return false;
+
+      const inningsNo = Number(matchState.inningsNumber) || 1;
+      const current = buildCurrentInningsSnapshot();
+      const cards = Array.isArray(matchState.inningsScorecards) ? clonePlain(matchState.inningsScorecards) : [];
+      cards[inningsNo - 1] = current;
+      matchState.inningsScorecards = cards.filter(Boolean).sort((a, b) => (Number(a.inningsNumber) || 0) - (Number(b.inningsNumber) || 0));
+      matchState.firstInnings = matchState.inningsScorecards[0] || null;
+      matchState.secondInnings = matchState.inningsScorecards[1] || null;
+
+      if (!isTestFormat(matchState.format)) {
+        if (inningsNo === 1) {
+          matchState.target = (Number(current.runs) || 0) + 1;
+          matchState.awaitingNextInnings = true;
+          matchState.completed = true;
+          addCommentary(current.overs, `1st innings complete: ${getInningsScoreText(current)}. Target is ${matchState.target}. Click Next Innings to start the chase.`);
+          return true;
+        }
+        completeLimitedOversMatchFromState(matchState.wickets >= 10 ? "all_out" : "overs_complete");
+        return true;
+      }
+
+      const firstBatSide = matchState.inningsScorecards[0]?.battingSide;
+      const secondBatSide = matchState.inningsScorecards[0]?.bowlingSide;
+      const firstTotal = getTotalRunsForSide(matchState.inningsScorecards, firstBatSide);
+      const secondTotal = getTotalRunsForSide(matchState.inningsScorecards, secondBatSide);
+
+      if (inningsNo === 3 && firstTotal <= secondTotal) {
+        completeTestMatchFromState("innings_defeat");
+        return true;
+      }
+
+      if (inningsNo >= 4) {
+        completeTestMatchFromState(matchState.wickets >= 10 ? "all_out" : "draw_or_overs_complete");
+        return true;
+      }
+
+      if (inningsNo === 3) {
+        matchState.target = Math.max(1, firstTotal - secondTotal + 1);
+        addCommentary(current.overs, `${getInningsOrdinal(inningsNo)} innings complete: ${getInningsScoreText(current)}. Target is ${matchState.target}. Click Next Innings for the final chase.`);
+      } else {
+        matchState.target = null;
+        addCommentary(current.overs, `${getInningsOrdinal(inningsNo)} innings complete: ${getInningsScoreText(current)}. Click Next Innings to continue the Test match.`);
+      }
+
+      matchState.awaitingNextInnings = true;
+      matchState.completed = true;
+      return true;
+    }
+
+    function handleMatchFlowAfterBall() {
+      if (!matchState || matchState.matchCompleted) return;
+
+      if (!isTestFormat(matchState.format) && Number(matchState.inningsNumber) === 2 && matchState.target && matchState.runs >= matchState.target) {
+        completeLimitedOversMatchFromState("target_reached");
+        return;
+      }
+
+      if (isTestFormat(matchState.format) && Number(matchState.inningsNumber) === 4 && matchState.target && matchState.runs >= matchState.target) {
+        completeTestMatchFromState("target_reached");
+        return;
+      }
+
+      finishCurrentInningsIfNeeded();
+    }
+
+    function getNextInningsSides(nextInningsNumber) {
+      const cards = Array.isArray(matchState.inningsScorecards) ? matchState.inningsScorecards : [];
+      const first = cards[0] || matchState.firstInnings || buildCurrentInningsSnapshot();
+
+      if (!isTestFormat(matchState.format)) {
+        return {
+          battingSide: first.bowlingSide,
+          bowlingSide: first.battingSide,
+          battingTeam: first.bowlingTeam,
+          bowlingTeam: first.battingTeam
+        };
+      }
+
+      const firstBattingSide = first.battingSide;
+      const secondBattingSide = first.bowlingSide;
+      const battingSide = Number(nextInningsNumber) % 2 === 1 ? firstBattingSide : secondBattingSide;
+      const bowlingSide = battingSide === firstBattingSide ? secondBattingSide : firstBattingSide;
+      return {
+        battingSide,
+        bowlingSide,
+        battingTeam: getTeamNameForSide(battingSide),
+        bowlingTeam: getTeamNameForSide(bowlingSide)
+      };
+    }
+
+    function startNextInnings() {
+      const currentMatch = readJSON("currentTourMatch", null);
+      if (!currentMatch || !matchState) return;
+      currentMatchCache = currentMatch;
+
+      if (!matchState.awaitingNextInnings) {
+        alert("The current innings is not complete yet.");
+        return;
+      }
+
+      const current = buildCurrentInningsSnapshot();
+      const cards = Array.isArray(matchState.inningsScorecards) ? clonePlain(matchState.inningsScorecards) : [];
+      cards[(Number(current.inningsNumber) || 1) - 1] = current;
+      matchState.inningsScorecards = cards.filter(Boolean).sort((a, b) => (Number(a.inningsNumber) || 0) - (Number(b.inningsNumber) || 0));
+      matchState.firstInnings = matchState.inningsScorecards[0] || null;
+      matchState.secondInnings = matchState.inningsScorecards[1] || null;
+
+      const nextInningsNumber = (Number(matchState.inningsNumber) || 1) + 1;
+      const requiredInnings = getRequiredInningsCount(matchState.format);
+      if (nextInningsNumber > requiredInnings) {
+        alert("No next innings available. The match is complete.");
+        return;
+      }
+
+      const sides = getNextInningsSides(nextInningsNumber);
+      const battingXI = getSelectedXI(currentMatch, sides.battingSide);
+      const bowlingXI = getSelectedXI(currentMatch, sides.bowlingSide);
+      const striker = battingXI[0] || { name: "Opening Batter" };
+      const nonStriker = battingXI[1] || { name: "Opening Batter" };
+      const strikerKey = getPlayerKey(striker, `striker_${nextInningsNumber}`);
+      const nonStrikerKey = getPlayerKey(nonStriker, `nonStriker_${nextInningsNumber}`);
+      const opening = buildOpeningBowlingSetup(bowlingXI, sides.bowlingSide, matchState.format);
+
+      const battingStats = {};
+      battingStats[strikerKey] = createBatterStat(striker);
+      battingStats[nonStrikerKey] = createBatterStat(nonStriker);
+
+      let target = null;
+      let introText = `${sides.battingTeam} begin the ${getInningsOrdinal(nextInningsNumber)} innings. ${getPlayerName(striker)} and ${getPlayerName(nonStriker)} are opening. ${getPlayerName(opening.openingBowler)} will bowl.`;
+
+      if (!isTestFormat(matchState.format)) {
+        target = (Number(matchState.firstInnings?.runs) || 0) + 1;
+        introText = `${sides.battingTeam} need ${target} to win. ${getPlayerName(striker)} and ${getPlayerName(nonStriker)} are opening. ${getPlayerName(opening.openingBowler)} will bowl.`;
+      } else if (nextInningsNumber === 4) {
+        const firstBatSide = matchState.inningsScorecards[0]?.battingSide;
+        const secondBatSide = matchState.inningsScorecards[0]?.bowlingSide;
+        const firstTotal = getTotalRunsForSide(matchState.inningsScorecards, firstBatSide);
+        const secondTotal = getTotalRunsForSide(matchState.inningsScorecards, secondBatSide);
+        target = Math.max(1, firstTotal - secondTotal + 1);
+        introText = `${sides.battingTeam} need ${target} to win in the final innings. ${getPlayerName(striker)} and ${getPlayerName(nonStriker)} are opening. ${getPlayerName(opening.openingBowler)} will bowl.`;
+      }
+
+      matchState.inningsNumber = nextInningsNumber;
+      matchState.battingSide = sides.battingSide;
+      matchState.bowlingSide = sides.bowlingSide;
+      matchState.battingTeam = sides.battingTeam;
+      matchState.bowlingTeam = sides.bowlingTeam;
+      matchState.runs = 0;
+      matchState.wickets = 0;
+      matchState.balls = 0;
+      matchState.strikerKey = strikerKey;
+      matchState.nonStrikerKey = nonStrikerKey;
+      matchState.nextBatterIndex = 2;
+      matchState.currentBowlerKey = opening.bowlerKey;
+      matchState.previousBowlerKey = null;
+      matchState.lastCompletedOverBowlerKey = null;
+      matchState.bowlerPlan = opening.bowlerPlan;
+      matchState.overHistory = [];
+      matchState.battingStats = battingStats;
+      matchState.bowlingStats = opening.bowlingStats;
+      matchState.partnershipRuns = 0;
+      matchState.partnershipBalls = 0;
+      matchState.currentOverBalls = [];
+      matchState.awaitingNextInnings = false;
+      matchState.completed = false;
+      matchState.matchCompleted = false;
+      matchState.result = null;
+      matchState.target = target;
+      matchState.commentary = [
+        {
+          label: `0.0 • ${getInningsOrdinal(nextInningsNumber)} innings`,
+          text: introText
+        },
+        ...matchState.commentary
+      ].slice(0, 22);
+
+      saveMatchState();
+      renderMatchCenter();
+    }
+
+
+    function playSimulationBall(aggression) {
+      if (!matchState || matchState.completed) return;
+
+      const maxBalls = matchState.maxOvers * 6;
+      if (matchState.balls >= maxBalls || matchState.wickets >= 10) {
+        matchState.completed = true;
+        return;
+      }
+
+      const strikerPlayer = getBatterByKey(matchState.strikerKey);
+      const bowlerPlayer = getBowlerByKey(matchState.currentBowlerKey);
+      const outcome = pickOutcome(aggression, strikerPlayer, bowlerPlayer);
+      const striker = ensureBatterStat(matchState.strikerKey);
+      const bowler = ensureBowlerStat(matchState.currentBowlerKey);
+
+      matchState.balls += 1;
+      bowler.balls += 1;
+      drainBowlerStamina(matchState.currentBowlerKey);
+      striker.balls += 1;
+      matchState.partnershipBalls += 1;
+
+      updateBatterConfidenceAfterOutcome(matchState.strikerKey, outcome);
+      updateBatterFatigueAfterOutcome(matchState.strikerKey, outcome, aggression, false);
+
+      const outcomeRunsForFatigue = Number(outcome);
+      if (Number.isFinite(outcomeRunsForFatigue) && [1, 2, 3].includes(outcomeRunsForFatigue)) {
+        updateBatterFatigueAfterOutcome(matchState.nonStrikerKey, outcome, aggression, true);
+      }
+
+      if (outcome === "W") {
+        matchState.wickets += 1;
+        bowler.wickets += 1;
+        striker.out = true;
+        striker.howOut = `c & b ${bowler.name}`;
+        matchState.partnershipRuns = 0;
+        matchState.partnershipBalls = 0;
+
+        const battingXI = getBattingXI();
+        if (matchState.wickets < 10 && matchState.nextBatterIndex < battingXI.length) {
+          const newBatter = battingXI[matchState.nextBatterIndex];
+          const newKey = getPlayerKey(newBatter, `batter_${matchState.nextBatterIndex}`);
+          matchState.battingStats[newKey] = createBatterStat(newBatter);
+          matchState.strikerKey = newKey;
+          matchState.nextBatterIndex += 1;
+        } else {
+          matchState.completed = true;
+        }
+      } else {
+        const runs = Number(outcome) || 0;
+        matchState.runs += runs;
+        matchState.partnershipRuns += runs;
+        striker.runs += runs;
+        bowler.runs += runs;
+
+        if (runs === 4) striker.fours += 1;
+        if (runs === 6) striker.sixes += 1;
+
+        if (runs % 2 === 1) switchStrike();
+      }
+
+      if (matchState.balls % 6 === 0 && !matchState.completed) {
+        const completedBowlerKey = matchState.currentBowlerKey;
+        recordCompletedOverForBowler(completedBowlerKey);
+        switchStrike();
+        matchState.currentOverBalls = [];
+        chooseNextBowler();
+      }
+
+      if (matchState.balls >= maxBalls || matchState.wickets >= 10) {
+        matchState.completed = true;
+      }
+    }
+
+    function getLowScoreThreshold(formatKey) {
+      if (formatKey === 'test') return 170;
+      if (formatKey === 'odi') return 190;
+      return 110;
+    }
+
+    function run200SimTest() {
+      const currentMatch = readJSON("currentTourMatch", null);
+      if (!currentMatch) {
+        alert("No currentTourMatch found. Start from the tour/select XI page first.");
+        return;
+      }
+
+      const originalState = clonePlain(matchState);
+      const originalMatchCache = currentMatchCache;
+      const aggression = clampNumber(document.getElementById("aggression")?.value || 6, 1, 10);
+      const simCount = 200;
+      const results = [];
+      const previousSuppress = SIM_SUPPRESS_ENGINE_LOG;
+
+      SIM_SUPPRESS_ENGINE_LOG = true;
+
+      for (let i = 0; i < simCount; i += 1) {
+        currentMatchCache = currentMatch;
+        matchState = createInitialMatchState(currentMatch);
+
+        let safety = 0;
+        while (!matchState.completed && safety < matchState.maxOvers * 6 + 12) {
+          playSimulationBall(aggression);
+          safety += 1;
+        }
+
+        const formatKey = getFormatKey(matchState.format);
+        const lowThreshold = getLowScoreThreshold(formatKey);
+        results.push({
+          sim: i + 1,
+          runs: matchState.runs,
+          wickets: matchState.wickets,
+          balls: matchState.balls,
+          overs: ballsToOvers(matchState.balls),
+          allOut: matchState.wickets >= 10,
+          lowScore: matchState.runs < lowThreshold,
+          collapse: matchState.wickets >= 7 && matchState.runs < lowThreshold + 20,
+          format: formatKey
+        });
+      }
+
+      SIM_SUPPRESS_ENGINE_LOG = previousSuppress;
+      currentMatchCache = originalMatchCache;
+      matchState = originalState;
+
+      const scores = results.map(row => row.runs).sort((a, b) => a - b);
+      const avg = scores.reduce((sum, value) => sum + value, 0) / scores.length;
+      const median = scores[Math.floor(scores.length / 2)];
+      const p10 = scores[Math.floor(scores.length * 0.10)];
+      const p90 = scores[Math.floor(scores.length * 0.90)];
+      const allOuts = results.filter(row => row.allOut).length;
+      const lowScores = results.filter(row => row.lowScore).length;
+      const collapses = results.filter(row => row.collapse).length;
+      const lowestTen = [...results].sort((a, b) => a.runs - b.runs || b.wickets - a.wickets).slice(0, 10);
+      const highestFive = [...results].sort((a, b) => b.runs - a.runs).slice(0, 5);
+
+      const summary = {
+        engine: 'V21 ODI/Test fixed 200-sim test',
+        aggression,
+        simulations: simCount,
+        averageScore: Math.round(avg * 10) / 10,
+        medianScore: median,
+        p10Score: p10,
+        p90Score: p90,
+        lowestScore: scores[0],
+        highestScore: scores[scores.length - 1],
+        allOuts,
+        allOutRate: Math.round((allOuts / simCount) * 1000) / 10,
+        lowScores,
+        lowScoreRate: Math.round((lowScores / simCount) * 1000) / 10,
+        collapses,
+        collapseRate: Math.round((collapses / simCount) * 1000) / 10,
+        lowestTen,
+        highestFive
+      };
+
+      const out = document.getElementById("out");
+      if (out) {
+        out.textContent = JSON.stringify(summary, null, 2);
+        const details = out.closest("details");
+        if (details) details.open = true;
+      }
+
+    }
+
+function playNextBall() {
+      if (!matchState) return;
+
+      if (matchState.matchCompleted) {
+        renderMatchCenter();
+        return;
+      }
+
+      if (matchState.awaitingNextInnings) {
+        alert("The innings is complete. Click Next Innings to continue.");
+        return;
+      }
+
+      if (matchState.completed) return;
+
+      const maxBalls = matchState.maxOvers * 6;
+      if (matchState.balls >= maxBalls || matchState.wickets >= 10) {
+        handleMatchFlowAfterBall();
+        saveMatchState();
+        renderMatchCenter();
+        return;
+      }
+
+      const aggression = document.getElementById("aggression")?.value || 5;
+      const strikerPlayer = getBatterByKey(matchState.strikerKey);
+      const bowlerPlayer = getBowlerByKey(matchState.currentBowlerKey);
+      const outcome = pickOutcome(aggression, strikerPlayer, bowlerPlayer);
+      const ballLabel = getBallLabelBeforeDelivery();
+      const striker = ensureBatterStat(matchState.strikerKey);
+      const bowler = ensureBowlerStat(matchState.currentBowlerKey);
+
+      matchState.balls += 1;
+      bowler.balls += 1;
+      drainBowlerStamina(matchState.currentBowlerKey);
+      striker.balls += 1;
+      matchState.partnershipBalls += 1;
+
+      const updatedConfidence = updateBatterConfidenceAfterOutcome(matchState.strikerKey, outcome);
+      const updatedBatterFatigue = updateBatterFatigueAfterOutcome(matchState.strikerKey, outcome, aggression, false);
+
+      const outcomeRunsForFatigue = Number(outcome);
+      if (Number.isFinite(outcomeRunsForFatigue) && [1, 2, 3].includes(outcomeRunsForFatigue)) {
+        updateBatterFatigueAfterOutcome(matchState.nonStrikerKey, outcome, aggression, true);
+      }
+
+      let message = "";
+
+      if (outcome === "W") {
+        matchState.wickets += 1;
+        bowler.wickets += 1;
+        striker.out = true;
+        striker.howOut = `c & b ${bowler.name}`;
+        message = `WICKET! ${striker.name} is out. ${matchState.battingTeam} are ${matchState.runs}/${matchState.wickets}.`;
+        matchState.currentOverBalls.push({ value: "W", className: "wicket" });
+        matchState.partnershipRuns = 0;
+        matchState.partnershipBalls = 0;
+
+        const battingXI = getBattingXI();
+        if (matchState.wickets < 10 && matchState.nextBatterIndex < battingXI.length) {
+          const newBatter = battingXI[matchState.nextBatterIndex];
+          const newKey = getPlayerKey(newBatter, `batter_${matchState.nextBatterIndex}`);
+          matchState.battingStats[newKey] = createBatterStat(newBatter);
+          matchState.strikerKey = newKey;
+          matchState.nextBatterIndex += 1;
+          message += ` ${getPlayerName(newBatter)} comes in.`;
+        } else {
+          matchState.completed = true;
+          message += " All out.";
+        }
+      } else {
+        const runs = Number(outcome) || 0;
+        matchState.runs += runs;
+        matchState.partnershipRuns += runs;
+        striker.runs += runs;
+        bowler.runs += runs;
+
+        if (runs === 4) striker.fours += 1;
+        if (runs === 6) striker.sixes += 1;
+
+        if (runs === 0) message = `${bowler.name} to ${striker.name}, defended. No run.`;
+        if (runs === 1) message = `${bowler.name} to ${striker.name}, worked away for one.`;
+        if (runs === 2) message = `${bowler.name} to ${striker.name}, placed into the gap for two.`;
+        if (runs === 3) message = `${bowler.name} to ${striker.name}, excellent running for three.`;
+        if (runs === 4) message = `FOUR! ${striker.name} finds the boundary with clean timing.`;
+        if (runs === 6) message = `SIX! ${striker.name} launches it into the stands.`;
+
+        matchState.currentOverBalls.push({ value: String(runs), className: classifyOutcome(runs) });
+
+        if (runs % 2 === 1) {
+          switchStrike();
+        }
+      }
+
+      addCommentary(`${ballLabel} • ${bowler.name}`, message);
+      animateBallForOutcome(outcome);
+
+      if (matchState.balls % 6 === 0 && !matchState.completed) {
+        const completedBowlerKey = matchState.currentBowlerKey;
+        const completedBowler = ensureBowlerStat(completedBowlerKey);
+        recordCompletedOverForBowler(completedBowlerKey);
+
+        switchStrike();
+        matchState.currentOverBalls = [];
+
+        const bowlerChanged = chooseNextBowler();
+
+        if (bowlerChanged) {
+          addCommentary(
+            ballsToOvers(matchState.balls),
+            `End of over. ${matchState.battingTeam} ${matchState.runs}/${matchState.wickets}. ${completedBowler.name} cannot bowl the next over. New bowler: ${ensureBowlerStat(matchState.currentBowlerKey).name}.`
+          );
+        }
+      }
+
+      handleMatchFlowAfterBall();
+
+      saveMatchState();
+      renderMatchCenter();
+    }
+
+    function playOver() {
+      if (!matchState || matchState.completed || matchState.awaitingNextInnings || matchState.matchCompleted) return;
+
+      const startOver = Math.floor(matchState.balls / 6);
+      let safety = 0;
+
+      while (!matchState.completed && Math.floor(matchState.balls / 6) === startOver && safety < 6) {
+        playNextBall();
+        safety += 1;
+      }
+    }
+
+    function buildResultFromCurrentScore(currentMatch) {
+      if (matchState?.result) return matchState.result;
+
+      const teams = getFullTeamNames(currentMatch);
+      const battingTeam = matchState?.battingTeam || teams.userTeam;
+      const bowlingTeam = matchState?.bowlingTeam || teams.computerTeam;
+      const scorePressure = Math.max(0.25, Math.min(0.75, (matchState?.runs || 0) / 280));
+      const battingWins = Math.random() < scorePressure;
+      const winner = battingWins ? battingTeam : bowlingTeam;
 
       let marginText = "";
 
-      if (wonByWickets) {
-        const wickets = Math.floor(Math.random() * 8) + 1;
-        marginText = `${wickets} wicket${wickets === 1 ? "" : "s"}`;
+      if (battingWins) {
+        const runMargin = Math.max(1, Math.round((matchState?.runs || 120) * (0.12 + Math.random() * 0.32)));
+        marginText = `${runMargin} run${runMargin === 1 ? "" : "s"}`;
       } else {
-        const runs = Math.floor(Math.random() * 190) + 10;
-        marginText = `${runs} run${runs === 1 ? "" : "s"}`;
+        const wicketsLeft = Math.max(1, Math.min(9, 10 - (matchState?.wickets || 5)));
+        const wickets = Math.max(1, Math.min(9, Math.round(wicketsLeft * (0.45 + Math.random() * 0.45))));
+        marginText = `${wickets} wicket${wickets === 1 ? "" : "s"}`;
       }
 
       return {
@@ -79,7 +3948,8 @@
         marginText,
         resultText: `${winner} won by ${marginText}`,
         simulated: true,
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
+        scoreText: `${matchState?.battingTeam || "Team"} ${matchState?.runs || 0}/${matchState?.wickets || 0} (${ballsToOvers(matchState?.balls || 0)})`
       };
     }
 
@@ -97,30 +3967,23 @@
         return;
       }
 
-      const matchIndex = Number(
-        currentMatch.matchIndex ??
-        currentMatch.match?.matchIndex ??
-        tourSave.tourProgress?.activeMatchIndex ??
-        0
-      );
+      currentMatchCache = currentMatch;
+      matchState = getOrCreateMatchState(currentMatch);
 
-      const result = buildFakeResult(currentMatch);
-
-      if (!tourSave.tourProgress) {
-        tourSave.tourProgress = {};
+      const matchIndex = getMatchIndex(currentMatch);
+      if (matchState?.awaitingNextInnings) {
+        alert("The current innings is complete. Click Next Innings before saving a match result.");
+        return;
       }
-
-      if (!Array.isArray(tourSave.tourProgress.completedMatchIndexes)) {
-        tourSave.tourProgress.completedMatchIndexes = [];
+      if (!matchState.matchCompleted && (matchState.balls >= matchState.maxOvers * 6 || matchState.wickets >= 10 || (matchState.target && matchState.runs >= matchState.target))) {
+        completeMatchFromState("manual_complete");
       }
+      const result = buildResultFromCurrentScore(currentMatch);
 
-      if (!tourSave.tourProgress.completedMatchIndexes.includes(matchIndex)) {
-        tourSave.tourProgress.completedMatchIndexes.push(matchIndex);
-      }
-
-      if (!tourSave.tourProgress.matchResults) {
-        tourSave.tourProgress.matchResults = {};
-      }
+      if (!tourSave.tourProgress) tourSave.tourProgress = {};
+      if (!Array.isArray(tourSave.tourProgress.completedMatchIndexes)) tourSave.tourProgress.completedMatchIndexes = [];
+      if (!tourSave.tourProgress.completedMatchIndexes.includes(matchIndex)) tourSave.tourProgress.completedMatchIndexes.push(matchIndex);
+      if (!tourSave.tourProgress.matchResults) tourSave.tourProgress.matchResults = {};
 
       tourSave.tourProgress.matchResults[String(matchIndex)] = {
         matchIndex,
@@ -129,6 +3992,7 @@
         resultText: result.resultText,
         winner: result.winner,
         marginText: result.marginText,
+        scoreText: result.scoreText,
         simulated: true,
         savedAt: result.savedAt
       };
@@ -136,28 +4000,210 @@
       tourSave.tourProgress.activeMatchIndex = null;
       tourSave.currentScreen = "summary";
 
-      currentMatch.result = {
-        matchIndex,
-        ...result
-      };
+      currentMatch.result = { matchIndex, ...result };
+      matchState.completed = true;
 
       writeJSON("currentTourMatch", currentMatch);
       writeJSON(TOUR_STORAGE_KEY, tourSave);
+      saveMatchState();
 
-      alert(result.resultText);
-
+      alert(`${result.resultText}\n${result.scoreText}`);
       window.location.href = "index.html";
     }
 
+    function renderBattingTable() {
+      const body = document.getElementById("battingTableBody");
+      if (!body || !matchState) return;
+
+      const battingXI = getBattingXI();
+      const rows = battingXI.map((player, index) => {
+        const key = getPlayerKey(player, `batter_${index}`);
+        const stat = matchState.battingStats[key] || {
+          name: getPlayerName(player), runs: 0, balls: 0, fours: 0, sixes: 0, out: false, howOut: ""
+        };
+
+        const isCurrent = key === matchState.strikerKey || key === matchState.nonStrikerKey;
+        const suffix = key === matchState.strikerKey ? " *" : "";
+        const status = stat.out ? ` (${stat.howOut || "out"})` : isCurrent ? " not out" : "";
+        const sr = stat.balls ? ((stat.runs / stat.balls) * 100).toFixed(1) : "-";
+
+        return `
+          <tr>
+            <td>${escapeHTML(stat.name)}${suffix}${escapeHTML(status)}</td>
+            <td>${stat.runs}</td>
+            <td>${stat.balls}</td>
+            <td>${stat.fours}</td>
+            <td>${stat.sixes}</td>
+            <td>${sr}</td>
+          </tr>
+        `;
+      }).join("");
+
+      body.innerHTML = rows || `<tr><td colspan="6">No batting card yet.</td></tr>`;
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderCommentary() {
+      const list = document.getElementById("commentaryList");
+      if (!list || !matchState) return;
+
+      list.innerHTML = matchState.commentary.map(item => `
+        <div class="commentary-item">
+          <strong>${escapeHTML(item.label)}</strong>
+          <p>${escapeHTML(item.text)}</p>
+        </div>
+      `).join("");
+
+      text("commentaryOverLabel", `Over ${Math.floor((matchState.balls || 0) / 6)}`);
+    }
+
+    function renderOverTimeline() {
+      const timeline = document.getElementById("overTimeline");
+      if (!timeline || !matchState) return;
+
+      timeline.innerHTML = (matchState.currentOverBalls || []).map(ball => `
+        <div class="ball-chip ${escapeHTML(ball.className)}">${escapeHTML(ball.value)}</div>
+      `).join("");
+    }
+
+    function renderMatchCenter() {
+      const currentMatch = readJSON("currentTourMatch", null);
+      currentMatchCache = currentMatch;
+
+      if (!currentMatch) {
+        text("matchSubtitle", "No current match loaded. Go back to Tour Summary.");
+        renderDebug();
+        return;
+      }
+
+      matchState = getOrCreateMatchState(currentMatch);
+
+      const teams = getFullTeamNames(currentMatch);
+      const format = currentMatch?.format || currentMatch?.match?.format || "Match";
+      const title = currentMatch?.match?.title || `${teams.userTeam} vs ${teams.computerTeam}`;
+      const venue = currentMatch?.match?.venue || "Cricket Ground";
+      const battingInfo = getBattingTeamFromToss(currentMatch, teams);
+
+      const userXI = getSelectedXI(currentMatch, "user");
+      const computerXI = getSelectedXI(currentMatch, "computer");
+      const userRatings = getTeamRatings(userXI);
+      const computerRatings = getTeamRatings(computerXI);
+
+      text("matchSubtitle", `${title} • ${venue}`);
+      text("formatBox", format);
+      text("tossBox", battingInfo.tossText);
+
+      text("teamAName", teams.userTeam);
+      text("teamABadge", getTeamShortName(teams.userTeam));
+      text("teamASub", `${matchState.battingSide === "user" ? "Batting" : "Bowling"} • Captain: ${getCaptainName(currentMatch, userXI, "user")}`);
+      text("teamABat", userRatings.bat);
+      text("teamABowl", userRatings.bowl);
+      text("teamAField", userRatings.field);
+
+      text("teamBName", teams.computerTeam);
+      text("teamBBadge", getTeamShortName(teams.computerTeam));
+      text("teamBSub", `${matchState.battingSide === "computer" ? "Batting" : "Bowling"} • Captain: ${getCaptainName(currentMatch, computerXI, "computer")}`);
+      text("teamBBat", computerRatings.bat);
+      text("teamBBowl", computerRatings.bowl);
+      text("teamBField", computerRatings.field);
+
+      text("mainScore", `${matchState.runs}/${matchState.wickets}`);
+      text("mainOvers", `${ballsToOvers(matchState.balls)} overs`);
+      text("runRate", getRunRate(matchState.runs, matchState.balls));
+
+      let targetText = `${matchState.battingTeam} batting`;
+      if (matchState.matchCompleted && matchState.result) {
+        targetText = matchState.result.resultText;
+      } else if (matchState.awaitingNextInnings) {
+        targetText = matchState.target
+          ? `Target ${matchState.target} • Click Next Innings`
+          : `${getInningsOrdinal((Number(matchState.inningsNumber) || 1) + 1)} innings ready • Click Next Innings`;
+      } else if (matchState.target) {
+        const needed = Math.max(0, (Number(matchState.target) || 0) - (Number(matchState.runs) || 0));
+        targetText = `Need ${needed} off ${getBallsRemainingInInnings()} • Target ${matchState.target}`;
+      } else if (isTestFormat(matchState.format)) {
+        const cards = getScorecardsWithCurrent();
+        const firstSide = cards[0]?.battingSide;
+        const secondSide = cards[0]?.bowlingSide;
+        if (firstSide && secondSide) {
+          targetText = `Test totals: ${getTeamShortName(getTeamNameForSide(firstSide))} ${getTotalRunsForSide(cards, firstSide)} • ${getTeamShortName(getTeamNameForSide(secondSide))} ${getTotalRunsForSide(cards, secondSide)}`;
+        }
+      }
+
+      text("targetPill", targetText);
+      text("inningsLabel", `${getInningsOrdinal(matchState.inningsNumber)} Innings • ${matchState.battingTeam}`);
+      text("partnershipBox", `${matchState.partnershipRuns} off ${matchState.partnershipBalls}`);
+
+      const striker = ensureBatterStat(matchState.strikerKey);
+      const nonStriker = ensureBatterStat(matchState.nonStrikerKey);
+      const bowler = ensureBowlerStat(matchState.currentBowlerKey);
+
+      text("strikerName", striker.name);
+      text("strikerInfo", `${striker.runs} runs • ${striker.balls} balls • Confidence ${Math.round(getBatterConfidence(matchState.strikerKey))}% • Fatigue ${Math.round(getBatterFatigue(matchState.strikerKey))}%`);
+      text("nonStrikerName", nonStriker.name);
+      text("nonStrikerInfo", `${nonStriker.runs} runs • ${nonStriker.balls} balls • Confidence ${Math.round(getBatterConfidence(matchState.nonStrikerKey))}% • Fatigue ${Math.round(getBatterFatigue(matchState.nonStrikerKey))}%`);
+
+      text("currentBowlerName", bowler.name);
+      text("currentBowlerFigures", `${ballsToOvers(bowler.balls)}-${bowler.maidens}-${bowler.runs}-${bowler.wickets}`);
+      text("currentBowlerStamina", `Stamina: ${Math.round(Number(bowler.stamina) || 0)}%`);
+      text("currentBowlerLimit", getBowlerLimitText(bowler));
+
+      const staminaFill = document.getElementById("currentBowlerStaminaFill");
+      if (staminaFill) {
+        staminaFill.style.width = `${Math.max(0, Math.min(100, Number(bowler.stamina) || 0))}%`;
+      }
+
+      const plan = matchState.bowlerPlan || {};
+
+      if (plan.computerPatternEnabled) {
+        text("openingBowlerPair", `Computer A-E: ${getComputerPatternNamesText(plan)}`);
+        text("bowlingPlanText", `Computer fixed order: ${plan.computerPatternDisplay || COMPUTER_BOWLING_PATTERN_DISPLAY} • A-E are top five ranked bowlers`);
+      } else {
+        text("openingBowlerPair", `Opening pair: ${plan.openingBowlerOneName || "-"} / ${plan.openingBowlerTwoName || "-"}`);
+
+        const maxOversText = plan.formatMaxOvers === null || plan.formatMaxOvers === undefined
+          ? "No Test max overs — stamina controls spells"
+          : `Max ${plan.formatMaxOvers} overs per bowler`;
+
+        text("bowlingPlanText", `${maxOversText} • no consecutive overs`);
+      }
+
+      const nextBallBtn = document.getElementById("nextBallBtn");
+      const playOverBtn = document.getElementById("playOverBtn");
+      const nextInningsBtn = document.getElementById("nextInningsBtn");
+      const liveDisabled = !!matchState.completed || !!matchState.awaitingNextInnings || !!matchState.matchCompleted;
+      if (nextBallBtn) nextBallBtn.disabled = liveDisabled;
+      if (playOverBtn) playOverBtn.disabled = liveDisabled;
+      if (nextInningsBtn) nextInningsBtn.disabled = !matchState.awaitingNextInnings || !!matchState.matchCompleted;
+
+      renderBattingTable();
+      renderCommentary();
+      renderOverTimeline();
+      renderDebug();
+    }
+
     function renderDebug() {
-      document.getElementById("out").textContent = JSON.stringify({
+      const out = document.getElementById("out");
+      if (!out) return;
+
+      out.textContent = JSON.stringify({
+        matchState,
         currentTourMatch: readJSON("currentTourMatch"),
         currentTossResult: readJSON("currentTossResult"),
         tourSave: readJSON(TOUR_STORAGE_KEY)
       }, null, 2);
     }
 
-    renderDebug();
+    window.addEventListener("pageshow", renderMatchCenter);
   </script>
+  <script src="mobile-viewport.js?v=1"></script>
 </body>
 </html>

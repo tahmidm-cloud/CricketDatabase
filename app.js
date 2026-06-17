@@ -1,5 +1,4 @@
 const JSON_FILE_PATH = "data/players.json";
-const STATS_JSON_FILE_PATH = "data/stats.json";
 
 let allPlayers = [];
 let filteredPlayers = [];
@@ -8,22 +7,6 @@ let currentSort = {
   key: null,
   direction: "asc"
 };
-
-let currentPage = 1;
-let playersPerPage = 25;
-let currentSortedPlayers = [];
-
-let REAL_WORLD_STATS_BY_ID = {};
-let REAL_WORLD_STATS_BY_NAME = new Map();
-let realWorldStatsLoadPromise = null;
-
-function runAfterFirstPaint(callback) {
-  if ("requestIdleCallback" in window) {
-    window.requestIdleCallback(callback, { timeout: 1200 });
-  } else {
-    setTimeout(callback, 50);
-  }
-}
 
 const playerTableBody = document.getElementById("playerTableBody");
 const playerCount = document.getElementById("playerCount");
@@ -117,9 +100,7 @@ const FIELD_NAMES = {
 
 async function loadPlayers() {
   try {
-    loadRealWorldStats();
-
-    const response = await fetch(JSON_FILE_PATH, { cache: "no-store" });
+    const response = await fetch(JSON_FILE_PATH);
 
     if (!response.ok) {
       throw new Error("Could not load players.json");
@@ -129,51 +110,25 @@ async function loadPlayers() {
 
     allPlayers = normalizePlayers(rawData).map((player, index) => ({
       ...player,
-      id: String(
-        player.id ??
-        player.playerId ??
-        player.player_id ??
-        player.final_cricinfo_id ??
-        player.cricinfo_id ??
-        player.master_cricinfo_id ??
-        `player_${index}`
-      )
+      id: String(player.id ?? player.playerId ?? player.player_id ?? `player_${index}`)
     }));
 
+    recalculateAllPlayerPlaystyles();
+    snapshotOriginalPlayers();
+    applySavedPlayerEdits();
+    recalculateAllPlayerPlaystyles();
+
     filteredPlayers = [...allPlayers];
-    currentSortedPlayers = [...filteredPlayers];
-    currentPage = 1;
 
-    ensurePaginationControls();
-    renderCurrentPage();
+    buildFilters();
+    renderTable(filteredPlayers);
     updateSortButtons();
-
-    runAfterFirstPaint(() => {
-      try {
-        recalculateAllPlayerPlaystyles();
-        snapshotOriginalPlayers();
-        applySavedPlayerEdits();
-        recalculateAllPlayerPlaystyles();
-
-        filteredPlayers = [...allPlayers];
-        currentSortedPlayers = sortPlayers(filteredPlayers);
-
-        buildFilters();
-        renderCurrentPage();
-        updateSortButtons();
-      } catch (slowLoadError) {
-        console.error("Background database setup error:", slowLoadError);
-        buildFilters();
-        renderCurrentPage();
-        updateSortButtons();
-      }
-    });
   } catch (error) {
     console.error(error);
 
     playerTableBody.innerHTML = `
       <tr>
-        <td colspan="8">
+        <td colspan="10">
           Could not load JSON file. Make sure your file is at:
           <strong>data/players.json</strong>
           and you are running a local server.
@@ -182,6 +137,7 @@ async function loadPlayers() {
     `;
   }
 }
+
 function normalizePlayers(rawData) {
   if (Array.isArray(rawData)) return rawData;
   if (rawData.players && Array.isArray(rawData.players)) return rawData.players;
@@ -201,110 +157,6 @@ function normalizePlayers(rawData) {
   }
 
   return [];
-}
-
-function normalizeStatsLookupKey(value) {
-  return String(value ?? "").trim().toLowerCase();
-}
-
-function normalizeStatsName(value) {
-  return String(value ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
-}
-
-function rememberStatsName(name, statsObject) {
-  const normalized = normalizeStatsName(name);
-  if (normalized && !REAL_WORLD_STATS_BY_NAME.has(normalized)) {
-    REAL_WORLD_STATS_BY_NAME.set(normalized, statsObject);
-  }
-}
-
-function buildRealWorldStatsIndexes(data) {
-  REAL_WORLD_STATS_BY_ID = data && typeof data === "object" ? data : {};
-  REAL_WORLD_STATS_BY_NAME = new Map();
-
-  Object.entries(REAL_WORLD_STATS_BY_ID).forEach(([id, statsObject]) => {
-    if (!statsObject || typeof statsObject !== "object") return;
-
-    const info = statsObject.player_info || {};
-
-    rememberStatsName(info.final_player_name, statsObject);
-    rememberStatsName(info.final_short_name, statsObject);
-    rememberStatsName(info.name, statsObject);
-    rememberStatsName(info.player_name, statsObject);
-    rememberStatsName(statsObject.name, statsObject);
-    rememberStatsName(statsObject.fullName, statsObject);
-
-    const idKey = normalizeStatsLookupKey(id);
-    if (idKey && !REAL_WORLD_STATS_BY_NAME.has(idKey)) {
-      REAL_WORLD_STATS_BY_NAME.set(idKey, statsObject);
-    }
-  });
-}
-
-async function loadRealWorldStats() {
-  if (realWorldStatsLoadPromise) return realWorldStatsLoadPromise;
-
-  realWorldStatsLoadPromise = fetch(STATS_JSON_FILE_PATH, { cache: "no-store" })
-    .then((response) => {
-      if (!response.ok) return {};
-      return response.json();
-    })
-    .then((data) => {
-      buildRealWorldStatsIndexes(data);
-      return REAL_WORLD_STATS_BY_ID;
-    })
-    .catch((error) => {
-      console.warn("Could not load data/stats.json:", error);
-      buildRealWorldStatsIndexes({});
-      return {};
-    });
-
-  return realWorldStatsLoadPromise;
-}
-
-function findRealWorldStats(player, display = null) {
-  const playerDisplay = display || getDisplayPlayer(player);
-
-  const possibleIds = [
-    player.id,
-    player.playerId,
-    player.player_id,
-    player.final_cricinfo_id,
-    player.cricinfo_id,
-    player.master_cricinfo_id,
-    player.master_id,
-    player.espn_id,
-    player.info?.final_cricinfo_id,
-    player.player_info?.final_cricinfo_id
-  ];
-
-  for (const possibleId of possibleIds) {
-    const key = String(possibleId ?? "").trim();
-    if (key && REAL_WORLD_STATS_BY_ID[key]) return REAL_WORLD_STATS_BY_ID[key];
-  }
-
-  const possibleNames = [
-    playerDisplay.name,
-    player.name,
-    player.fullName,
-    player.playerName,
-    player.player_name,
-    player.final_player_name,
-    player.final_short_name,
-    player.info?.final_player_name,
-    player.player_info?.final_player_name,
-    player.player_info?.final_short_name
-  ];
-
-  for (const possibleName of possibleNames) {
-    const key = normalizeStatsName(possibleName);
-    if (key && REAL_WORLD_STATS_BY_NAME.has(key)) return REAL_WORLD_STATS_BY_NAME.get(key);
-  }
-
-  return null;
 }
 
 function getField(player, possibleNames) {
@@ -1072,18 +924,6 @@ function getDisplayPlayer(player) {
   };
 }
 
-function getPlayerFullNameForPopup(player) {
-  return (
-    player?.fullName ||
-    player?.full_name ||
-    player?.final_player_name ||
-    player?.player_info?.final_player_name ||
-    player?.name ||
-    "-"
-  );
-}
-
-
 function escapeHTML(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -1171,12 +1011,11 @@ function getVisibleSectionsByRole(role) {
   return { playstyles: ["batting", "fielding"], attributes: ["batting", "fielding"] };
 }
 
-function renderTable(players, totalPlayers = players.length) {
-  playerCount.textContent = totalPlayers;
+function renderTable(players) {
+  playerCount.textContent = players.length;
 
-  if (totalPlayers === 0) {
-    playerTableBody.innerHTML = `<tr><td colspan="8">No players found.</td></tr>`;
-    updatePaginationControls(0);
+  if (players.length === 0) {
+    playerTableBody.innerHTML = `<tr><td colspan="10">No players found.</td></tr>`;
     return;
   }
 
@@ -1191,6 +1030,8 @@ function renderTable(players, totalPlayers = players.length) {
       <td>${escapeHTML(display.age)}</td>
       <td>${escapeHTML(display.nation)}</td>
       <td><span class="badge">${escapeHTML(display.role)}</span></td>
+      <td>${escapeHTML(display.hand)}</td>
+      <td>${escapeHTML(display.bowlingType)}</td>
       <td>${escapeHTML(display.style)}</td>
       <td title="${escapeHTML(display.batStyleTooltip)}"><span class="playstyle-pill ${display.batStyleClass}">${escapeHTML(display.batStyle)}</span></td>
       <td title="${escapeHTML(display.bowlStyleTooltip)}"><span class="playstyle-pill ${display.bowlStyleClass}">${escapeHTML(display.bowlStyle)}</span></td>
@@ -1200,117 +1041,8 @@ function renderTable(players, totalPlayers = players.length) {
     row.querySelector(".player-link").addEventListener("click", () => openPlayerModal(player));
     playerTableBody.appendChild(row);
   });
-
-  updatePaginationControls(totalPlayers);
 }
 
-function ensurePaginationControls() {
-  if (document.getElementById("databasePagination")) return;
-
-  const pagination = document.createElement("section");
-  pagination.className = "database-pagination";
-  pagination.id = "databasePagination";
-
-  pagination.innerHTML = `
-    <div class="pagination-left">
-      <span id="paginationInfo">Showing 0 players</span>
-    </div>
-
-    <div class="pagination-right">
-      <label>
-        Per page:
-        <select id="playersPerPageSelect">
-          <option value="25" selected>25</option>
-          <option value="50">50</option>
-        </select>
-      </label>
-
-      <button type="button" id="prevPageBtn">← Prev</button>
-      <span id="pageNumberText">Page 1</span>
-      <button type="button" id="nextPageBtn">Next →</button>
-    </div>
-  `;
-
-  const controls = document.querySelector(".controls");
-  const tableCard = document.querySelector(".table-card");
-
-  if (controls) {
-    controls.insertAdjacentElement("afterend", pagination);
-  } else if (tableCard) {
-    tableCard.insertAdjacentElement("beforebegin", pagination);
-  }
-
-  document.getElementById("playersPerPageSelect").addEventListener("change", (event) => {
-    playersPerPage = Number(event.target.value) || 25;
-    currentPage = 1;
-    renderCurrentPage();
-  });
-
-  document.getElementById("prevPageBtn").addEventListener("click", () => {
-    if (currentPage > 1) {
-      currentPage--;
-      renderCurrentPage();
-    }
-  });
-
-  document.getElementById("nextPageBtn").addEventListener("click", () => {
-    const totalPages = getTotalPages(currentSortedPlayers.length);
-
-    if (currentPage < totalPages) {
-      currentPage++;
-      renderCurrentPage();
-    }
-  });
-}
-
-function getTotalPages(totalPlayers) {
-  return Math.max(1, Math.ceil(totalPlayers / playersPerPage));
-}
-
-function renderCurrentPage() {
-  ensurePaginationControls();
-
-  const totalPlayers = currentSortedPlayers.length;
-  const totalPages = getTotalPages(totalPlayers);
-
-  if (currentPage > totalPages) currentPage = totalPages;
-  if (currentPage < 1) currentPage = 1;
-
-  const startIndex = (currentPage - 1) * playersPerPage;
-  const endIndex = startIndex + playersPerPage;
-  const pagePlayers = currentSortedPlayers.slice(startIndex, endIndex);
-
-  renderTable(pagePlayers, totalPlayers);
-}
-
-function updatePaginationControls(totalPlayers) {
-  ensurePaginationControls();
-
-  const totalPages = getTotalPages(totalPlayers);
-  const startNumber = totalPlayers === 0 ? 0 : (currentPage - 1) * playersPerPage + 1;
-  const endNumber = Math.min(currentPage * playersPerPage, totalPlayers);
-
-  const paginationInfo = document.getElementById("paginationInfo");
-  const pageNumberText = document.getElementById("pageNumberText");
-  const prevPageBtn = document.getElementById("prevPageBtn");
-  const nextPageBtn = document.getElementById("nextPageBtn");
-
-  if (paginationInfo) {
-    paginationInfo.textContent = `Showing ${startNumber}-${endNumber} of ${totalPlayers} players`;
-  }
-
-  if (pageNumberText) {
-    pageNumberText.textContent = `Page ${currentPage} of ${totalPages}`;
-  }
-
-  if (prevPageBtn) {
-    prevPageBtn.disabled = currentPage <= 1 || totalPlayers === 0;
-  }
-
-  if (nextPageBtn) {
-    nextPageBtn.disabled = currentPage >= totalPages || totalPlayers === 0;
-  }
-}
 function renderPlaystyleRows(playstyles) {
   if (!playstyles || playstyles.length === 0) return `<p>-</p>`;
 
@@ -1335,190 +1067,8 @@ function renderAttributeGroup(title, attributes, className) {
   return `<div class="attribute-group ${className}"><h4>${escapeHTML(title)}</h4><div class="attribute-list">${items}</div></div>`;
 }
 
-function statFieldLabel(field) {
-  const labels = {
-    Matches: "Mat",
-    Innings: "Inns",
-    NotOuts: "NO",
-    Runs: "Runs",
-    HighScore: "HS",
-    Average: "Avg",
-    BallsFaced: "BF",
-    StrikeRate: "SR",
-    Hundreds: "100s",
-    Fifties: "50s",
-    Ducks: "0s",
-    FoursTotal: "4s",
-    SixesTotal: "6s",
-    Overs: "Overs",
-    MaidensTotal: "Mdn",
-    Wickets: "Wkts",
-    Economy: "Econ",
-    BestBowlingInnings: "BBI",
-    FourWickets: "4W",
-    FiveWickets: "5W",
-    TenWickets: "10W"
-  };
-
-  return labels[field] || field;
-}
-
-function formatStatsValue(value) {
-  if (value === undefined || value === null || value === "") return "-";
-  return String(value);
-}
-
-function ballsToOversDisplay(ballsValue) {
-  const totalBalls = Number(ballsValue);
-
-  if (!Number.isFinite(totalBalls) || totalBalls <= 0) {
-    return "-";
-  }
-
-  const overs = Math.floor(totalBalls / 6);
-  const balls = totalBalls % 6;
-
-  return `${overs}.${balls}`;
-}
-
-function getStatsDisplayValue(formatStats, field) {
-  if (!formatStats || typeof formatStats !== "object") {
-    return "-";
-  }
-
-  if (field === "Overs") {
-    if (
-      formatStats.Overs !== undefined &&
-      formatStats.Overs !== null &&
-      formatStats.Overs !== ""
-    ) {
-      return formatStats.Overs;
-    }
-
-    return ballsToOversDisplay(formatStats.Balls);
-  }
-
-  const value = formatStats[field];
-
-  if (value === undefined || value === null || value === "") {
-    return "-";
-  }
-
-  return value;
-}
-
-function renderStatsTable(title, sectionData, preferredFields) {
-  const formats = ["test", "odi", "t20"];
-  const fields = preferredFields;
-
-  return `
-    <div class="real-stats-card">
-      <h4>${escapeHTML(title)}</h4>
-
-      <div class="real-stats-table-wrap">
-        <table class="real-stats-table">
-          <thead>
-            <tr>
-              <th>Fmt</th>
-              ${fields.map(field => `
-                <th title="${escapeHTML(formatLabel(field))}">
-                  ${escapeHTML(statFieldLabel(field))}
-                </th>
-              `).join("")}
-            </tr>
-          </thead>
-
-          <tbody>
-            ${formats.map(format => {
-              const formatStats = sectionData?.[format] || {};
-
-              return `
-                <tr>
-                  <td><strong>${escapeHTML(format.toUpperCase())}</strong></td>
-                  ${fields.map(field => `
-                    <td>${escapeHTML(formatStatsValue(getStatsDisplayValue(formatStats, field)))}</td>
-                  `).join("")}
-                </tr>
-              `;
-            }).join("")}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-}
-
-function renderRealWorldStatsPanel(player) {
-  const display = getDisplayPlayer(player);
-  const stats = findRealWorldStats(player, display);
-
-  if (!stats) {
-    return `
-      <section class="real-stats-section hidden" id="realWorldStatsPanel">
-        <div class="real-stats-empty">
-          No real-world stats found yet. Make sure this player has a matching ID or name in <strong>data/stats.json</strong>.
-        </div>
-      </section>
-    `;
-  }
-
-  const info = stats.player_info || {};
-
-  const battingFields = [
-    "Matches",
-    "Innings",
-    "NotOuts",
-    "Runs",
-    "HighScore",
-    "Average",
-    "BallsFaced",
-    "StrikeRate",
-    "Hundreds",
-    "Fifties",
-    "Ducks",
-    "FoursTotal",
-    "SixesTotal"
-  ];
-
-  const bowlingFields = [
-    "Matches",
-    "Innings",
-    "Overs",
-    "Runs",
-    "MaidensTotal",
-    "Wickets",
-    "Average",
-    "Economy",
-    "StrikeRate",
-    "BestBowlingInnings",
-    "FourWickets",
-    "FiveWickets",
-    "TenWickets"
-  ];
-
-  return `
-    <section class="real-stats-section hidden" id="realWorldStatsPanel">
-      <div class="real-stats-head">
-        <div>
-          <h3>Real World Stats</h3>
-          <p>${escapeHTML(info.final_player_name || display.name)}${info.overall_career_status ? ` • ${escapeHTML(info.overall_career_status)}` : ""}</p>
-        </div>
-        <span class="real-stats-id">Stats ID: ${escapeHTML(player.id)}</span>
-      </div>
-
-      <div class="real-stats-grid">
-        ${renderStatsTable("Batting", stats.batting, battingFields)}
-        ${renderStatsTable("Bowling", stats.bowling, bowlingFields)}
-      </div>
-    </section>
-  `;
-}
-
 function openPlayerModal(player) {
   const display = getDisplayPlayer(player);
-  const fullName = getPlayerFullNameForPopup(player);
-  const shouldShowFullName = fullName && fullName !== "-" && fullName !== display.name;
-
   const visibleSections = getVisibleSectionsByRole(display.role);
   const overallNumber = getPlayerOverall(player);
 
@@ -1531,55 +1081,22 @@ function openPlayerModal(player) {
   const fieldingAttributes = player.attributes?.fielding;
 
   let profileCardsHTML = "";
-
-  if (visibleSections.playstyles.includes("batting")) {
-    profileCardsHTML += renderProfileCard("Top Batting Playstyles", battingPlaystyles, "batting");
-  }
-
-  if (visibleSections.playstyles.includes("bowling")) {
-    profileCardsHTML += renderProfileCard("Top Bowling Playstyles", bowlingPlaystyles, "bowling");
-  }
-
-  if (visibleSections.playstyles.includes("fielding")) {
-    profileCardsHTML += renderProfileCard("Top Fielding Playstyles", fieldingPlaystyles, "fielding");
-  }
+  if (visibleSections.playstyles.includes("batting")) profileCardsHTML += renderProfileCard("Top Batting Playstyles", battingPlaystyles, "batting");
+  if (visibleSections.playstyles.includes("bowling")) profileCardsHTML += renderProfileCard("Top Bowling Playstyles", bowlingPlaystyles, "bowling");
+  if (visibleSections.playstyles.includes("fielding")) profileCardsHTML += renderProfileCard("Top Fielding Playstyles", fieldingPlaystyles, "fielding");
 
   let attributesHTML = "";
-
-  if (visibleSections.attributes.includes("batting")) {
-    attributesHTML += renderAttributeGroup("Batting", battingAttributes, "batting");
-  }
-
-  if (visibleSections.attributes.includes("bowling")) {
-    attributesHTML += renderAttributeGroup("Bowling", bowlingAttributes, "bowling");
-  }
-
-  if (visibleSections.attributes.includes("fielding")) {
-    attributesHTML += renderAttributeGroup("Fielding", fieldingAttributes, "fielding");
-  }
+  if (visibleSections.attributes.includes("batting")) attributesHTML += renderAttributeGroup("Batting", battingAttributes, "batting");
+  if (visibleSections.attributes.includes("bowling")) attributesHTML += renderAttributeGroup("Bowling", bowlingAttributes, "bowling");
+  if (visibleSections.attributes.includes("fielding")) attributesHTML += renderAttributeGroup("Fielding", fieldingAttributes, "fielding");
 
   modalContent.innerHTML = `
     <div class="player-profile-header">
       <div class="player-profile-title-row">
-        <div class="player-profile-name-block">
-          <h2>${escapeHTML(display.name)}</h2>
-
-          ${
-            shouldShowFullName
-              ? `<p class="profile-full-name">Full name: ${escapeHTML(fullName)}</p>`
-              : ""
-          }
-        </div>
-
-        <div class="player-profile-actions">
-          <button class="db-stats-toggle-btn" id="dbStatsToggleBtn" type="button">
-            Show Stats
-          </button>
-
-          <button class="db-edit-player-btn" onclick="openPlayerEditor('${escapeHTML(player.id)}')">
-            Edit Player
-          </button>
-        </div>
+        <h2>${escapeHTML(display.name)}</h2>
+        <button class="db-edit-player-btn" onclick="openPlayerEditor('${escapeHTML(player.id)}')">
+          Edit Player
+        </button>
       </div>
 
       <div class="player-meta">
@@ -1592,61 +1109,17 @@ function openPlayerModal(player) {
       </div>
     </div>
 
-    <div class="profile-grid" id="profileGridSection">
-      ${profileCardsHTML}
-    </div>
+    <div class="profile-grid">${profileCardsHTML}</div>
 
-    <div class="attributes-section" id="attributesSection">
+    <div class="attributes-section">
       <h3>Attributes</h3>
-      <div class="attributes-grid">
-        ${attributesHTML}
-      </div>
+      <div class="attributes-grid">${attributesHTML}</div>
     </div>
-
-    ${renderRealWorldStatsPanel(player)}
   `;
-
-  const toggleButton = document.getElementById("dbStatsToggleBtn");
-
-  if (toggleButton) {
-    toggleButton.addEventListener("click", () => {
-      const profileGridSection = document.getElementById("profileGridSection");
-      const attributesSection = document.getElementById("attributesSection");
-      const liveStatsPanel = document.getElementById("realWorldStatsPanel");
-
-      if (!liveStatsPanel) return;
-
-      const showingStats = !liveStatsPanel.classList.contains("hidden");
-
-      liveStatsPanel.classList.toggle("hidden", showingStats);
-      profileGridSection?.classList.toggle("hidden", !showingStats);
-      attributesSection?.classList.toggle("hidden", !showingStats);
-
-      toggleButton.classList.toggle("active", !showingStats);
-      toggleButton.textContent = showingStats ? "Show Stats" : "Show Attributes";
-    });
-  }
-
-  loadRealWorldStats().then(() => {
-    const panel = document.getElementById("realWorldStatsPanel");
-
-    if (!panel || playerModal.classList.contains("hidden")) {
-      return;
-    }
-
-    const wasHidden = panel.classList.contains("hidden");
-
-    panel.outerHTML = renderRealWorldStatsPanel(player);
-
-    const updatedPanel = document.getElementById("realWorldStatsPanel");
-
-    if (updatedPanel && !wasHidden) {
-      updatedPanel.classList.remove("hidden");
-    }
-  });
 
   playerModal.classList.remove("hidden");
 }
+
 function closePlayerModal() {
   playerModal.classList.add("hidden");
 }
@@ -2387,7 +1860,6 @@ function applyFilters() {
     return matchesSearch && matchesNation && matchesRole;
   });
 
-  currentPage = 1;
   applySortAndRender();
 }
 
@@ -2441,8 +1913,8 @@ function updateSortButtons() {
 }
 
 function applySortAndRender() {
-  currentSortedPlayers = sortPlayers(filteredPlayers);
-  renderCurrentPage();
+  const sortedPlayers = sortPlayers(filteredPlayers);
+  renderTable(sortedPlayers);
   updateSortButtons();
 }
 
@@ -2457,7 +1929,6 @@ document.querySelectorAll(".column-sort-btn").forEach((button) => {
       currentSort.direction = "asc";
     }
 
-    currentPage = 1;
     applySortAndRender();
   });
 });
@@ -2472,9 +1943,9 @@ resetBtn.addEventListener("click", () => {
   roleFilter.value = "all";
   currentSort.key = null;
   currentSort.direction = "asc";
-  currentPage = 1;
   filteredPlayers = [...allPlayers];
-  applySortAndRender();
+  renderTable(filteredPlayers);
+  updateSortButtons();
 });
 
 closeModalBtn.addEventListener("click", closePlayerModal);

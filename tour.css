@@ -2471,25 +2471,3 @@ body.main-page .series-create-card button::after {
     linear-gradient(135deg, #fde047, #fb923c, #ea580c) !important;
   color: #120600 !important;
 }
-
-.result-text {
-  color: #7ee787 !important;
-  font-weight: 1000;
-}
-
-/* White team logo pill/background */
-.logo-frame,
-.team-badge,
-.team-badge.away {
-  background: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.85) !important;
-  box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.22),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.06) !important;
-}
-
-.logo-frame img,
-.team-badge-logo {
-  background: transparent !important;
-  object-fit: contain;
-}

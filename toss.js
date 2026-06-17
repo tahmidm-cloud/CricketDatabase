@@ -82,20 +82,6 @@ function safeDisplay(id, value) {
   }
 }
 
-function showContinueInTossControls() {
-  safeDisplay("headsBtn", "none");
-  safeDisplay("tailsBtn", "none");
-  safeDisplay("flipBtn", "none");
-  safeDisplay("continueBtn", "block");
-}
-
-function showTossCallControls() {
-  safeDisplay("headsBtn", "inline-flex");
-  safeDisplay("tailsBtn", "inline-flex");
-  safeDisplay("flipBtn", "block");
-  safeDisplay("continueBtn", "none");
-}
-
 function safeClass(id, className, shouldAdd) {
   const element = document.getElementById(id);
 
@@ -975,7 +961,7 @@ function doToss() {
         `${matchData.teamA.name} called ${userCall}, but it landed ${outcome}. ${matchData.teamB.name} chooses to ${computerDecision.toLowerCase()} first.`
       );
 
-      showContinueInTossControls();
+      safeDisplay("continueBtn", "block");
     }
 
     isFlipping = false;
@@ -1030,7 +1016,7 @@ function chooseDecision(decision) {
     button.disabled = true;
   });
 
-  showContinueInTossControls();
+  safeDisplay("continueBtn", "block");
   flashResult();
 }
 
@@ -1054,7 +1040,6 @@ function resetTossUI() {
   safeDisabled("headsBtn", false);
   safeDisabled("tailsBtn", false);
   safeDisabled("flipBtn", false);
-  showTossCallControls();
 
   const flipBtn = document.getElementById("flipBtn");
 
@@ -1072,6 +1057,8 @@ function resetTossUI() {
       button.disabled = false;
     });
   }
+
+  safeDisplay("continueBtn", "none");
 
   safeText("resultTitle", "Choose Heads or Tails");
   safeText(

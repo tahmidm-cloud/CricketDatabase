@@ -1,8 +1,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#061018" />
   <title>Match Toss</title>
-  <link rel="stylesheet" href="toss.css?v=17">
+  <link rel="stylesheet" href="toss.css?v=15">
+  <link rel="stylesheet" href="mobile-iphone15pro.css?v=1" />
 </head>
 <body>
   <div class="stadium-lights">
@@ -81,22 +85,11 @@
         </div>
 
         <div>
-          <div class="choice-row" id="choiceRow">
+          <div class="choice-row">
             <button id="headsBtn" onclick="selectCall('Heads')" class="active">Heads</button>
             <button id="tailsBtn" onclick="selectCall('Tails')">Tails</button>
           </div>
-
           <button class="toss-btn" id="flipBtn" onclick="doToss()">Flip Toss</button>
-
-          <button
-            class="toss-btn continue-btn"
-            id="continueBtn"
-            onclick="goToMatchCenter()"
-            style="display: none;"
-          >
-            Continue to Match Center
-          </button>
-
           <div class="decision-row" id="decisionRow">
             <button onclick="chooseDecision('Bat')">Bat First</button>
             <button onclick="chooseDecision('Bowl')">Bowl First</button>
@@ -138,13 +131,16 @@
             </div>
         
         </div>
+        
+        <button class="toss-btn continue-btn" id="continueBtn" onclick="goToMatchCenter()">Continue to Match Center</button>
 
       </section>
     </main>
 
 
   </div>
-  <script src="toss.js?v=17"></script>
+  <script src="toss.js?v=15"></script>
 
 
+  <script src="mobile-viewport.js?v=1"></script>
 </body></html>

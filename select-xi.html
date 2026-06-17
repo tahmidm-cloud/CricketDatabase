@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#061018" />
   <title>Select XI</title>
 
   <style>
@@ -1031,6 +1034,7 @@
     background: rgba(246, 196, 83, 0.55) !important;
     }
     </style>
+  <link rel="stylesheet" href="mobile-iphone15pro.css?v=1" />
 </head>
 
 <body>
@@ -1038,9 +1042,7 @@
     <header class="xi-topbar-new">
       <div class="xi-header-left">
         <button class="back-btn" onclick="goBackToSummary()">← Tour Summary</button>
-        <button class="back-btn" onclick="testAutoPickCaptainOnly()">Test Auto Captain</button> 
         <button class="back-btn" onclick="autoPickBestXI()">Auto Pick XI</button>
-        <button class="back-btn" onclick="testAutoPickComputerCaptainOnly()">Test Computer Captain</button>
       </div>
 
       <div class="xi-header-center">
@@ -1211,79 +1213,36 @@
         return bat * 5 + field;
     }
 
-    function safeCaptainNumber(value, fallback = 0) {
-    const numberValue = Number(value);
-    return Number.isFinite(numberValue) ? numberValue : fallback;
-}
-
-    function getCaptainAttribute(player, key, fallback = 0) {
-        return safeCaptainNumber(
-            player?.attributes?.mental?.[key] ??
-            player?.mental?.[key] ??
-            player?.[key],
-            fallback
-        );
-    }
-
     function getLeadership(player) {
-        return getCaptainAttribute(player, "leadership", 0);
+        return Number(player?.attributes?.mental?.leadership) || 0;
     }
 
     function getTemperament(player) {
-        return getCaptainAttribute(player, "temperament", 0);
+        return Number(player?.attributes?.mental?.temperament) || 0;
     }
 
     function getJudgement(player) {
-        return getCaptainAttribute(player, "judgement", 0);
-    }
+        }
 
     function getCaptainScore(player) {
-        const leadership = getLeadership(player);
-        const temperament = getTemperament(player);
-        const judgement = getJudgement(player);
-        const playerScore = safeCaptainNumber(getPlayerScore(player), 0);
-
-        const role = String(getRoleGroup(player) || "").toLowerCase();
-
-        let roleBonus = 0;
-
-        if (role.includes("all-rounder") || role.includes("all rounder")) {
-            roleBonus += 4;
-        }
-
-        if (role.includes("batsman") || role.includes("batter")) {
-            roleBonus += 2;
-        }
-
-        if (role.includes("wicket")) {
-            roleBonus += 1;
-        }
-
         return (
-            leadership * 4 +
-            temperament * 1.5 +
-            judgement * 1.5 +
-            playerScore * 0.25 +
-            roleBonus
+            getLeadership(player) * 5 +
+            getTemperament(player) * 2 +
+            getJudgement(player) * 2 +
+            getPlayerScore(player) * 0.15
         );
     }
 
     function pickDefaultCaptain(players) {
-        if (!Array.isArray(players) || players.length === 0) {
-            return null;
-        }
+        const list = Array.isArray(players) ? players : [];
 
-        return [...players].sort((a, b) => {
-            const scoreDiff = getCaptainScore(b) - getCaptainScore(a);
+        if (!list.length) return null;
 
-            if (scoreDiff !== 0) {
-                return scoreDiff;
-            }
-
-            return safeCaptainNumber(getPlayerScore(b), 0) - safeCaptainNumber(getPlayerScore(a), 0);
+        return [...list].sort((a, b) => {
+            return getCaptainScore(b) - getCaptainScore(a);
         })[0];
     }
-    
+
     function addBest(result, used, pool, amount, scoreFunction) {
         const ranked = pool
         .filter(player => !used.has(getPlayerKey(player)))
@@ -1888,10 +1847,6 @@
             return;
         }
 
-        const selectedComputerXI = pickDefaultXI(latestComputerSquad);
-        const computerCaptain = pickDefaultCaptain(selectedComputerXI);
-        const computerCaptainPlayerId = computerCaptain ? getPlayerKey(computerCaptain) : null;
-
         currentMatch = {
             ...(freshCurrentMatch || currentMatch),
 
@@ -1904,18 +1859,9 @@
             selectedUserXI: selectedXI,
             userBench: benchPlayers,
 
-            selectedComputerXI: selectedComputerXI,
-
-            computerCaptainPlayerId: computerCaptainPlayerId,
-            computerCaptain: computerCaptain,
+            selectedComputerXI: pickDefaultXI(latestComputerSquad),
 
             battingOrder: selectedXI.map((player, index) => ({
-                position: index + 1,
-                playerId: getPlayerKey(player),
-                name: getPlayerName(player)
-            })),
-
-            computerBattingOrder: selectedComputerXI.map((player, index) => ({
                 position: index + 1,
                 playerId: getPlayerKey(player),
                 name: getPlayerName(player)
@@ -1949,161 +1895,6 @@
 
     let xiPageLoadedOnce = false;
 
-    function testAutoPickCaptainOnly() {
-        if (!currentMatch) {
-            currentMatch = getCurrentTourMatch();
-        }
-
-        if (!currentMatch) {
-            alert("No current match loaded.");
-            return;
-        }
-
-        let testXI = [];
-
-        if (Array.isArray(selectedXI) && selectedXI.length > 0) {
-            testXI = selectedXI;
-        } else if (Array.isArray(currentMatch.selectedUserXI) && currentMatch.selectedUserXI.length > 0) {
-            testXI = currentMatch.selectedUserXI;
-        } else if (Array.isArray(currentMatch.userSquad) && currentMatch.userSquad.length >= 11) {
-            testXI = pickDefaultXI(currentMatch.userSquad);
-            selectedXI = testXI;
-
-            const selectedKeys = new Set(selectedXI.map(getPlayerKey));
-            benchPlayers = currentMatch.userSquad.filter(player => !selectedKeys.has(getPlayerKey(player)));
-        }
-
-        if (!testXI.length) {
-            alert("No XI found to test captain picker.");
-            return;
-        }
-
-        const ranked = [...testXI]
-            .map(player => {
-                return {
-                    player,
-                    name: getPlayerName(player),
-                    role: getRoleGroup(player),
-                    leadership: getLeadership(player),
-                    temperament: getTemperament(player),
-                    judgement: getJudgement(player),
-                    captainScore: Math.round(safeCaptainNumber(getCaptainScore(player), 0) * 100) / 100
-                };
-            })
-            .sort((a, b) => b.captainScore - a.captainScore);
-
-        const picked = ranked[0]?.player || null;
-
-        if (!picked) {
-            alert("Captain picker failed.");
-            return;
-        }
-
-        captainPlayerId = getPlayerKey(picked);
-
-        currentMatch.captainPlayerId = captainPlayerId;
-        currentMatch.captain = picked;
-
-        saveDraftXI();
-        renderXIPage();
-
-        console.table(
-            ranked.map((row, index) => ({
-                rank: index + 1,
-                name: row.name,
-                role: row.role,
-                leadership: row.leadership,
-                temperament: row.temperament,
-                judgement: row.judgement,
-                playerScore: row.playerScore,
-                captainScore: row.captainScore
-            }))
-        );
-
-        alert(
-            "AUTO CAPTAIN TEST\n\n" +
-            "Picked: " + getPlayerName(picked) + "\n" +
-            "Captain Score: " + ranked[0].captainScore + "\n" +
-            "Leadership: " + ranked[0].leadership + "\n" +
-            "Temperament: " + ranked[0].temperament + "\n" +
-            "Judgement: " + ranked[0].judgement + "\n\n" +
-            "Full ranking printed in console."
-        );
-    }
-
-    function testAutoPickComputerCaptainOnly() {
-        if (!currentMatch) {
-            currentMatch = getCurrentTourMatch();
-        }
-
-        if (!currentMatch) {
-            alert("No current match loaded.");
-            return;
-        }
-
-        let computerXI = [];
-
-        if (Array.isArray(currentMatch.selectedComputerXI) && currentMatch.selectedComputerXI.length > 0) {
-            computerXI = currentMatch.selectedComputerXI;
-        } else if (Array.isArray(currentMatch.computerSquad) && currentMatch.computerSquad.length >= 11) {
-            computerXI = pickDefaultXI(currentMatch.computerSquad);
-            currentMatch.selectedComputerXI = computerXI;
-        }
-
-        if (!computerXI.length) {
-            alert("No computer XI found to test captain picker.");
-            return;
-        }
-
-        const ranked = [...computerXI]
-            .map(player => ({
-                player,
-                name: getPlayerName(player),
-                role: getRoleGroup(player),
-                leadership: getLeadership(player),
-                temperament: getTemperament(player),
-                judgement: getJudgement(player),
-                playerScore: Math.round(safeCaptainNumber(getPlayerScore(player), 0)),
-                captainScore: Math.round(safeCaptainNumber(getCaptainScore(player), 0) * 100) / 100
-            }))
-            .sort((a, b) => b.captainScore - a.captainScore);
-
-        const picked = ranked[0]?.player || null;
-
-        if (!picked) {
-            alert("Computer captain picker failed.");
-            return;
-        }
-
-        currentMatch.computerCaptainPlayerId = getPlayerKey(picked);
-        currentMatch.computerCaptain = picked;
-
-        localStorage.setItem("currentTourMatch", JSON.stringify(currentMatch));
-
-        console.table(
-            ranked.map((row, index) => ({
-                rank: index + 1,
-                name: row.name,
-                role: row.role,
-                leadership: row.leadership,
-                temperament: row.temperament,
-                judgement: row.judgement,
-                playerScore: row.playerScore,
-                captainScore: row.captainScore
-            }))
-        );
-
-        alert(
-            "AUTO COMPUTER CAPTAIN TEST\n\n" +
-            "Picked: " + getPlayerName(picked) + "\n" +
-            "Captain Score: " + ranked[0].captainScore + "\n" +
-            "Leadership: " + ranked[0].leadership + "\n" +
-            "Temperament: " + ranked[0].temperament + "\n" +
-            "Judgement: " + ranked[0].judgement + "\n\n" +
-            "Full ranking printed in console."
-        );
-    }
-
     document.addEventListener("DOMContentLoaded", () => {
     xiPageLoadedOnce = true;
     loadPage();
@@ -2116,5 +1907,6 @@
     });
 
     </script>
+  <script src="mobile-viewport.js?v=1"></script>
 </body>
 </html>

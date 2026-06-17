@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#061018" />
   <title>My Cricket Player Database</title>
-  <link rel="stylesheet" href="database.css?v=1010" />
+  <link rel="stylesheet" href="database.css?v=1005" />
+  <link rel="stylesheet" href="mobile-iphone15pro.css?v=1" />
 </head>
 <body>
   <div class="page">
@@ -46,6 +50,8 @@
             <th><button class="column-sort-btn" data-sort="age">Age <span class="sort-icon">↕</span></button></th>
             <th><button class="column-sort-btn" data-sort="nation">Nation <span class="sort-icon">↕</span></button></th>
             <th><button class="column-sort-btn" data-sort="role">Role <span class="sort-icon">↕</span></button></th>
+            <th><button class="column-sort-btn" data-sort="hand">Hand <span class="sort-icon">↕</span></button></th>
+            <th><button class="column-sort-btn" data-sort="bowlingType">Type <span class="sort-icon">↕</span></button></th>
             <th><button class="column-sort-btn" data-sort="style">Style <span class="sort-icon">↕</span></button></th>
             <th><button class="column-sort-btn" data-sort="batStyle">Bat Style <span class="sort-icon">↕</span></button></th>
             <th><button class="column-sort-btn" data-sort="bowlStyle">Bowl Style <span class="sort-icon">↕</span></button></th>
@@ -55,7 +61,7 @@
 
         <tbody id="playerTableBody">
           <tr>
-            <td colspan="8">Loading players...</td>
+            <td colspan="10">Loading players...</td>
           </tr>
         </tbody>
       </table>
@@ -69,6 +75,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=1010"></script>
+  <script src="app.js?v=1005"></script>
+  <script src="mobile-viewport.js?v=1"></script>
 </body>
 </html>
