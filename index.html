@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#061018" />
   <title>Cricket Tour Setup - JSON Ready</title>
   <link rel="stylesheet" href="tour.css?v=1049" />
-  <link rel="stylesheet" href="mobile-iphone15pro.css?v=1" />
+  <link rel="stylesheet" href="mobile-iphone15pro.css?v=8" />
 </head>
 <body class="app-loading main-page">
   <main class="page">
@@ -161,12 +161,13 @@
       </button>
 
       <pre id="computerSquadTestOut"></pre>
-      <div class="topline">
-        <div>
+      <div class="topline squad-mobile-header-row">
+        <div class="squad-title-wrap">
           <h2 id="formatSquadTitle">Select Format Squad</h2>
         </div>
 
-        <button class="secondary" onclick="showScreen('setup')">Back to Setup</button>
+        <button type="button" id="squadPanelToggle" class="squad-panel-toggle" onclick="toggleSquadSidePanel()" aria-expanded="true">Hide</button>
+        <button class="secondary squad-back-setup-btn" onclick="showScreen('setup')">Back to Setup</button>
       </div>
 
       <section class="panel">
@@ -314,6 +315,17 @@
   </main>
 
   <script src="tour.js?v=1049"></script>
-  <script src="mobile-viewport.js?v=1"></script>
+
+  <script>
+    function toggleSquadSidePanel() {
+      const hidden = document.body.classList.toggle("squad-side-hidden");
+      const btn = document.getElementById("squadPanelToggle");
+      if (btn) {
+        btn.textContent = hidden ? "Show" : "Hide";
+        btn.setAttribute("aria-expanded", String(!hidden));
+      }
+    }
+  </script>
+  <script src="mobile-viewport.js?v=2"></script>
 </body>
 </html>

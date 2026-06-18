@@ -1034,7 +1034,7 @@
     background: rgba(246, 196, 83, 0.55) !important;
     }
     </style>
-  <link rel="stylesheet" href="mobile-iphone15pro.css?v=1" />
+  <link rel="stylesheet" href="mobile-iphone15pro.css?v=5" />
 </head>
 
 <body>
@@ -1043,6 +1043,7 @@
       <div class="xi-header-left">
         <button class="back-btn" onclick="goBackToSummary()">← Tour Summary</button>
         <button class="back-btn" onclick="autoPickBestXI()">Auto Pick XI</button>
+        <button class="back-btn bench-toggle-btn" onclick="toggleBenchPanel()">Hide Bench</button>
       </div>
 
       <div class="xi-header-center">
@@ -1907,6 +1908,14 @@
     });
 
     </script>
-  <script src="mobile-viewport.js?v=1"></script>
+  <script src="mobile-viewport.js?v=2">
+    function toggleBenchPanel() {
+        const page = document.querySelector('.select-xi-page');
+        if (!page) return;
+        const hidden = page.classList.toggle('bench-hidden');
+        const btn = document.querySelector('.bench-toggle-btn');
+        if (btn) btn.textContent = hidden ? 'Show Bench' : 'Hide Bench';
+    }
+</script>
 </body>
 </html>

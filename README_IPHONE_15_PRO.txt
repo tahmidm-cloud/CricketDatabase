@@ -34,3 +34,10 @@ How to test locally:
 5. Press Reset Match once after replacing match-center.html.
 
 Do not delete mobile-iphone15pro.css or mobile-viewport.js; all pages link to them.
+
+
+V25.2 fixes:
+- Tour summary page top/header compressed on iPhone.
+- Format squad page has a Hide rules / filters panel button.
+- Select XI page has a Hide Bench button.
+- Toss page now allows vertical scrolling and uses a compact iPhone layout.
