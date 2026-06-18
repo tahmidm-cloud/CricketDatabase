@@ -721,9 +721,12 @@
         </article>
 
         <article class="card scroll-card">
-          <div class="section-title">
+          <div class="section-title scorecard-title-row">
             <h3>Batting Card</h3>
-            <span id="battingCardStatus">Live</span>
+            <div class="scorecard-title-actions">
+              <span id="battingCardStatus">Live</span>
+              <button id="toggleScorecardBtn" class="scorecard-hide-btn" type="button" onclick="toggleMobileScorecard()">Hide</button>
+            </div>
           </div>
 
           <table class="score-table">
@@ -4203,6 +4206,24 @@ function playNextBall() {
     }
 
     window.addEventListener("pageshow", renderMatchCenter);
+
+    function toggleMobileScorecard() {
+      const table = document.querySelector('.left-stack .score-table');
+      const debug = document.querySelector('.left-stack .debug-box');
+      const button = document.getElementById('toggleScorecardBtn');
+      const shouldHide = !document.body.classList.contains('scorecard-collapsed-mobile');
+
+      document.body.classList.toggle('scorecard-collapsed-mobile', shouldHide);
+
+      if (button) {
+        button.textContent = shouldHide ? 'Show' : 'Hide';
+        button.setAttribute('aria-expanded', String(!shouldHide));
+      }
+
+      if (table) table.hidden = shouldHide;
+      if (debug) debug.hidden = shouldHide;
+    }
+
   </script>
   <script src="mobile-viewport.js?v=3"></script>
 </body>

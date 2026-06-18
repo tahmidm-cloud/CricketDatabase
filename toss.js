@@ -82,6 +82,18 @@ function safeDisplay(id, value) {
   }
 }
 
+
+function setTossActionState(state) {
+  const actions = document.getElementById("tossActions");
+
+  if (!actions) {
+    return;
+  }
+
+  actions.classList.toggle("is-user-decision", state === "user-decision");
+  actions.classList.toggle("is-complete", state === "complete");
+}
+
 function safeClass(id, className, shouldAdd) {
   const element = document.getElementById(id);
 
@@ -905,6 +917,7 @@ function doToss() {
   }
 
   safeDisplay("continueBtn", "none");
+  setTossActionState("default");
 
   const outcome = Math.random() < 0.5 ? "Heads" : "Tails";
 
@@ -951,6 +964,8 @@ function doToss() {
       if (decisionRow) {
         decisionRow.classList.add("show");
       }
+
+      setTossActionState("user-decision");
     } else {
       const computerDecision = getComputerDecision();
 
@@ -961,6 +976,7 @@ function doToss() {
         `${matchData.teamA.name} called ${userCall}, but it landed ${outcome}. ${matchData.teamB.name} chooses to ${computerDecision.toLowerCase()} first.`
       );
 
+      setTossActionState("complete");
       safeDisplay("continueBtn", "block");
     }
 
@@ -1016,6 +1032,7 @@ function chooseDecision(decision) {
     button.disabled = true;
   });
 
+  setTossActionState("complete");
   safeDisplay("continueBtn", "block");
   flashResult();
 }
@@ -1059,6 +1076,7 @@ function resetTossUI() {
   }
 
   safeDisplay("continueBtn", "none");
+  setTossActionState("default");
 
   safeText("resultTitle", "Choose Heads or Tails");
   safeText(

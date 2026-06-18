@@ -1837,23 +1837,57 @@ function getMatchActionButton(match, nextPlayableMatchIndex) {
 }
 
 
+function getSavedMatchResult(match) {
+  const matchIndex = String(match?.matchIndex ?? "");
+
+  if (!matchIndex) {
+    return null;
+  }
+
+  const savedResult = tourProgress?.matchResults?.[matchIndex];
+
+  if (savedResult) {
+    return savedResult;
+  }
+
+  try {
+    const currentMatch = JSON.parse(localStorage.getItem("currentTourMatch") || "null");
+
+    if (Number(currentMatch?.matchIndex) === Number(match.matchIndex) && currentMatch?.result) {
+      return currentMatch.result;
+    }
+  } catch (error) {
+    console.warn("Could not read current match result:", error);
+  }
+
+  return null;
+}
+
 function renderScheduleMatch(match, nextPlayableMatchIndex) {
   const formatClass = match.format.toLowerCase();
   const isCompleted = tourProgress.completedMatchIndexes.includes(match.matchIndex);
   const isPlayable = match.matchIndex === nextPlayableMatchIndex && !isCompleted;
+  const savedResult = getSavedMatchResult(match);
+  const hasResult = Boolean(savedResult?.resultText);
 
   const buttonHTML = getMatchActionButton(match, nextPlayableMatchIndex);
+  const primaryTimeText = hasResult
+    ? savedResult.resultText
+    : `${match.localTime} (${match.localNote})`;
+  const secondaryTimeText = hasResult
+    ? ""
+    : `${match.gmtTime} GMT / LOCAL`;
 
   return `
-    <div class="schedule-match-card compact-match-card">
+    <div class="schedule-match-card compact-match-card ${hasResult ? "has-match-result result-only-card" : ""}">
       <div class="match-main-info">
         <div class="match-title">${esc(match.title)}</div>
         <div class="match-venue">${esc(match.venue)}</div>
       </div>
 
-      <div class="match-time-info">
-        <div class="match-local-time">${esc(match.localTime)} <span>(${esc(match.localNote)})</span></div>
-        <div class="match-gmt-time">${esc(match.gmtTime)} GMT / LOCAL</div>
+      <div class="match-time-info ${hasResult ? "result-only-time" : ""}">
+        <div class="match-local-time ${hasResult ? "match-result-line large-result-line" : ""}">${esc(primaryTimeText)}</div>
+        ${secondaryTimeText ? `<div class="match-gmt-time">${esc(secondaryTimeText)}</div>` : ""}
       </div>
 
       <div class="match-format-pill ${esc(formatClass)}">

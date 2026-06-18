@@ -2471,3 +2471,69 @@ body.main-page .series-create-card button::after {
     linear-gradient(135deg, #fde047, #fb923c, #ea580c) !important;
   color: #120600 !important;
 }
+
+/* Match result replaces the match time after a completed match. */
+.schedule-match-card.has-match-result .match-time-info {
+  border-color: rgba(126, 231, 135, 0.35);
+  background: rgba(126, 231, 135, 0.08);
+}
+
+.schedule-match-card.has-match-result .match-result-line {
+  color: var(--accent);
+  font-weight: 950;
+}
+
+.schedule-match-card.has-match-result .match-score-line {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+
+/* =========================================================
+   Completed match card: show only large result in time box
+   Example: India won by 6 wickets
+========================================================= */
+.compact-match-card.has-match-result .match-time-info,
+.compact-match-card.has-match-result .result-only-time {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 34px !important;
+  text-align: center !important;
+  padding-top: 6px !important;
+  padding-bottom: 6px !important;
+}
+
+.compact-match-card.has-match-result .large-result-line,
+.compact-match-card.has-match-result .match-result-line {
+  font-size: clamp(14px, 1.25vw, 18px) !important;
+  line-height: 1.12 !important;
+  font-weight: 950 !important;
+  color: var(--accent) !important;
+  letter-spacing: -0.025em !important;
+  white-space: normal !important;
+}
+
+.compact-match-card.has-match-result .match-score-line,
+.compact-match-card.has-match-result .match-gmt-time {
+  display: none !important;
+}
+
+@media (max-width: 480px) {
+  .compact-match-card.has-match-result .match-time-info,
+  .compact-match-card.has-match-result .result-only-time {
+    min-height: 32px !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+
+  .compact-match-card.has-match-result .large-result-line,
+  .compact-match-card.has-match-result .match-result-line {
+    font-size: 14px !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.015em !important;
+  }
+}

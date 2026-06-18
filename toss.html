@@ -7,8 +7,48 @@
   <title>Match Toss</title>
   <link rel="stylesheet" href="toss.css?v=15">
   <link rel="stylesheet" href="mobile-iphone15pro.css?v=6" />
+
+  <style id="toss-choice-state-layout">
+    /* Toss action states: default = Heads/Tails + Flip; user wins = Bat/Bowl; completed = Continue */
+    body.toss-page #continueBtn,
+    body.toss-page #decisionRow {
+      display: none !important;
+    }
+
+    body.toss-page .toss-actions {
+      display: grid;
+      gap: 10px;
+      width: 100%;
+    }
+
+    body.toss-page .toss-actions.is-user-decision .choice-row,
+    body.toss-page .toss-actions.is-user-decision #flipBtn,
+    body.toss-page .toss-actions.is-user-decision #continueBtn {
+      display: none !important;
+    }
+
+    body.toss-page .toss-actions.is-user-decision #decisionRow,
+    body.toss-page .toss-actions.is-user-decision #decisionRow.show {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 0;
+    }
+
+    body.toss-page .toss-actions.is-complete .choice-row,
+    body.toss-page .toss-actions.is-complete #flipBtn,
+    body.toss-page .toss-actions.is-complete #decisionRow {
+      display: none !important;
+    }
+
+    body.toss-page .toss-actions.is-complete #continueBtn {
+      display: block !important;
+      width: 100%;
+      margin: 0;
+    }
+  </style>
 </head>
-<body>
+<body class="toss-page">
   <div class="stadium-lights">
     <div class="beam left"></div>
     <div class="beam center"></div>
@@ -84,7 +124,7 @@
           <canvas id="coinCanvas" width="325" height="325" aria-label="Animated cricket toss coin"></canvas>
         </div>
 
-        <div>
+        <div class="toss-actions" id="tossActions">
           <div class="choice-row">
             <button id="headsBtn" onclick="selectCall('Heads')" class="active">Heads</button>
             <button id="tailsBtn" onclick="selectCall('Tails')">Tails</button>
@@ -94,6 +134,7 @@
             <button onclick="chooseDecision('Bat')">Bat First</button>
             <button onclick="chooseDecision('Bowl')">Bowl First</button>
           </div>
+          <button class="toss-btn continue-btn" id="continueBtn" onclick="goToMatchCenter()">Continue to Match Center</button>
           <div class="result-box flash-result" id="resultBox" style="margin-top: 10px;">
             <h3 id="resultTitle">Choose Heads or Tails</h3>
             <p id="resultText">Pick your toss call, then flip the coin.</p>
@@ -132,8 +173,6 @@
         
         </div>
         
-        <button class="toss-btn continue-btn" id="continueBtn" onclick="goToMatchCenter()">Continue to Match Center</button>
-
       </section>
     </main>
 
