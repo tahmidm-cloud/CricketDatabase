@@ -1,7 +1,9 @@
-<html lang="en"><head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#030712">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#030712" />
   <title>T20 Skill Match Center</title>
   <style>
     :root {
@@ -644,18 +646,18 @@
 
       <div class="teams-vs">
         <div class="team-pill home">
-          <div class="badge" id="teamABadge">SX</div>
+          <div class="badge" id="teamABadge">A</div>
           <div>
-            <strong id="teamAName">Skill XI</strong>
-            <span id="teamASub">Imran Shah</span>
+            <strong id="teamAName">Team A</strong>
+            <span id="teamASub">Captain</span>
           </div>
         </div>
         <span class="vs-label">vs</span>
         <div class="team-pill away">
-          <div class="badge" id="teamBBadge">AX</div>
+          <div class="badge" id="teamBBadge">B</div>
           <div>
-            <strong id="teamBName">Attribute XI</strong>
-            <span id="teamBSub">Vik Rao</span>
+            <strong id="teamBName">Team B</strong>
+            <span id="teamBSub">Captain</span>
           </div>
         </div>
       </div>
@@ -667,9 +669,9 @@
 
     <section class="scorebar">
       <div class="score-team-block">
-        <div class="badge score-badge" id="scoreBattingBadge">SX</div>
+        <div class="badge score-badge" id="scoreBattingBadge">BAT</div>
         <div>
-          <div class="score-team-name" id="scoreBattingName">Skill XI</div>
+          <div class="score-team-name" id="scoreBattingName">Batting Team</div>
           <div class="score-subline" id="inningsLabel">1st Innings</div>
         </div>
       </div>
@@ -686,7 +688,7 @@
       </div>
 
       <div class="score-meta-block">
-        <div class="score-bowling-team"><span>Bowling</span><b id="scoreBowlingName">Attribute XI</b></div>
+        <div class="score-bowling-team"><span>Bowling</span><b id="scoreBowlingName">Team</b></div>
         <div class="score-metrics-inline">
           <span><b id="formatBox">T20</b></span>
           <span id="phaseBox">Powerplay</span>
@@ -695,27 +697,27 @@
       </div>
 
       <div class="rating-row">
-        <div class="mini-stat"><span>A Bat</span><b id="teamABat">56</b></div>
-        <div class="mini-stat"><span>A Bowl</span><b id="teamABowl">49</b></div>
-        <div class="mini-stat"><span>A Field</span><b id="teamAField">63</b></div>
-        <div class="mini-stat"><span>B Bat</span><b id="teamBBat">55</b></div>
-        <div class="mini-stat"><span>B Bowl</span><b id="teamBBowl">49</b></div>
-        <div class="mini-stat"><span>B Field</span><b id="teamBField">63</b></div>
+        <div class="mini-stat"><span>A Bat</span><b id="teamABat">0</b></div>
+        <div class="mini-stat"><span>A Bowl</span><b id="teamABowl">0</b></div>
+        <div class="mini-stat"><span>A Field</span><b id="teamAField">0</b></div>
+        <div class="mini-stat"><span>B Bat</span><b id="teamBBat">0</b></div>
+        <div class="mini-stat"><span>B Bowl</span><b id="teamBBowl">0</b></div>
+        <div class="mini-stat"><span>B Field</span><b id="teamBField">0</b></div>
       </div>
     </section>
 
     <section class="live-strip">
       <article class="player-live-card striker">
         <div class="live-card-top"><div class="label">On Strike</div><div class="strike-star">*</div></div>
-        <h3 id="strikerName">Aarav Khan</h3>
-        <p id="strikerInfo">0 runs • 0 balls • Skill 85 • Conf 50 • Fatigue 0</p>
+        <h3 id="strikerName">Opening Batter</h3>
+        <p id="strikerInfo">0 runs • 0 balls • Skill 0 • Conf 50</p>
         <div class="batter-intent-control" data-slot="striker">
           <div class="intent-head"><span>Intent</span><b id="strikerAggressionLabel">Aggressive 7</b></div>
           <input id="strikerAggressionInput" type="range" min="1" max="10" value="7" oninput="setBatterAggression('striker', this.value)">
           <div class="intent-buttons compact-intents">
             <button type="button" data-slot="striker" data-intent="2" onclick="setBatterAggression('striker', 2)">Def</button>
             <button type="button" data-slot="striker" data-intent="5" onclick="setBatterAggression('striker', 5)">Bal</button>
-            <button type="button" data-slot="striker" data-intent="7" onclick="setBatterAggression('striker', 7)" class="active">Agg</button>
+            <button type="button" data-slot="striker" data-intent="7" onclick="setBatterAggression('striker', 7)">Agg</button>
             <button type="button" data-slot="striker" data-intent="10" onclick="setBatterAggression('striker', 10)">Atk</button>
           </div>
         </div>
@@ -723,15 +725,15 @@
 
       <article class="player-live-card">
         <div class="live-card-top"><div class="label">Non-Striker</div></div>
-        <h3 id="nonStrikerName">Rayan Malik</h3>
-        <p id="nonStrikerInfo">0 runs • 0 balls • Skill 80 • Conf 50 • Fatigue 0</p>
+        <h3 id="nonStrikerName">Opening Batter</h3>
+        <p id="nonStrikerInfo">0 runs • 0 balls • Skill 0 • Conf 50</p>
         <div class="batter-intent-control" data-slot="nonStriker">
           <div class="intent-head"><span>Intent</span><b id="nonStrikerAggressionLabel">Aggressive 7</b></div>
           <input id="nonStrikerAggressionInput" type="range" min="1" max="10" value="7" oninput="setBatterAggression('nonStriker', this.value)">
           <div class="intent-buttons compact-intents">
             <button type="button" data-slot="nonStriker" data-intent="2" onclick="setBatterAggression('nonStriker', 2)">Def</button>
             <button type="button" data-slot="nonStriker" data-intent="5" onclick="setBatterAggression('nonStriker', 5)">Bal</button>
-            <button type="button" data-slot="nonStriker" data-intent="7" onclick="setBatterAggression('nonStriker', 7)" class="active">Agg</button>
+            <button type="button" data-slot="nonStriker" data-intent="7" onclick="setBatterAggression('nonStriker', 7)">Agg</button>
             <button type="button" data-slot="nonStriker" data-intent="10" onclick="setBatterAggression('nonStriker', 10)">Atk</button>
           </div>
         </div>
@@ -741,19 +743,19 @@
         <div class="bowler-card-main">
           <div>
             <span>Current Bowler</span>
-            <strong id="currentBowlerName">Rishi Kapoor</strong>
-            <span id="currentBowlerFigures">0.0-0-0 • Eco 0.00 • Skill 80</span>
+            <strong id="currentBowlerName">Bowler</strong>
+            <span id="currentBowlerFigures">0.0-0-0</span>
           </div>
           <button id="changeBowlerBtn" class="secondary small-action-btn" type="button" onclick="openBowlerChangeModal()">Change</button>
         </div>
-        <div class="bowler-meter" title="Bowler stamina"><div class="bowler-meter-fill" id="currentBowlerStaminaFill" style="width: 83.5%;"></div></div>
+        <div class="bowler-meter" title="Bowler stamina"><div class="bowler-meter-fill" id="currentBowlerStaminaFill"></div></div>
         <div class="bowler-small-row">
-          <span id="currentBowlerStamina">Stamina: 84% • Fatigue 0</span>
+          <span id="currentBowlerStamina">Stamina: 100%</span>
           <span id="currentBowlerLimit">Limit: 0.0 / 4.0</span>
         </div>
         <div class="bowler-plan-box">
           <span>Engine Rule</span>
-          <strong id="bowlingPlanText">Bowl AI: Death-Over Lockdown (A:Rishi Kapoor B:Adil Qureshi C:Taran Mehta D:Manav Jain E:Vik Rao)</strong>
+          <strong id="bowlingPlanText">T20 only • no country boost • raw batter attributes vs bowler attributes</strong>
         </div>
       </article>
     </section>
@@ -765,7 +767,7 @@
           <span id="commentaryOverLabel">Over 0</span>
         </div>
         <div class="commentary-body">
-          <div class="commentary-list" id="commentaryList"><div class="commentary-item note"><strong>AI</strong><p>Attribute XI bowling AI selected: Death-Over Lockdown.</p><small>Bowl AI: Death-Over Lockdown (A:Rishi Kapoor B:Adil Qureshi C:Taran Mehta D:Manav Jain E:Vik Rao)</small></div><div class="commentary-item note"><strong>0.0</strong><p>T20 skill engine ready. This version uses raw attributes only: batter skill vs bowler skill.</p><small>No country boost. No real-world stat shortcut. No hidden team help.</small></div></div>
+          <div class="commentary-list" id="commentaryList"></div>
           <div class="over-timeline" id="overTimeline"></div>
         </div>
       </article>
@@ -774,14 +776,14 @@
         <div class="section-title">
           <h3>Scorecard</h3>
           <div class="scorecard-title-actions">
-            <button class="innings-tab active" type="button"><span id="scoreBattingTabName">Skill XI</span> <b id="scoreBattingTabScore">0/0</b></button>
-            <button class="innings-tab" type="button" disabled=""><span id="scoreBowlingTabName">Attribute XI</span></button>
+            <button class="innings-tab active" type="button"><span id="scoreBattingTabName">Batting</span> <b id="scoreBattingTabScore">0/0</b></button>
+            <button class="innings-tab" type="button" disabled><span id="scoreBowlingTabName">Bowling</span></button>
           </div>
         </div>
         <div class="scorecard-body">
           <div class="scorecard-heading-line">
             <div>
-              <h3 id="scorecardInningsTitle">Skill XI Innings</h3>
+              <h3 id="scorecardInningsTitle">Innings</h3>
               <p id="scorecardScoreLine">0/0 (0.0 ov)</p>
             </div>
           </div>
@@ -791,132 +793,22 @@
                 <th>Batter</th><th>R</th><th>B</th><th>4s</th><th>6s</th><th>SR</th>
               </tr>
             </thead>
-            <tbody id="battingTableBody"><tr>
-          <td><strong>Aarav Khan *</strong><br><span style="color:var(--muted);font-size:10px">not out</span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Rayan Malik</strong><br><span style="color:var(--muted);font-size:10px">not out</span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Samir Das</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Imran Shah</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Zahid Ali</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Kamal Roy</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Nabil Chowdhury</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Farhan Mir</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Rafi Islam</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Sohan Patel</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Arman Gill</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr></tbody>
+            <tbody id="battingTableBody"></tbody>
           </table>
           <div class="extras-total-box">
             <div><span>Extras</span><b id="extrasLine">0 (wd 0, nb 0, b 0, lb 0)</b></div>
             <div><span>Total</span><b id="scorecardTotalLine">0/0 (0.0 ov)</b></div>
           </div>
           <div class="bowling-card-block">
-            <h4 id="bowlingCardTitle">Attribute XI Bowling</h4>
+            <h4 id="bowlingCardTitle">Bowling</h4>
             <table class="score-table bowling-table">
               <thead><tr><th>Bowler</th><th>O</th><th>R</th><th>W</th><th>Eco</th></tr></thead>
-              <tbody id="bowlingTableBody"><tr>
-            <td>Rishi Kapoor</td>
-            <td>0.0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0.00</td>
-          </tr></tbody>
+              <tbody id="bowlingTableBody"></tbody>
             </table>
           </div>
           <details class="debug-box">
             <summary>Debug State</summary>
-            <pre id="out">{
-  "phase": "innings1",
-  "inningsNo": 1,
-  "score": "0/0 (0.0)",
-  "battingAI": null,
-  "bowlingAI": {
-    "type": "bowling",
-    "modelKey": "DEATH_LOCK",
-    "modelName": "Death-Over Lockdown",
-    "description": "Keeps best death skills available for overs 16-20.",
-    "pattern": "CDEABCEDABCDEABCDABE",
-    "slots": {
-      "A": "Rishi_Kapoor",
-      "B": "Adil_Qureshi",
-      "C": "Taran_Mehta",
-      "D": "Manav_Jain",
-      "E": "Vik_Rao"
-    },
-    "names": {
-      "A": "Rishi Kapoor",
-      "B": "Adil Qureshi",
-      "C": "Taran Mehta",
-      "D": "Manav Jain",
-      "E": "Vik Rao"
-    }
-  },
-  "lastBattle": null
-}</pre>
+            <pre id="out">{}</pre>
           </details>
         </div>
       </article>
@@ -930,7 +822,7 @@
       <button id="autoPlayBtn" class="secondary" type="button" onclick="toggleAutoPlay()">Auto Play</button>
       <button id="simInningsBtn" class="secondary" type="button" onclick="simulateCurrentInnings()">Simulate Innings</button>
       <button id="simMatchBtn" class="secondary" type="button" onclick="simulateWholeMatch()">Simulate Match</button>
-      <button id="nextInningsBtn" class="secondary" type="button" onclick="startNextInnings()" disabled="">Next Innings</button>
+      <button id="nextInningsBtn" class="secondary" type="button" onclick="startNextInnings()">Next Innings</button>
       <button class="secondary" type="button" onclick="openStressTestModal()">Stress Test</button>
       <button class="danger" type="button" onclick="resetMatchCenterState()">Reset</button>
     </div>
@@ -942,7 +834,7 @@
       <h2 id="matchCompleteTitle">Match completed</h2>
       <p id="matchCompleteScore">Scoreline</p>
       <div class="player-option-actions" style="display:grid;gap:9px">
-        <button onclick="returnToSummaryPage()">Save &amp; Return to Summary</button>
+        <button onclick="returnToSummaryPage()">Save & Return to Summary</button>
         <button class="secondary" onclick="closeMatchCompleteModal()">Stay on Scorecard</button>
       </div>
     </div>
@@ -988,7 +880,7 @@
     const CURRENT_MATCH_KEYS = ["currentTourMatch", "currentTourMatch_v1", "currentMatch", "tourCurrentMatch"];
     const TOUR_STORAGE_KEY = "cricketTourSetupSave_v1";
     const TOSS_KEY = "currentTossResult";
-    const STATE_PREFIX = "skillT20MatchState_v3_fixed_";
+    const STATE_PREFIX = "skillT20MatchState_v3_fixed_tuned_targets_";
 
     let matchState = null;
     let currentMatchCache = null;
@@ -1827,7 +1719,7 @@
       const bowlingXI = getSelectedXI(currentMatch, first.bowlingSide);
 
       const state = {
-        version: "t20-skill-v3-fixed",
+        version: "t20-skill-v3-target-tuned",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -1926,15 +1818,15 @@
 
     function makeWeights() {
       return {
-        wicket: 5.4,
-        dot: 32.5,
-        one: 36.0,
-        two: 13.2,
-        three: 0.8,
-        four: 8.9,
-        six: 3.7,
-        wide: 1.45,
-        noBall: 0.38
+        wicket: 5.25,
+        dot: 30.2,
+        one: 36.8,
+        two: 13.8,
+        three: 0.9,
+        four: 10.4,
+        six: 4.9,
+        wide: 1.50,
+        noBall: 0.40
       };
     }
 
@@ -2013,42 +1905,42 @@
 
       // Phase shape: T20 only.
       if (phase === "Powerplay") {
-        multiply(weights, "dot", 0.98);
-        multiply(weights, "four", 1.06);
-        multiply(weights, "six", 0.94);
+        multiply(weights, "dot", 0.94);
+        multiply(weights, "four", 1.10);
+        multiply(weights, "six", 1.00);
         multiply(weights, "wicket", 1.06);
       } else if (phase === "Middle") {
         // Overs 7-15: T20 rotation phase.
-        // Singles and twos should be much more common here than boundaries.
-        multiply(weights, "dot", 1.04);
+        // Singles and twos should be higher here than boundaries.
+        multiply(weights, "dot", 1.02);
         multiply(weights, "one", 1.22);
-        multiply(weights, "two", 1.34);
+        multiply(weights, "two", 1.32);
         multiply(weights, "three", 1.10);
-        multiply(weights, "four", 0.86);
-        multiply(weights, "six", 0.60);
+        multiply(weights, "four", 0.92);
+        multiply(weights, "six", 0.68);
       } else if (phase === "Death") {
-        multiply(weights, "dot", 0.90);
-        multiply(weights, "one", 0.97);
-        multiply(weights, "two", 1.16);
-        multiply(weights, "four", 1.10);
-        multiply(weights, "six", 1.16);
+        multiply(weights, "dot", 0.84);
+        multiply(weights, "one", 0.94);
+        multiply(weights, "two", 1.14);
+        multiply(weights, "four", 1.20);
+        multiply(weights, "six", 1.32);
         multiply(weights, "wicket", 1.28);
       }
 
       // Aggression shape.
-      multiply(weights, "dot", 1.18 - attack * 0.24);
-      multiply(weights, "one", 1.11 - attack * 0.12);
+      multiply(weights, "dot", 1.18 - attack * 0.29);
+      multiply(weights, "one", 1.11 - attack * 0.14);
       multiply(weights, "two", 0.98 + attack * 0.13);
-      multiply(weights, "four", 0.72 + attack * 0.43);
-      multiply(weights, "six", 0.42 + attack * 0.74);
-      multiply(weights, "wicket", 0.76 + attack * 0.76);
+      multiply(weights, "four", 0.72 + attack * 0.50);
+      multiply(weights, "six", 0.43 + attack * 0.86);
+      multiply(weights, "wicket", 0.76 + attack * 0.78);
 
       // Raw skill vs raw skill.
-      multiply(weights, "four", 1 + clamp(skillEdge, -38, 38) * 0.008);
-      multiply(weights, "six", 1 + clamp(powerEdge, -38, 38) * 0.010);
-      multiply(weights, "two", 1 + clamp(rotateEdge, -30, 30) * 0.006);
+      multiply(weights, "four", 1 + clamp(skillEdge, -38, 38) * 0.0105);
+      multiply(weights, "six", 1 + clamp(powerEdge, -38, 38) * 0.013);
+      multiply(weights, "two", 1 + clamp(rotateEdge, -30, 30) * 0.007);
       multiply(weights, "one", 1 + clamp(rotateEdge, -30, 30) * 0.004);
-      multiply(weights, "dot", 1 + clamp(-controlEdge, -35, 35) * 0.013);
+      multiply(weights, "dot", 1 + clamp(-controlEdge, -35, 35) * 0.012);
       multiply(weights, "wicket", 1 + clamp(-controlEdge, -38, 38) * 0.014);
       multiply(weights, "wicket", 1 + clamp(bowlThreat - batControl, -35, 35) * 0.010);
 
@@ -2064,10 +1956,10 @@
       weights.noBall *= 1 + controlRisk * 0.55 + Math.max(0, 40 - bowlerStat.stamina) * 0.012;
 
       // Soft caps so T20 is lively but not random nonsense.
-      weights.wicket = clamp(weights.wicket, 1.9, 13.0);
-      weights.six = clamp(weights.six, 0.8, 9.8);
-      weights.four = clamp(weights.four, 3.2, 15.5);
-      weights.dot = clamp(weights.dot, 12.0, 50.0);
+      weights.wicket = clamp(weights.wicket, 1.8, 13.0);
+      weights.six = clamp(weights.six, 0.9, 12.4);
+      weights.four = clamp(weights.four, 3.5, 18.5);
+      weights.dot = clamp(weights.dot, 10.0, 48.0);
 
       const outcome = weightedRoll(weights);
       const battle = {
@@ -2688,7 +2580,7 @@
 
       const canRestore =
         saved &&
-        saved.version === "t20-skill-v3-fixed" &&
+        saved.version === "t20-skill-v3-target-tuned" &&
         saved.matchIdentity === currentIdentity &&
         saved.phase !== "completed";
 
@@ -2711,19 +2603,33 @@
       document.getElementById("stressTestModal")?.classList.add("hidden");
     }
 
+    function getStressFirstInningsInfo(currentMatch, teams) {
+      // Stress test should test the actual selected match setup, not randomize the toss.
+      // If a live match already exists, use its first-innings order.
+      if (matchState?.innings?.[0] && !isStressTesting) {
+        const first = matchState.innings[0];
+        return {
+          battingTeam: first.battingTeam,
+          bowlingTeam: first.bowlingTeam,
+          battingSide: first.battingSide,
+          bowlingSide: first.bowlingSide,
+          tossText: "Stress test uses current match batting order"
+        };
+      }
+
+      const tossOrder = getBattingFromToss(currentMatch, teams);
+      return {
+        ...tossOrder,
+        tossText: tossOrder.tossText || "Stress test uses saved toss"
+      };
+    }
+
     function createStressInitialMatchState(currentMatch) {
       const teams = getFullTeamNames(currentMatch);
-      const userBatsFirst = Math.random() < 0.5;
-      const first = {
-        battingTeam: userBatsFirst ? teams.userTeam : teams.computerTeam,
-        bowlingTeam: userBatsFirst ? teams.computerTeam : teams.userTeam,
-        battingSide: userBatsFirst ? "user" : "computer",
-        bowlingSide: userBatsFirst ? "computer" : "user",
-        tossText: "Stress test random toss"
-      };
+      const first = getStressFirstInningsInfo(currentMatch, teams);
 
       const state = {
-        version: "t20-skill-v3-fixed",
+        version: "t20-skill-v3-target-tuned",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -2919,6 +2825,78 @@
       }, 30);
     }
 
+
+    function sideRatingForStress(currentMatch, side) {
+      const xi = getSelectedXI(currentMatch, side);
+      const ratings = getTeamRatings(xi);
+      return {
+        bat: ratings.bat,
+        bowl: ratings.bowl,
+        field: ratings.field,
+        total: ratings.bat * 0.45 + ratings.bowl * 0.40 + ratings.field * 0.15
+      };
+    }
+
+    function getStressTargetProfile(currentMatch, results) {
+      const current = currentMatch || currentMatchCache || loadCurrentMatch();
+      const user = sideRatingForStress(current, "user");
+      const computer = sideRatingForStress(current, "computer");
+      const firstTeam = results?.[0]?.firstTeam || "";
+      const teams = getFullTeamNames(current);
+      const firstIsUser = firstTeam === teams.userTeam;
+      const battingSide = firstIsUser ? user : computer;
+      const bowlingSide = firstIsUser ? computer : user;
+      const battingGap = battingSide.bat - bowlingSide.bowl;
+      const totalGap = battingSide.total - bowlingSide.total;
+
+      if (Math.abs(totalGap) <= 8 && Math.abs(battingGap) <= 8) {
+        return {
+          label: "Equal vs equal",
+          targetLow: 160,
+          targetHigh: 175,
+          note: "Balanced teams should usually land in the 160-175 first-innings range."
+        };
+      }
+
+      if (battingGap >= 18 || totalGap >= 16) {
+        return {
+          label: "Big batting side vs smaller bowling side",
+          targetLow: 175,
+          targetHigh: 185,
+          note: "A strong batting team against a weaker attack should usually reach 175-185 when batting first."
+        };
+      }
+
+      if (battingGap <= -18 || totalGap <= -16) {
+        return {
+          label: "Small batting side vs bigger bowling side",
+          targetLow: 125,
+          targetHigh: 145,
+          note: "A weaker batting team against a strong attack should often be held around 125-145."
+        };
+      }
+
+      return {
+        label: "Moderate advantage matchup",
+        targetLow: 150,
+        targetHigh: 170,
+        note: "A moderate mismatch should sit between equal-team and big-team scoring."
+      };
+    }
+
+    function getTargetAwareRecommendation({ avgFirst, avgFirstWkts, chaseRate, avgSixes, targetProfile }) {
+      const notes = [];
+      if (avgFirst < targetProfile.targetLow) notes.push(`increase scoring: target for ${targetProfile.label} is ${targetProfile.targetLow}-${targetProfile.targetHigh}`);
+      if (avgFirst > targetProfile.targetHigh) notes.push(`reduce scoring: target for ${targetProfile.label} is ${targetProfile.targetLow}-${targetProfile.targetHigh}`);
+      if (avgFirstWkts < 4.5) notes.push("increase wicket pressure at high aggression");
+      if (avgFirstWkts > 8.0) notes.push("reduce wicket pressure or improve rotation/survival");
+      if (chaseRate < 0.42) notes.push("make chase AI attack earlier or soften death bowling");
+      if (chaseRate > 0.58) notes.push("make chase harder or improve death bowling");
+      if (avgSixes < 7 && targetProfile.targetLow >= 160) notes.push("slightly increase power reward");
+      if (avgSixes > 16) notes.push("reduce six weight");
+      return notes.length ? notes.join("; ") : "balance looks reasonable for this matchup";
+    }
+
     function renderStressResults(results) {
       const output = document.getElementById("stressSummary");
       if (!output) return;
@@ -2939,6 +2917,14 @@
       const highChase = Math.max(...results.map(r => r.secondRuns));
       const lowChase = Math.min(...results.map(r => r.secondRuns));
       const bands = ["<120", "120-139", "140-159", "160-179", "180-199", "200+"];
+      const targetProfile = getStressTargetProfile(currentMatchCache || loadCurrentMatch(), results);
+      const targetRecommendation = getTargetAwareRecommendation({
+        avgFirst,
+        avgFirstWkts,
+        chaseRate: chaseWins / count,
+        avgSixes,
+        targetProfile
+      });
 
       output.innerHTML = `
         <div class="stress-grid">
@@ -2965,12 +2951,14 @@
             <tr><td>1st innings range</td><td>${lowFirst} to ${highFirst}</td></tr>
             <tr><td>Chase innings range</td><td>${lowChase} to ${highChase}</td></tr>
             <tr><td>Ties</td><td>${ties}</td></tr>
-            <tr><td>Recommended check</td><td>${getStressRecommendation({ avgFirst, avgFirstWkts, chaseRate: chaseWins / count, avgSixes })}</td></tr>
+            <tr><td>Matchup profile</td><td>${targetProfile.label}</td></tr>
+            <tr><td>Target first-innings average</td><td>${targetProfile.targetLow}-${targetProfile.targetHigh}</td></tr>
+            <tr><td>Recommended check</td><td>${targetRecommendation}</td></tr>
           </tbody>
         </table>
 
         <p class="stress-note">
-          Healthy early target: average first innings around 145-175, average wickets 5-8, chase wins around 45-55% for equal teams.
+          ${targetProfile.note} Equal vs equal target: 160-175. Big batting side vs smaller bowling side: 175-185.
         </p>
       `;
     }
@@ -3275,6 +3263,5 @@
 
     init();
   </script>
-
-
-</body></html>
+</body>
+</html>
