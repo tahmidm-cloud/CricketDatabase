@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#061018" />
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#061018">
   <title>Select XI</title>
 
   <style>
@@ -418,11 +416,11 @@
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.055);
     border: 1px solid var(--line);
-    cursor: grab;
+    cursor: pointer;
     }
 
     .xi-player-card:active {
-    cursor: grabbing;
+    cursor: pointer;
     }
 
     .xi-player-card.dragging {
@@ -603,7 +601,7 @@
     .xi-player-card {
     min-height: 58px;
     border-radius: 18px;
-    cursor: grab;
+    cursor: pointer;
     }
 
     .xi-rank {
@@ -1033,8 +1031,61 @@
     .xi-list::-webkit-scrollbar-thumb:hover {
     background: rgba(246, 196, 83, 0.55) !important;
     }
+
+
+    /* Tap-swap behavior: selected player becomes a solid colored pill, no glow */
+    .xi-player-card.swap-selected {
+    position: relative;
+    overflow: hidden;
+    border-color: rgba(250, 204, 21, 0.92) !important;
+    background:
+        linear-gradient(135deg, rgba(250, 204, 21, 0.88), rgba(251, 146, 60, 0.86)) !important;
+    color: #1c0a00 !important;
+    box-shadow: none !important;
+    transform: none !important;
+    padding-top: 10px !important;
+    }
+
+    .xi-player-card.swap-selected::before,
+    .xi-player-card.swap-selected::after {
+    content: none !important;
+    display: none !important;
+    }
+
+    .xi-player-card.swap-selected .xi-player-main strong,
+    .xi-player-card.swap-selected .xi-player-main span,
+    .xi-player-card.swap-selected .xi-player-rating,
+    .xi-player-card.swap-selected .xi-player-rating div {
+    color: #1c0a00 !important;
+    }
+
+    .xi-player-card.swap-selected .xi-rank {
+    background: rgba(28, 10, 0, 0.18) !important;
+    border-color: rgba(28, 10, 0, 0.28) !important;
+    color: #1c0a00 !important;
+    }
+
+    .xi-player-card.swap-selected .xi-role-tag.captain {
+    background: rgba(28, 10, 0, 0.20) !important;
+    border-color: rgba(28, 10, 0, 0.32) !important;
+    color: #1c0a00 !important;
+    }
+
+    .xi-player-card.swap-selected .xi-role-tag.keeper {
+    background: rgba(0, 18, 25, 0.22) !important;
+    border-color: rgba(0, 18, 25, 0.34) !important;
+    color: #001219 !important;
+    }
+
+    .select-xi-page.bench-hidden .xi-two-column-layout {
+    grid-template-columns: 1fr !important;
+    }
+
+    .select-xi-page.bench-hidden .bench-xi-box {
+    display: none !important;
+    }
     </style>
-  <link rel="stylesheet" href="mobile-iphone15pro.css?v=6" />
+  <link rel="stylesheet" href="mobile-iphone15pro.css?v=6">
 </head>
 
 <body>
@@ -1048,7 +1099,7 @@
 
       <div class="xi-header-center">
         <h1>Select Playing XI</h1>
-        <div class="match-pill" id="matchType">Match</div>
+        <div class="match-pill" id="matchType">No match loaded</div>
       </div>
 
       <div class="xi-header-right">
@@ -1061,36 +1112,26 @@
         <div class="xi-box-head">
           <div>
             <h2>Selected XI</h2>
-            <p>Drag inside this box to set batting order.</p>
+            <p>Tap one player, then tap another to swap batting order.</p>
           </div>
 
           <div class="xi-count" id="selectedCount">0 / 11</div>
         </div>
 
-        <div
-          class="xi-list selected-xi-list"
-          id="selectedXiList"
-          ondragover="allowDrop(event)"
-          ondrop="handleListDrop(event, 'selected')"
-        ></div>
+        <div class="xi-list selected-xi-list" id="selectedXiList"></div>
       </section>
 
       <section class="card xi-box bench-xi-box">
         <div class="xi-box-head">
           <div>
             <h2>Bench / Squad</h2>
-            <p>Drag a player onto the XI to replace someone.</p>
+            <p>Tap a bench player, then tap an XI player to swap.</p>
           </div>
 
           <div class="xi-count" id="benchCount">0</div>
         </div>
 
-        <div
-          class="xi-list bench-xi-list"
-          id="benchList"
-          ondragover="allowDrop(event)"
-          ondrop="handleListDrop(event, 'bench')"
-        ></div>
+        <div class="xi-list bench-xi-list" id="benchList"></div>
       </section>
     </main>
   </div>
@@ -1121,6 +1162,10 @@
     let captainPlayerId = null;
     let wicketkeeperPlayerId = null;
     let didDragPlayer = false;
+
+    let swapSelection = null;
+    let longPressTimer = null;
+    let suppressNextClick = false;
 
     function getStoredTourMatch() {
         const raw = localStorage.getItem("currentTourMatch");
@@ -1223,7 +1268,8 @@
     }
 
     function getJudgement(player) {
-        }
+        return Number(player?.attributes?.mental?.judgement) || 0;
+    }
 
     function getCaptainScore(player) {
         return (
@@ -1510,7 +1556,13 @@
         const startBtn = document.getElementById("startMatchBtn");
 
         if (startBtn) {
-        startBtn.disabled = selectedXI.length !== 11;
+        const selectedKeys = new Set(selectedXI.map(getPlayerKey));
+        startBtn.disabled =
+            selectedXI.length !== 11 ||
+            !captainPlayerId ||
+            !selectedKeys.has(captainPlayerId) ||
+            !wicketkeeperPlayerId ||
+            !selectedKeys.has(wicketkeeperPlayerId);
         }
     }
 
@@ -1533,17 +1585,24 @@
 
         const nameTags = `${captainTag}${keeperTag}`;
 
+        const isSwapSelected =
+            swapSelection &&
+            swapSelection.listName === listName &&
+            swapSelection.playerKey === playerId;
+
+        const swapClass = isSwapSelected ? " swap-selected" : "";
+
         return `
             <div
-            class="xi-player-card"
-            draggable="true"
+            class="xi-player-card${swapClass}"
             data-list="${listName}"
             data-index="${index}"
             onclick="handlePlayerCardClick(event, '${listName}', ${index})"
-            ondragstart="handleDragStart(event, '${listName}', ${index})"
-            ondragend="handleDragEnd(event)"
-            ondragover="allowDrop(event)"
-            ondrop="handleCardDrop(event, '${listName}', ${index})"
+            oncontextmenu="handlePlayerCardContextMenu(event, '${listName}', ${index})"
+            onpointerdown="startHoldForOptions(event, '${listName}', ${index})"
+            onpointerup="cancelHoldForOptions()"
+            onpointerleave="cancelHoldForOptions()"
+            onpointercancel="cancelHoldForOptions()"
             >
             ${rankHtml}
 
@@ -1567,8 +1626,67 @@
 
 
     function handlePlayerCardClick(event, listName, index) {
-        if (didDragPlayer) return;
+        if (suppressNextClick) {
+            suppressNextClick = false;
+            return;
+        }
 
+        const list = getList(listName);
+        const player = list[index];
+
+        if (!player) return;
+
+        const playerKey = getPlayerKey(player);
+
+        if (!swapSelection) {
+            swapSelection = {
+                listName,
+                index,
+                playerKey
+            };
+            renderXIPage();
+            return;
+        }
+
+        if (swapSelection.listName === listName && swapSelection.playerKey === playerKey) {
+            swapSelection = null;
+            renderXIPage();
+            return;
+        }
+
+        swapPlayersByTap(swapSelection.listName, swapSelection.index, listName, index);
+        swapSelection = null;
+        cleanRoleSelections();
+        saveDraftXI();
+        renderXIPage();
+    }
+
+    function handlePlayerCardContextMenu(event, listName, index) {
+        event.preventDefault();
+        cancelHoldForOptions();
+        suppressNextClick = true;
+        openPlayerOptionModal(listName, index);
+    }
+
+    function startHoldForOptions(event, listName, index) {
+        if (event.pointerType === "mouse") return;
+
+        cancelHoldForOptions();
+
+        longPressTimer = setTimeout(() => {
+            suppressNextClick = true;
+            openPlayerOptionModal(listName, index);
+        }, 520);
+    }
+
+    function cancelHoldForOptions() {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+    }
+
+    function openPlayerOptionModal(listName, index) {
         const list = getList(listName);
         const player = list[index];
 
@@ -1587,6 +1705,8 @@
     }
 
     function closePlayerOptionModal() {
+        cancelHoldForOptions();
+
         const modal = document.getElementById("playerOptionModal");
         modal.classList.add("hidden");
 
@@ -1623,6 +1743,40 @@
         saveDraftXI();
         renderXIPage();
         closePlayerOptionModal();
+    }
+
+
+    function swapPlayersByTap(fromListName, fromIndex, targetListName, targetIndex) {
+        const fromList = getList(fromListName);
+        const targetList = getList(targetListName);
+
+        const fromPlayer = fromList[fromIndex];
+        const targetPlayer = targetList[targetIndex];
+
+        if (!fromPlayer || !targetPlayer) return;
+
+        if (fromListName === targetListName) {
+            fromList[fromIndex] = targetPlayer;
+            fromList[targetIndex] = fromPlayer;
+            return;
+        }
+
+        fromList[fromIndex] = targetPlayer;
+        targetList[targetIndex] = fromPlayer;
+    }
+
+    function cleanRoleSelections() {
+        const selectedKeys = new Set(selectedXI.map(getPlayerKey));
+
+        if (!captainPlayerId || !selectedKeys.has(captainPlayerId)) {
+            const defaultCaptain = pickDefaultCaptain(selectedXI);
+            captainPlayerId = defaultCaptain ? getPlayerKey(defaultCaptain) : null;
+        }
+
+        if (!wicketkeeperPlayerId || !selectedKeys.has(wicketkeeperPlayerId)) {
+            const keeper = selectedXI.find(player => getRoleGroup(player) === "wicketkeeper");
+            wicketkeeperPlayerId = keeper ? getPlayerKey(keeper) : null;
+        }
     }
    
     function handleDragStart(event, listName, index) {
@@ -1738,6 +1892,7 @@
         return;
         }
 
+        swapSelection = null;
         selectedXI = pickDefaultXI(currentMatch.userSquad);
 
         const selectedKeys = new Set(selectedXI.map(getPlayerKey));
@@ -1785,6 +1940,18 @@
 
         if (selectedXI.length !== 11) {
             alert("You need exactly 11 players in the Selected XI.");
+            return;
+        }
+
+        const selectedKeysForRoles = new Set(selectedXI.map(getPlayerKey));
+
+        if (!captainPlayerId || !selectedKeysForRoles.has(captainPlayerId)) {
+            alert("Select a captain from your Selected XI.");
+            return;
+        }
+
+        if (!wicketkeeperPlayerId || !selectedKeysForRoles.has(wicketkeeperPlayerId)) {
+            alert("Select a wicketkeeper from your Selected XI.");
             return;
         }
 
@@ -1908,7 +2075,8 @@
     });
 
     </script>
-  <script src="mobile-viewport.js?v=3">
+  <script src="mobile-viewport.js?v=3"></script>
+  <script>
     function toggleBenchPanel() {
         const page = document.querySelector('.select-xi-page');
         if (!page) return;
@@ -1916,6 +2084,6 @@
         const btn = document.querySelector('.bench-toggle-btn');
         if (btn) btn.textContent = hidden ? 'Show Bench' : 'Hide Bench';
     }
-</script>
-</body>
-</html>
+  </script>
+
+</body></html>
