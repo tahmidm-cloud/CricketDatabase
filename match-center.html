@@ -880,7 +880,7 @@
     const CURRENT_MATCH_KEYS = ["currentTourMatch", "currentTourMatch_v1", "currentMatch", "tourCurrentMatch"];
     const TOUR_STORAGE_KEY = "cricketTourSetupSave_v1";
     const TOSS_KEY = "currentTossResult";
-    const STATE_PREFIX = "skillT20MatchState_v3_full_member_balance_";
+    const STATE_PREFIX = "skillT20MatchState_v3_boundary_shape_";
 
     let matchState = null;
     let currentMatchCache = null;
@@ -1762,7 +1762,7 @@
       const bowlingXI = getSelectedXI(currentMatch, first.bowlingSide);
 
       const state = {
-        version: "t20-skill-v3-full-member-balance",
+        version: "t20-skill-v3-boundary-shape",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -1866,8 +1866,8 @@
         one: 38.2,
         two: 15.0,
         three: 0.8,
-        four: 8.7,
-        six: 7.1,
+        four: 9.8,
+        six: 6.1,
         wide: 1.45,
         noBall: 0.38
       };
@@ -1964,8 +1964,8 @@
       if (phase === "Powerplay") {
         multiply(weights, "dot", 0.94);
         multiply(weights, "one", 1.04);
-        multiply(weights, "four", 0.96);
-        multiply(weights, "six", 1.10);
+        multiply(weights, "four", 1.05);
+        multiply(weights, "six", 0.98);
         multiply(weights, "wicket", 1.00);
       } else if (phase === "Middle") {
         // Overs 7-15: T20 rotation phase.
@@ -1974,15 +1974,15 @@
         multiply(weights, "one", 1.28);
         multiply(weights, "two", 1.38);
         multiply(weights, "three", 1.08);
-        multiply(weights, "four", 0.76);
-        multiply(weights, "six", 0.88);
+        multiply(weights, "four", 0.86);
+        multiply(weights, "six", 0.76);
         multiply(weights, "wicket", 0.86);
       } else if (phase === "Death") {
         multiply(weights, "dot", 0.86);
         multiply(weights, "one", 0.96);
         multiply(weights, "two", 1.12);
-        multiply(weights, "four", 0.92);
-        multiply(weights, "six", 1.48);
+        multiply(weights, "four", 1.08);
+        multiply(weights, "six", 1.28);
         multiply(weights, "wicket", 1.18);
       }
 
@@ -1990,13 +1990,13 @@
       multiply(weights, "dot", 1.16 - attack * 0.24);
       multiply(weights, "one", 1.14 - attack * 0.12);
       multiply(weights, "two", 1.02 + attack * 0.10);
-      multiply(weights, "four", 0.64 + attack * 0.36);
-      multiply(weights, "six", 0.62 + attack * 0.88);
+      multiply(weights, "four", 0.68 + attack * 0.44);
+      multiply(weights, "six", 0.56 + attack * 0.72);
       multiply(weights, "wicket", 0.72 + attack * 0.70);
 
       // Raw skill vs raw skill.
-      multiply(weights, "four", 1 + clamp(skillEdge, -30, 30) * 0.0055);
-      multiply(weights, "six", 1 + clamp(powerEdge, -30, 30) * 0.0135);
+      multiply(weights, "four", 1 + clamp(skillEdge, -30, 30) * 0.0070);
+      multiply(weights, "six", 1 + clamp(powerEdge, -30, 30) * 0.0100);
       multiply(weights, "two", 1 + clamp(rotateEdge, -30, 30) * 0.0085);
       multiply(weights, "one", 1 + clamp(rotateEdge, -30, 30) * 0.005);
       multiply(weights, "dot", 1 + clamp(-controlEdge, -30, 30) * 0.0085);
@@ -2023,8 +2023,8 @@
       if (agg >= 10) multiply(weights, "wicket", 1.10);
 
       weights.wicket = clamp(weights.wicket, 1.5, 10.8);
-      weights.six = clamp(weights.six, 1.5, 15.0);
-      weights.four = clamp(weights.four, 2.4, 12.6);
+      weights.six = clamp(weights.six, 1.2, 12.8);
+      weights.four = clamp(weights.four, 2.8, 14.8);
       weights.dot = clamp(weights.dot, 8.5, 45.0);
 
       const outcome = weightedRoll(weights);
@@ -2646,7 +2646,7 @@
 
       const canRestore =
         saved &&
-        saved.version === "t20-skill-v3-full-member-balance" &&
+        saved.version === "t20-skill-v3-boundary-shape" &&
         saved.matchIdentity === currentIdentity &&
         saved.phase !== "completed";
 
@@ -2695,7 +2695,7 @@
       const first = getStressFirstInningsInfo(currentMatch, teams);
 
       const state = {
-        version: "t20-skill-v3-full-member-balance",
+        version: "t20-skill-v3-boundary-shape",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
