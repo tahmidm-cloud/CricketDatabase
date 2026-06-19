@@ -880,7 +880,7 @@
     const CURRENT_MATCH_KEYS = ["currentTourMatch", "currentTourMatch_v1", "currentMatch", "tourCurrentMatch"];
     const TOUR_STORAGE_KEY = "cricketTourSetupSave_v1";
     const TOSS_KEY = "currentTossResult";
-    const STATE_PREFIX = "skillT20MatchState_v3_fixed_tuned_targets_";
+    const STATE_PREFIX = "skillT20MatchState_v3_full_member_balance_";
 
     let matchState = null;
     let currentMatchCache = null;
@@ -1387,6 +1387,47 @@
       return runsNeeded / (ballsLeft / 6);
     }
 
+
+    function getFirstInningsTargetRangeForAI(inn) {
+      const battingXI = inn?.battingXI || [];
+      const bowlingXI = inn?.bowlingXI || [];
+      const batRating = getTeamRatings(battingXI);
+      const bowlRating = getTeamRatings(bowlingXI);
+      const battingGap = batRating.bat - bowlRating.bowl;
+      const totalGap = (batRating.bat * 0.45 + batRating.bowl * 0.35 + batRating.field * 0.20) -
+                       (bowlRating.bat * 0.45 + bowlRating.bowl * 0.35 + bowlRating.field * 0.20);
+
+      if (Math.abs(totalGap) <= 8 && Math.abs(battingGap) <= 8) return { low: 160, high: 175, label: "equal" };
+      if (battingGap >= 28 || totalGap >= 24) return { low: 175, high: 185, label: "big batting side" };
+      if (battingGap <= -28 || totalGap <= -24) return { low: 125, high: 145, label: "small batting side" };
+      if (battingGap >= 12 || totalGap >= 10) return { low: 160, high: 170, label: "controlled stronger side" };
+      if (battingGap <= -12 || totalGap <= -10) return { low: 140, high: 150, label: "weaker side under pressure" };
+      return { low: 150, high: 165, label: "moderate advantage" };
+    }
+
+    function applyFirstInningsRunSettingGovernor(inn, aggression) {
+      if (!inn || inn.target !== null || inn.target !== undefined) return aggression;
+      if (inn.balls < 18) return aggression;
+
+      const over = inn.balls / 6;
+      const projected = inn.balls ? (inn.runs * 120) / inn.balls : 0;
+      const range = getFirstInningsTargetRangeForAI(inn);
+
+      // Do not let dominant teams auto-race to 220+ unless the ball-by-ball luck is extreme.
+      if (over >= 6 && projected > range.high + 28) aggression -= 2;
+      else if (over >= 6 && projected > range.high + 12) aggression -= 1;
+
+      // If the batting side is behind its matchup par, encourage controlled acceleration.
+      if (over >= 8 && projected < range.low - 18 && inn.wickets <= 5) aggression += 1;
+      if (over >= 14 && projected < range.low - 8 && inn.wickets <= 6) aggression += 1;
+
+      // Wicket bank matters. Teams with many wickets can attack late; teams collapsing must rotate.
+      if (inn.wickets >= 7 && phase !== "Death") aggression -= 2;
+      else if (inn.wickets >= 5 && phase === "Middle") aggression -= 1;
+
+      return aggression;
+    }
+
     function getComputerAggression(inn, batterKey) {
       const ai = inn?.battingAI;
       const over = inn.balls / 6;
@@ -1411,7 +1452,7 @@
           aggression = phase === "Powerplay" ? 5 : phase === "Middle" ? 5 : 9;
           break;
         case "MAX_PRESSURE":
-          aggression = phase === "Powerplay" ? 9 : phase === "Middle" ? 8 : 10;
+          aggression = phase === "Powerplay" ? 8 : phase === "Middle" ? 7 : 10;
           break;
         case "WICKET_CHASE":
           aggression = phase === "Powerplay" ? 5 : phase === "Middle" ? 6 : 8;
@@ -1419,7 +1460,7 @@
           if (requiredRR !== null && requiredRR > 11.0) aggression += 1;
           break;
         case "POWER_CHASE":
-          aggression = phase === "Powerplay" ? 9 : phase === "Middle" ? 8 : 10;
+          aggression = phase === "Powerplay" ? 8 : phase === "Middle" ? 8 : 10;
           break;
         case "DEATH_CHARGE":
           aggression = phase === "Powerplay" ? 7 : phase === "Middle" ? 7 : 10;
@@ -1427,12 +1468,12 @@
           break;
         case "RATE_CHASE":
         default:
-          aggression = phase === "Powerplay" ? 7 : phase === "Middle" ? 7 : 9;
+          aggression = phase === "Powerplay" ? 6 : phase === "Middle" ? 7 : 9;
           if (requiredRR !== null) {
             if (requiredRR < 6.5) aggression -= 2;
             else if (requiredRR < 7.5) aggression -= 1;
-            else if (requiredRR > 9.5) aggression += 1;
             else if (requiredRR > 11.0) aggression += 2;
+            else if (requiredRR > 9.5) aggression += 1;
           } else {
             if (currentRR < 6.8 && over >= 6) aggression += 1;
             if (currentRR > 9.0 && wickets <= 3) aggression -= 1;
@@ -1440,15 +1481,17 @@
       }
 
       // Player-specific correction: powerful batters are allowed more, weak/tired batters hold back.
-      if (bat.boundary + bat.six > 125) aggression += 1;
-      if (bat.defense + bat.rotation < 95) aggression -= 1;
-      if (confidence > 75) aggression += 1;
-      if (confidence < 35) aggression -= 1;
+      if (bat.boundary + bat.six > 130) aggression += 1;
+      if (bat.defense + bat.rotation < 88) aggression -= 1;
+      if (confidence > 78) aggression += 1;
+      if (confidence < 30) aggression -= 1;
 
       // Wicket pressure.
-      if (wickets >= 6 && phase !== "Death") aggression -= 2;
-      else if (wickets >= 4 && phase === "Middle") aggression -= 1;
-      if (inn.target && matchState.maxBalls - inn.balls <= 18) aggression += 2;
+      if (wickets >= 7 && phase !== "Death") aggression -= 2;
+      else if (wickets >= 5 && phase === "Middle") aggression -= 1;
+      if (inn.target && matchState.maxBalls - inn.balls <= 18 && wickets <= 7) aggression += 2;
+
+      aggression = applyFirstInningsRunSettingGovernor(inn, aggression);
 
       return clamp(Math.round(aggression), 1, 10);
     }
@@ -1719,7 +1762,7 @@
       const bowlingXI = getSelectedXI(currentMatch, first.bowlingSide);
 
       const state = {
-        version: "t20-skill-v3-target-tuned",
+        version: "t20-skill-v3-full-member-balance",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -1818,20 +1861,29 @@
 
     function makeWeights() {
       return {
-        wicket: 5.25,
-        dot: 30.2,
-        one: 36.8,
-        two: 13.8,
-        three: 0.9,
-        four: 10.4,
-        six: 4.9,
-        wide: 1.50,
-        noBall: 0.40
+        wicket: 4.45,
+        dot: 29.4,
+        one: 38.2,
+        two: 15.0,
+        three: 0.8,
+        four: 8.7,
+        six: 7.1,
+        wide: 1.45,
+        noBall: 0.38
       };
     }
 
     function multiply(weights, key, factor) {
       weights[key] = Math.max(0.01, weights[key] * factor);
+    }
+
+    function compressSkillEdge(edge) {
+      // Keeps mismatch realistic without making strong teams automatic 220+ teams
+      // or weak teams automatic collapses. Skill still matters, but extremes are softened.
+      const sign = edge < 0 ? -1 : 1;
+      const abs = Math.abs(edge);
+      if (abs <= 18) return edge * 0.84;
+      return sign * (15.0 + (abs - 18) * 0.30);
     }
 
     function teamFieldingAverage(players) {
@@ -1895,54 +1947,61 @@
       const bowlDot = bowl.dot + bowlerStaminaAdj * 0.5 - bowlerFatiguePenalty * 0.8;
       const bowlDeath = bowl.death + bowlerStaminaAdj * 0.7 - bowlerFatiguePenalty;
 
-      const skillEdge = batAttack - weightedAverage([[bowlControl, 0.55], [bowlThreat, 0.45]]);
-      const controlEdge = batControl - bowlControl;
-      const rotateEdge = batRotate - bowlDot;
-      const powerEdge = batPower - weightedAverage([[bowlThreat, 0.7], [bowlDeath, 0.3]]);
-      const fieldEdge = field - 50;
+      const rawSkillEdge = batAttack - weightedAverage([[bowlControl, 0.55], [bowlThreat, 0.45]]);
+      const rawControlEdge = batControl - bowlControl;
+      const rawRotateEdge = batRotate - bowlDot;
+      const rawPowerEdge = batPower - weightedAverage([[bowlThreat, 0.7], [bowlDeath, 0.3]]);
+
+      const skillEdge = compressSkillEdge(rawSkillEdge);
+      const controlEdge = compressSkillEdge(rawControlEdge);
+      const rotateEdge = compressSkillEdge(rawRotateEdge);
+      const powerEdge = compressSkillEdge(rawPowerEdge);
+      const fieldEdge = (field - 50) * 0.75;
 
       const weights = makeWeights();
 
       // Phase shape: T20 only.
       if (phase === "Powerplay") {
         multiply(weights, "dot", 0.94);
-        multiply(weights, "four", 1.10);
-        multiply(weights, "six", 1.00);
-        multiply(weights, "wicket", 1.06);
+        multiply(weights, "one", 1.04);
+        multiply(weights, "four", 0.96);
+        multiply(weights, "six", 1.10);
+        multiply(weights, "wicket", 1.00);
       } else if (phase === "Middle") {
         // Overs 7-15: T20 rotation phase.
-        // Singles and twos should be higher here than boundaries.
-        multiply(weights, "dot", 1.02);
-        multiply(weights, "one", 1.22);
-        multiply(weights, "two", 1.32);
-        multiply(weights, "three", 1.10);
-        multiply(weights, "four", 0.92);
-        multiply(weights, "six", 0.68);
+        // More singles and twos, but sixes remain a real modern option.
+        multiply(weights, "dot", 1.00);
+        multiply(weights, "one", 1.28);
+        multiply(weights, "two", 1.38);
+        multiply(weights, "three", 1.08);
+        multiply(weights, "four", 0.76);
+        multiply(weights, "six", 0.88);
+        multiply(weights, "wicket", 0.86);
       } else if (phase === "Death") {
-        multiply(weights, "dot", 0.84);
-        multiply(weights, "one", 0.94);
-        multiply(weights, "two", 1.14);
-        multiply(weights, "four", 1.20);
-        multiply(weights, "six", 1.32);
-        multiply(weights, "wicket", 1.28);
+        multiply(weights, "dot", 0.86);
+        multiply(weights, "one", 0.96);
+        multiply(weights, "two", 1.12);
+        multiply(weights, "four", 0.92);
+        multiply(weights, "six", 1.48);
+        multiply(weights, "wicket", 1.18);
       }
 
       // Aggression shape.
-      multiply(weights, "dot", 1.18 - attack * 0.29);
-      multiply(weights, "one", 1.11 - attack * 0.14);
-      multiply(weights, "two", 0.98 + attack * 0.13);
-      multiply(weights, "four", 0.72 + attack * 0.50);
-      multiply(weights, "six", 0.43 + attack * 0.86);
-      multiply(weights, "wicket", 0.76 + attack * 0.78);
+      multiply(weights, "dot", 1.16 - attack * 0.24);
+      multiply(weights, "one", 1.14 - attack * 0.12);
+      multiply(weights, "two", 1.02 + attack * 0.10);
+      multiply(weights, "four", 0.64 + attack * 0.36);
+      multiply(weights, "six", 0.62 + attack * 0.88);
+      multiply(weights, "wicket", 0.72 + attack * 0.70);
 
       // Raw skill vs raw skill.
-      multiply(weights, "four", 1 + clamp(skillEdge, -38, 38) * 0.0105);
-      multiply(weights, "six", 1 + clamp(powerEdge, -38, 38) * 0.013);
-      multiply(weights, "two", 1 + clamp(rotateEdge, -30, 30) * 0.007);
-      multiply(weights, "one", 1 + clamp(rotateEdge, -30, 30) * 0.004);
-      multiply(weights, "dot", 1 + clamp(-controlEdge, -35, 35) * 0.012);
-      multiply(weights, "wicket", 1 + clamp(-controlEdge, -38, 38) * 0.014);
-      multiply(weights, "wicket", 1 + clamp(bowlThreat - batControl, -35, 35) * 0.010);
+      multiply(weights, "four", 1 + clamp(skillEdge, -30, 30) * 0.0055);
+      multiply(weights, "six", 1 + clamp(powerEdge, -30, 30) * 0.0135);
+      multiply(weights, "two", 1 + clamp(rotateEdge, -30, 30) * 0.0085);
+      multiply(weights, "one", 1 + clamp(rotateEdge, -30, 30) * 0.005);
+      multiply(weights, "dot", 1 + clamp(-controlEdge, -30, 30) * 0.0085);
+      multiply(weights, "wicket", 1 + clamp(-controlEdge, -30, 30) * 0.0075);
+      multiply(weights, "wicket", 1 + clamp(bowlThreat - batControl, -30, 30) * 0.006);
 
       // Fielding pressure.
       multiply(weights, "two", 1 - clamp(fieldEdge, -25, 25) * 0.004);
@@ -1956,10 +2015,17 @@
       weights.noBall *= 1 + controlRisk * 0.55 + Math.max(0, 40 - bowlerStat.stamina) * 0.012;
 
       // Soft caps so T20 is lively but not random nonsense.
-      weights.wicket = clamp(weights.wicket, 1.8, 13.0);
-      weights.six = clamp(weights.six, 0.9, 12.4);
-      weights.four = clamp(weights.four, 3.5, 18.5);
-      weights.dot = clamp(weights.dot, 10.0, 48.0);
+      // Modern T20 balance:
+      // - Sixes should be closer to fours.
+      // - Fours are not allowed to dominate every strong batting innings.
+      // - High aggression keeps real wicket risk even against weak bowling.
+      if (agg >= 9) multiply(weights, "wicket", 1.06);
+      if (agg >= 10) multiply(weights, "wicket", 1.10);
+
+      weights.wicket = clamp(weights.wicket, 1.5, 10.8);
+      weights.six = clamp(weights.six, 1.5, 15.0);
+      weights.four = clamp(weights.four, 2.4, 12.6);
+      weights.dot = clamp(weights.dot, 8.5, 45.0);
 
       const outcome = weightedRoll(weights);
       const battle = {
@@ -2580,7 +2646,7 @@
 
       const canRestore =
         saved &&
-        saved.version === "t20-skill-v3-target-tuned" &&
+        saved.version === "t20-skill-v3-full-member-balance" &&
         saved.matchIdentity === currentIdentity &&
         saved.phase !== "completed";
 
@@ -2629,7 +2695,7 @@
       const first = getStressFirstInningsInfo(currentMatch, teams);
 
       const state = {
-        version: "t20-skill-v3-target-tuned",
+        version: "t20-skill-v3-full-member-balance",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -2858,29 +2924,47 @@
         };
       }
 
-      if (battingGap >= 18 || totalGap >= 16) {
+      if (battingGap >= 28 || totalGap >= 24) {
         return {
           label: "Big batting side vs smaller bowling side",
           targetLow: 175,
           targetHigh: 185,
-          note: "A strong batting team against a weaker attack should usually reach 175-185 when batting first."
+          note: "A major batting mismatch should usually reach 175-185 when batting first."
         };
       }
 
-      if (battingGap <= -18 || totalGap <= -16) {
+      if (battingGap <= -28 || totalGap <= -24) {
         return {
           label: "Small batting side vs bigger bowling side",
           targetLow: 125,
           targetHigh: 145,
-          note: "A weaker batting team against a strong attack should often be held around 125-145."
+          note: "A major weaker-batting mismatch should often be held around 125-145."
+        };
+      }
+
+      if (battingGap >= 12 || totalGap >= 10) {
+        return {
+          label: "Controlled stronger side",
+          targetLow: 160,
+          targetHigh: 170,
+          note: "A stronger full-member style batting side should usually land around 160-170."
+        };
+      }
+
+      if (battingGap <= -12 || totalGap <= -10) {
+        return {
+          label: "Weaker side under pressure",
+          targetLow: 140,
+          targetHigh: 150,
+          note: "A weaker but capable batting side should usually fight toward 140-150, not collapse under 110."
         };
       }
 
       return {
         label: "Moderate advantage matchup",
         targetLow: 150,
-        targetHigh: 170,
-        note: "A moderate mismatch should sit between equal-team and big-team scoring."
+        targetHigh: 165,
+        note: "A moderate matchup should sit just below the equal-team par range."
       };
     }
 
@@ -3005,7 +3089,7 @@
     function downloadCSVFile(filename, rows) {
       const csv = rows
         .map(row => row.map(value => JSON.stringify(value ?? "")).join(","))
-        .join("\\n");
+        .join("\n");
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -3060,7 +3144,7 @@
         headers.join(","),
         ...latestStressResults.map(row => headers.map(key => JSON.stringify(row[key] ?? "")).join(","))
       ];
-      const blob = new Blob([lines.join("\\n")], { type: "text/csv;charset=utf-8" });
+      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
