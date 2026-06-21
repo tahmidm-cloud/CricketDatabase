@@ -363,15 +363,14 @@
 
     .prediction-winbar {
       position: relative;
-      display: grid;
-      grid-template-columns: var(--user-win, 50%) 1fr;
-      gap: 2px;
-      height: 9px;
+      display: flex;
+      width: 100%;
+      height: 12px;
       margin-top: 7px;
-      padding: 2px;
+      padding: 0;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(2, 6, 23, 0.62);
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(2, 6, 23, 0.72);
       overflow: hidden;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
     }
@@ -379,20 +378,25 @@
     .prediction-winbar i {
       display: block;
       height: 100%;
-      min-width: 2px;
-      border-radius: 999px;
-      transition: width .18s ease, filter .18s ease;
+      min-width: 0;
+      width: auto !important;
+      flex: 0 0 50%;
+      border-radius: 0;
+      transition: flex-basis .18s ease, filter .18s ease;
     }
 
     .prediction-user-fill {
-      background: linear-gradient(90deg, #0f4c81, #38bdf8);
-      box-shadow: 0 0 12px rgba(56,189,248,0.24);
+      background: var(--team-a-color, #38bdf8);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10);
     }
 
     .prediction-comp-fill {
-      background: linear-gradient(90deg, #7c2d12, #f6c453);
-      box-shadow: 0 0 12px rgba(246,196,83,0.22);
+      background: var(--team-b-color, #f6c453);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10);
     }
+
+    .prediction-user-fill:first-child { border-radius: 999px 0 0 999px; }
+    .prediction-comp-fill:last-child { border-radius: 0 999px 999px 0; }
 
     .prediction-bar-labels {
       position: relative;
@@ -474,33 +478,59 @@
     }
 
     .batter-name-line {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      display: flex;
       align-items: center;
-      gap: 7px;
+      justify-content: space-between;
+      gap: 8px;
       margin-top: 2px;
       min-width: 0;
+    }
+
+    .batter-name-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      flex: 1 1 auto;
     }
 
     .batter-name-line h3 {
       margin: 0;
       min-width: 0;
+      font-size: 15.5px;
+      line-height: 1.05;
+    }
+
+    .batter-skill-chip {
+      flex: 0 0 auto;
+      padding: 2px 5px;
+      border-radius: 999px;
+      background: rgba(250, 204, 21, 0.13);
+      border: 1px solid rgba(250, 204, 21, 0.24);
+      color: var(--gold);
+      font-size: 8px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
     }
 
     .batter-mini-bars {
       display: flex;
       align-items: center;
-      gap: 5px;
+      justify-content: flex-end;
+      gap: 6px;
       flex: 0 0 auto;
+      min-width: 150px;
     }
 
     .batter-mini-meter {
       display: grid;
-      grid-template-columns: auto 34px;
+      grid-template-columns: auto 54px;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
       color: var(--muted);
-      font-size: 7px;
+      font-size: 8px;
       font-weight: 1000;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -508,12 +538,13 @@
 
     .batter-mini-meter i {
       display: block;
-      width: 34px;
-      height: 6px;
+      width: 54px;
+      height: 9px;
       border-radius: 999px;
-      background: rgba(2, 6, 23, 0.70);
-      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(2, 6, 23, 0.76);
+      border: 1px solid rgba(255,255,255,0.15);
       overflow: hidden;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.35);
     }
 
     .batter-mini-meter b {
@@ -525,21 +556,23 @@
     }
 
     .confidence-fill {
-      background: linear-gradient(90deg, #22c55e, #86efac);
-      box-shadow: 0 0 8px rgba(34,197,94,0.26);
+      background: linear-gradient(90deg, #38bdf8 0%, #22c55e 62%, #a3e635 100%);
+      box-shadow: 0 0 10px rgba(34,197,94,0.30);
     }
 
     .fatigue-fill {
-      background: linear-gradient(90deg, #fb923c, #fb7185);
-      box-shadow: 0 0 8px rgba(251,146,60,0.22);
+      background: linear-gradient(90deg, #22c55e 0%, #facc15 54%, #fb7185 100%);
+      box-shadow: 0 0 10px rgba(251,146,60,0.24);
     }
 
     .batter-stat-grid {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 7px;
       white-space: nowrap;
       overflow: hidden;
+      font-size: 12px;
+      line-height: 1.25;
     }
 
     .batter-stat-grid span {
@@ -560,8 +593,25 @@
 
     .batter-stat-grid b {
       color: var(--text);
-      font-size: 10px;
+      font-size: 12.5px;
       font-weight: 1000;
+    }
+
+    #currentBowlerFigures {
+      margin-top: 4px;
+      color: var(--text);
+      font-size: 12.5px;
+      font-weight: 1000;
+      line-height: 1.25;
+      letter-spacing: 0.015em;
+      text-transform: none;
+    }
+
+    #currentBowlerStamina,
+    #currentBowlerLimit {
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.035em;
     }
 
     .live-card-top, .bowler-card-main, .bowler-small-row, .intent-head {
@@ -1099,7 +1149,9 @@
       .prediction-row { grid-template-columns: minmax(0, 1fr); min-width: 0; }
       .live-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 7px; }
       .current-bowler-box { grid-column: 1 / -1; }
-      .batter-stat-grid { gap: 4px; }
+      .batter-stat-grid { gap: 6px; font-size: 11.5px; }
+      .batter-stat-grid b { font-size: 12px; }
+      #currentBowlerFigures { font-size: 12px; }
       .ball-buttons button { flex: 1 1 auto; font-size: 12px; padding: 9px 10px; }
       .teams-vs { flex-wrap: wrap; }
       .team-pill, .team-pill.away { flex-direction: row; justify-content: center; }
@@ -1108,13 +1160,18 @@
     @media (max-width: 470px) {
       .live-strip { grid-template-columns: 1fr; }
       .current-bowler-box { grid-column: auto; }
-      .batter-name-line { grid-template-columns: minmax(0, 1fr); align-items: start; gap: 3px; }
-      .batter-mini-bars { gap: 4px; }
-      .batter-mini-meter { grid-template-columns: auto 28px; font-size: 6.5px; }
-      .batter-mini-meter i { width: 28px; height: 5px; }
-      .batter-stat-grid { gap: 3px; font-size: 8px; }
-      .batter-stat-grid span:not(:last-child)::after { margin-left: 3px; }
-      .batter-stat-grid b { font-size: 8.5px; }
+      .batter-name-line { display: flex; align-items: center; gap: 5px; }
+      .batter-name-wrap { gap: 4px; }
+      .batter-name-line h3 { font-size: 14px; }
+      .batter-skill-chip { padding: 1px 4px; font-size: 6.8px; }
+      .batter-mini-bars { gap: 4px; min-width: 112px; }
+      .batter-mini-meter { grid-template-columns: auto 36px; font-size: 6.8px; gap: 2px; }
+      .batter-mini-meter i { width: 36px; height: 7px; }
+      .batter-stat-grid { gap: 4px; font-size: 10.5px; }
+      .batter-stat-grid span:not(:last-child)::after { margin-left: 4px; }
+      .batter-stat-grid b { font-size: 11px; }
+      #currentBowlerFigures { font-size: 11.5px; }
+      #currentBowlerStamina, #currentBowlerLimit { font-size: 10px; }
       .compact-intents button { font-size: 7.4px; }
     }
   </style>
@@ -1207,10 +1264,13 @@
       <article class="player-live-card striker">
         <div class="live-card-top"><div class="label">On Strike</div><div class="strike-star">*</div></div>
         <div class="batter-name-line">
-          <h3 id="strikerName">Opening Batter</h3>
+          <div class="batter-name-wrap">
+            <h3 id="strikerName">Opening Batter</h3>
+            <span id="strikerSkillChip" class="batter-skill-chip">Skill 0</span>
+          </div>
           <div class="batter-mini-bars" aria-label="Batter confidence and fatigue">
-            <span class="batter-mini-meter">Conf<i><b id="strikerConfidenceFill" class="confidence-fill"></b></i></span>
-            <span class="batter-mini-meter">Fat<i><b id="strikerFatigueFill" class="fatigue-fill"></b></i></span>
+            <span class="batter-mini-meter">CONF<i><b id="strikerConfidenceFill" class="confidence-fill"></b></i></span>
+            <span class="batter-mini-meter">FAT<i><b id="strikerFatigueFill" class="fatigue-fill"></b></i></span>
           </div>
         </div>
         <p id="strikerInfo" class="batter-stat-grid">R 0 • B 0 • 4s 0 • 6s 0 • SR 0.00</p>
@@ -1228,10 +1288,13 @@
       <article class="player-live-card">
         <div class="live-card-top"><div class="label">Non-Striker</div></div>
         <div class="batter-name-line">
-          <h3 id="nonStrikerName">Opening Batter</h3>
+          <div class="batter-name-wrap">
+            <h3 id="nonStrikerName">Opening Batter</h3>
+            <span id="nonStrikerSkillChip" class="batter-skill-chip">Skill 0</span>
+          </div>
           <div class="batter-mini-bars" aria-label="Batter confidence and fatigue">
-            <span class="batter-mini-meter">Conf<i><b id="nonStrikerConfidenceFill" class="confidence-fill"></b></i></span>
-            <span class="batter-mini-meter">Fat<i><b id="nonStrikerFatigueFill" class="fatigue-fill"></b></i></span>
+            <span class="batter-mini-meter">CONF<i><b id="nonStrikerConfidenceFill" class="confidence-fill"></b></i></span>
+            <span class="batter-mini-meter">FAT<i><b id="nonStrikerFatigueFill" class="fatigue-fill"></b></i></span>
           </div>
         </div>
         <p id="nonStrikerInfo" class="batter-stat-grid">R 0 • B 0 • 4s 0 • 6s 0 • SR 0.00</p>
@@ -1573,6 +1636,43 @@
         .join("")
         .slice(0, 3)
         .toUpperCase();
+    }
+
+    const TEAM_PRIMARY_COLORS = {
+      "afghanistan": "#D32027",
+      "australia": "#00843D",
+      "bangladesh": "#006A4E",
+      "england": "#15295E",
+      "india": "#1D5EAB",
+      "ireland": "#169B62",
+      "new zealand": "#111827",
+      "pakistan": "#01411C",
+      "south africa": "#007A4D",
+      "sri lanka": "#1B4DA1",
+      "west indies": "#7A0026",
+      "zimbabwe": "#FFD100",
+      "scotland": "#005EB8",
+      "netherlands": "#FF7F00",
+      "nepal": "#003893",
+      "oman": "#DB161B",
+      "canada": "#D52B1E",
+      "namibia": "#003580",
+      "united arab emirates": "#00732F",
+      "united states": "#3C3B6E",
+      "united states of america": "#3C3B6E",
+      "usa": "#3C3B6E"
+    };
+
+    function getTeamPrimaryColor(teamName, fallback = "#38bdf8") {
+      const key = String(teamName || "").trim().toLowerCase();
+      return TEAM_PRIMARY_COLORS[key] || fallback;
+    }
+
+    function applyPredictionTeamColors(teams) {
+      const panel = document.getElementById("predictionPanel");
+      if (!panel) return;
+      panel.style.setProperty("--team-a-color", getTeamPrimaryColor(teams?.userTeam, "#38bdf8"));
+      panel.style.setProperty("--team-b-color", getTeamPrimaryColor(teams?.computerTeam, "#f6c453"));
     }
 
     function ballsToOvers(balls) {
@@ -3605,7 +3705,7 @@
 
       const canRestore =
         saved &&
-        ["t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-prediction-winbar-meter-hide-commentary"].includes(saved.version) &&
+        ["t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
         saved.matchIdentity === currentIdentity &&
         saved.phase !== "completed";
 
@@ -3654,7 +3754,7 @@
       const first = getStressFirstInningsInfo(currentMatch, teams);
 
       const state = {
-        version: "t20-skill-v3-prediction-winbar-meter",
+        version: "t20-skill-v3-two-color-prediction-bar",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -4162,12 +4262,13 @@
       text("predictionContext", prediction.context);
       text("predictionBarUserLabel", `${getTeamShortName(teams.userTeam)} ${prediction.userPct}%`);
       text("predictionBarCompLabel", `${getTeamShortName(teams.computerTeam)} ${prediction.compPct}%`);
-      const winBar = document.querySelector(".prediction-winbar");
+      applyPredictionTeamColors(teams);
       const userBar = document.getElementById("predictionUserBar");
       const compBar = document.getElementById("predictionCompBar");
-      if (winBar) winBar.style.setProperty("--user-win", `${clamp(prediction.userPct, 1, 99)}%`);
-      if (userBar) userBar.style.width = `${clamp(prediction.userPct, 1, 99)}%`;
-      if (compBar) compBar.style.width = `${clamp(prediction.compPct, 1, 99)}%`;
+      const userPct = clamp(Number(prediction.userPct || 0), 0, 100);
+      const compPct = clamp(Number(prediction.compPct || 0), 0, 100);
+      if (userBar) userBar.style.flexBasis = `${userPct}%`;
+      if (compBar) compBar.style.flexBasis = `${compPct}%`;
 
       if (matchState.completed) text("targetPill", matchState.resultText);
       else if (matchState.phase === "break") text("targetPill", `Target: ${matchState.innings[0].runs + 1}`);
@@ -4218,8 +4319,13 @@
         statCell("6s", stat.sixes || 0),
         statCell("SR", strikeRate)
       ];
-      if (!commentaryHidden) batterCells.push(statCell("Skill", Math.round(skill.overall)));
       setHTML(`${slot}Info`, batterCells.join(""));
+
+      const skillChip = document.getElementById(`${slot}SkillChip`);
+      if (skillChip) {
+        skillChip.textContent = `Skill ${Math.round(skill.overall)}`;
+        skillChip.style.display = commentaryHidden ? "none" : "inline-flex";
+      }
 
       const confFill = document.getElementById(`${slot}ConfidenceFill`);
       const fatFill = document.getElementById(`${slot}FatigueFill`);
@@ -4258,7 +4364,7 @@
       const eco = stat.balls ? (stat.runs / (stat.balls / 6)).toFixed(2) : "0.00";
 
       text("currentBowlerName", getPlayerName(bowler));
-      text("currentBowlerFigures", `${ballsToOvers(stat.balls)}-${stat.runs}-${stat.wickets} • Eco ${eco} • Skill ${Math.round(skill.overall)}`);
+      text("currentBowlerFigures", `O ${ballsToOvers(stat.balls)} • R ${stat.runs} • W ${stat.wickets} • Eco ${eco} • Skill ${Math.round(skill.overall)}`);
       text("currentBowlerStamina", `Stamina: ${Math.round(stat.stamina)}% • Fatigue ${Math.round(stat.fatigue)}`);
       text("currentBowlerLimit", `Limit: ${ballsToOvers(stat.balls)} / 4.0`);
       text("bowlingPlanText", getAIPlanSummary(inn) || "Manual/user controlled");
