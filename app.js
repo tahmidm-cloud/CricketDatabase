@@ -16,6 +16,7 @@ const roleFilter = document.getElementById("roleFilter");
 const resetBtn = document.getElementById("resetBtn");
 
 const PLAYER_EDITOR_STORAGE_KEY = "cm25_database_player_edits_v1";
+const PLAYER_SOURCE_SIGNATURE_KEY = "cm25_database_player_source_signature_v1";
 let editingPlayerId = null;
 const ORIGINAL_PLAYER_COPY_BY_ID = new Map();
 
@@ -98,9 +99,62 @@ const FIELD_NAMES = {
   style: ["style", "bowlingStyle", "bowling_style", "mainStyle", "main_style", "bowlingStyleAbbrev"]
 };
 
+
+function simpleHashText(value) {
+  const text = String(value ?? "");
+  let hash = 2166136261;
+
+  for (let i = 0; i < text.length; i += 1) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return (hash >>> 0).toString(36);
+}
+
+function getPlayerSourceSignature(players) {
+  const sourceShape = (players || []).map((player, index) => {
+    return {
+      id: String(player.id ?? player.playerId ?? player.player_id ?? `player_${index}`),
+      name: player.name ?? player.fullName ?? player.final_player_name ?? "",
+      nationality: player.nationality ?? player.nation ?? player.country ?? "",
+      role: player.role ?? "",
+      battingHand: player.battingHand ?? player.batting_hand ?? "",
+      bowlingType: player.bowlingType ?? player.bowling_type ?? "",
+      bowlingStyle: player.bowlingStyle ?? player.bowling_style ?? "",
+      battingOverall: player.attributes?.overall?.batting_overall ?? null,
+      bowlingOverall: player.attributes?.overall?.bowling_overall ?? null,
+      primaryBattingPosition: player.primaryBattingPosition ?? null
+    };
+  });
+
+  return simpleHashText(JSON.stringify(sourceShape));
+}
+
+function clearSavedEditsIfSourceChanged(players) {
+  const newSignature = getPlayerSourceSignature(players);
+  const oldSignature = localStorage.getItem(PLAYER_SOURCE_SIGNATURE_KEY);
+
+  if (oldSignature && oldSignature !== newSignature) {
+    localStorage.removeItem(PLAYER_EDITOR_STORAGE_KEY);
+    console.info("players.json changed, so old local database edits were cleared.");
+  }
+
+  localStorage.setItem(PLAYER_SOURCE_SIGNATURE_KEY, newSignature);
+}
+
+function clearDatabaseLocalEditsAndReload() {
+  localStorage.removeItem(PLAYER_EDITOR_STORAGE_KEY);
+  localStorage.removeItem(PLAYER_SOURCE_SIGNATURE_KEY);
+  window.location.reload();
+}
+
+
 async function loadPlayers() {
   try {
-    const response = await fetch(JSON_FILE_PATH);
+    const response = await fetch(`${JSON_FILE_PATH}?v=${Date.now()}`, {
+      cache: "no-store"
+    });
 
     if (!response.ok) {
       throw new Error("Could not load players.json");
@@ -113,6 +167,7 @@ async function loadPlayers() {
       id: String(player.id ?? player.playerId ?? player.player_id ?? `player_${index}`)
     }));
 
+    clearSavedEditsIfSourceChanged(allPlayers);
     recalculateAllPlayerPlaystyles();
     snapshotOriginalPlayers();
     applySavedPlayerEdits();
@@ -1937,7 +1992,12 @@ searchInput.addEventListener("input", applyFilters);
 nationFilter.addEventListener("change", applyFilters);
 roleFilter.addEventListener("change", applyFilters);
 
-resetBtn.addEventListener("click", () => {
+resetBtn.addEventListener("click", (event) => {
+  if (event.shiftKey) {
+    clearDatabaseLocalEditsAndReload();
+    return;
+  }
+
   searchInput.value = "";
   nationFilter.value = "all";
   roleFilter.value = "all";
@@ -1966,5 +2026,7 @@ document.addEventListener("keydown", (event) => {
     closePlayerModal();
   }
 });
+
+window.clearDatabaseLocalEditsAndReload = clearDatabaseLocalEditsAndReload;
 
 loadPlayers();

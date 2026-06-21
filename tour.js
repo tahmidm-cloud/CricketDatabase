@@ -185,6 +185,9 @@ function loadPlayersFromData(rawData, sourceLabel = "JSON file") {
 
   DATA_SOURCE_LABEL = sourceLabel;
 
+  state.tourId = null;
+  state.tourCreatedAt = null;
+  state.tourStartDate = null;
   state.userTeam = "";
   state.computerTeam = "";
   state.series = [];
@@ -296,6 +299,10 @@ const TEAM_LOGOS = {
 };
 
 const state = {
+  tourId: null,
+  tourCreatedAt: null,
+  tourStartDate: null,
+
   userTeam: "",
   computerTeam: "",
   series: [],
@@ -322,10 +329,15 @@ let squadSort = {
 
 let tourProgress = {
   completedMatchIndexes: [],
-  activeMatchIndex: null
+  activeMatchIndex: null,
+  matchResults: {}
 };
 
 const TOUR_STORAGE_KEY = "cricketTourSetupSave_v1";
+const TOUR_ID_KEY = "currentTourId_v1";
+const LEGACY_RESULT_KEY = "lastCompletedMatchResult";
+const CURRENT_MATCH_KEYS = ["currentTourMatch", "currentTourMatch_v1", "currentMatch", "tourCurrentMatch"];
+const TOSS_KEY = "currentTossResult";
 let currentScreenName = "setup";
 
 let isRestoringTour = false;
@@ -335,6 +347,106 @@ let lastComputerTeam = "";
 let teamCardsReady = false;
 
 const $ = id => document.getElementById(id);
+
+function readJSON(key, fallback = null) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJSON(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function createTourId() {
+  if (window.crypto && typeof window.crypto.randomUUID === "function") {
+    return `tour_${window.crypto.randomUUID()}`;
+  }
+  return `tour_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function getActiveTourId() {
+  return state.tourId || localStorage.getItem(TOUR_ID_KEY) || null;
+}
+
+function setActiveTourId(tourId) {
+  state.tourId = tourId;
+  if (tourId) localStorage.setItem(TOUR_ID_KEY, tourId);
+}
+
+function normalizeTourProgress(progress = {}) {
+  return {
+    completedMatchIndexes: Array.isArray(progress.completedMatchIndexes) ? progress.completedMatchIndexes : [],
+    activeMatchIndex: progress.activeMatchIndex ?? null,
+    matchResults: progress.matchResults && typeof progress.matchResults === "object" ? progress.matchResults : {}
+  };
+}
+
+function removeLocalStorageByPrefix(prefixes) {
+  Object.keys(localStorage).forEach(key => {
+    if (prefixes.some(prefix => key.startsWith(prefix))) {
+      localStorage.removeItem(key);
+    }
+  });
+}
+
+function clearActiveMatchRuntimeStorage(options = {}) {
+  const { clearResults = false } = options;
+
+  CURRENT_MATCH_KEYS.forEach(key => localStorage.removeItem(key));
+  localStorage.removeItem(TOSS_KEY);
+  localStorage.removeItem("matchSummaryReturnUrl");
+  removeLocalStorageByPrefix(["skillT20MatchState_"]);
+
+  if (clearResults) {
+    localStorage.removeItem(LEGACY_RESULT_KEY);
+    removeLocalStorageByPrefix(["lastCompletedMatchResult_"]);
+  }
+}
+
+function clearMatchResultFromObject(match) {
+  if (!match || typeof match !== "object") return match;
+
+  delete match.result;
+  delete match.resultText;
+  delete match.scoreText;
+  delete match.winner;
+  delete match.marginText;
+
+  match.completed = false;
+  match.simulated = false;
+  match.status = match.status === "completed" ? "scheduled" : (match.status || "scheduled");
+
+  if (match.match && typeof match.match === "object") {
+    clearMatchResultFromObject(match.match);
+  }
+
+  return match;
+}
+
+function isResultForCurrentTour(result) {
+  if (!result) return false;
+  const activeTourId = getActiveTourId();
+
+  // New match-center saves tourId. Legacy unscoped results are not trusted for new tours.
+  if (!activeTourId) return !result.tourId;
+  return result.tourId === activeTourId;
+}
+
+function beginFreshTourSession() {
+  const newTourId = createTourId();
+  setActiveTourId(newTourId);
+  state.tourCreatedAt = new Date().toISOString();
+  state.tourStartDate = state.tourCreatedAt;
+
+  clearActiveMatchRuntimeStorage({ clearResults: true });
+  localStorage.setItem(TOUR_ID_KEY, newTourId);
+
+  return newTourId;
+}
 
 const uniqueTeams = () =>
   [...new Set(PLAYER_DATA.map(p => p.nationality).filter(Boolean))].sort();
@@ -713,6 +825,8 @@ function createSeries() {
   if (teamPlayers(user).length < 12) return showMsg("setupMsg", `${user} has fewer than 12 available players.`);
   if (teamPlayers(computer).length < 12) return showMsg("setupMsg", `${computer} has fewer than 12 available players.`);
 
+  beginFreshTourSession();
+
   state.userTeam = user;
   state.computerTeam = computer;
   state.series = makeMatches(tests, odis, t20s);
@@ -730,10 +844,11 @@ function createSeries() {
   state.activeSquadFormat = null;
   state.activeSquadMatchIndex = null;
 
-  tourProgress = {
+  tourProgress = normalizeTourProgress({
     completedMatchIndexes: [],
-    activeMatchIndex: null
-  };
+    activeMatchIndex: null,
+    matchResults: {}
+  });
 
   saveTourState("summary");
   showScreen("summary");
@@ -1450,10 +1565,10 @@ function finishSquad() {
     so it must also write a fresh currentTourMatch.
     Otherwise select-xi.html keeps using the old one.
   */
-  localStorage.removeItem("currentTourMatch");
-  localStorage.removeItem("currentTossResult");
+  clearActiveMatchRuntimeStorage();
 
   const currentMatchData = {
+    tourId: getActiveTourId(),
     matchIndex: matchIndex,
     match: match,
     format: formatKey,
@@ -1471,6 +1586,8 @@ function finishSquad() {
     selectedComputerXI: [],
 
     toss: null,
+    returnUrl: "index.html",
+    summaryUrl: "index.html",
     savedAt: new Date().toISOString()
   };
 
@@ -1631,7 +1748,10 @@ function buildTourSchedule() {
   const schedule = [];
   let scheduleMatchIndex = 0;
 
-  const startDate = new Date();
+  const startDate = state.tourStartDate ? new Date(state.tourStartDate) : new Date();
+  if (Number.isNaN(startDate.getTime())) {
+    startDate.setTime(Date.now());
+  }
   startDate.setHours(9, 30, 0, 0);
 
   let dayOffset = 0;
@@ -1840,24 +1960,31 @@ function getMatchActionButton(match, nextPlayableMatchIndex) {
 function getSavedMatchResult(match) {
   const matchIndex = String(match?.matchIndex ?? "");
 
-  if (!matchIndex) {
-    return null;
-  }
+  if (!matchIndex) return null;
 
   const savedResult = tourProgress?.matchResults?.[matchIndex];
-
-  if (savedResult) {
+  if (isResultForCurrentTour(savedResult)) {
     return savedResult;
   }
 
   try {
     const currentMatch = JSON.parse(localStorage.getItem("currentTourMatch") || "null");
+    const currentResult = currentMatch?.result;
 
-    if (Number(currentMatch?.matchIndex) === Number(match.matchIndex) && currentMatch?.result) {
-      return currentMatch.result;
+    if (
+      Number(currentMatch?.matchIndex) === Number(match.matchIndex) &&
+      currentMatch?.tourId === getActiveTourId() &&
+      isResultForCurrentTour(currentResult)
+    ) {
+      return currentResult;
     }
   } catch (error) {
     console.warn("Could not read current match result:", error);
+  }
+
+  const legacyResult = readJSON(LEGACY_RESULT_KEY, null);
+  if (Number(legacyResult?.matchIndex) === Number(match.matchIndex) && isResultForCurrentTour(legacyResult)) {
+    return legacyResult;
   }
 
   return null;
@@ -2043,9 +2170,10 @@ function selectXIForMatch(matchIndex) {
   tourProgress.activeMatchIndex = matchIndex;
 
   // Important: remove stale match before writing the new one.
-  localStorage.removeItem("currentTourMatch");
+  clearActiveMatchRuntimeStorage();
 
   const currentMatchData = {
+    tourId: getActiveTourId(),
     matchIndex: Number(matchIndex),
     match: match,
     format: formatKey,
@@ -2065,6 +2193,8 @@ function selectXIForMatch(matchIndex) {
     selectedComputerXI: [],
 
     toss: null,
+    returnUrl: "index.html",
+    summaryUrl: "index.html",
     savedAt: new Date().toISOString()
   };
 
@@ -2075,6 +2205,13 @@ function selectXIForMatch(matchIndex) {
 }
 
 function renderSummary() {
+  tourProgress = normalizeTourProgress(tourProgress);
+
+  const legacyResult = readJSON(LEGACY_RESULT_KEY, null);
+  if (legacyResult?.tourId && legacyResult.tourId !== getActiveTourId()) {
+    localStorage.removeItem(LEGACY_RESULT_KEY);
+  }
+
   const schedule = buildTourSchedule();
   const grouped = groupScheduleByDate(schedule);
   const nextPlayableMatchIndex = getNextPlayableMatchIndex(schedule);
@@ -2121,7 +2258,9 @@ function renderSummary() {
 
 function getTourPayload() {
   return {
-    createdAt: new Date().toISOString(),
+    tourId: getActiveTourId(),
+    createdAt: state.tourCreatedAt || new Date().toISOString(),
+    tourStartDate: state.tourStartDate || state.tourCreatedAt || new Date().toISOString(),
     userTeam: state.userTeam,
     computerTeam: state.computerTeam,
     series: {
@@ -2149,7 +2288,12 @@ function copyJson() {
 
 function resetAll() {
   localStorage.removeItem(TOUR_STORAGE_KEY);
+  localStorage.removeItem(TOUR_ID_KEY);
+  clearActiveMatchRuntimeStorage({ clearResults: true });
 
+  state.tourId = null;
+  state.tourCreatedAt = null;
+  state.tourStartDate = null;
   state.userTeam = "";
   state.computerTeam = "";
   state.series = [];
@@ -2165,10 +2309,11 @@ function resetAll() {
   state.activeSquadFormat = null;
   state.activeSquadMatchIndex = null;
 
-  tourProgress = {
+  tourProgress = normalizeTourProgress({
     completedMatchIndexes: [],
-    activeMatchIndex: null
-  };
+    activeMatchIndex: null,
+    matchResults: {}
+  });
 
   currentScreenName = "setup";
 
@@ -2201,6 +2346,9 @@ function saveTourState(screenName = currentScreenName) {
   const computerTeamValue = state.computerTeam || $("computerTeamSelect")?.value || "";
 
   const saveData = {
+    tourId: getActiveTourId(),
+    createdAt: state.tourCreatedAt || new Date().toISOString(),
+    tourStartDate: state.tourStartDate || state.tourCreatedAt || new Date().toISOString(),
     currentScreen: screenName,
     userTeam: userTeamValue,
     computerTeam: computerTeamValue,
@@ -2214,6 +2362,7 @@ function saveTourState(screenName = currentScreenName) {
     activeSquadMatchIndex: state.activeSquadMatchIndex
   };
 
+  if (saveData.tourId) localStorage.setItem(TOUR_ID_KEY, saveData.tourId);
   localStorage.setItem(TOUR_STORAGE_KEY, JSON.stringify(saveData));
 }
 
@@ -2229,6 +2378,11 @@ function restoreTourStateAfterDataLoad() {
   try {
     const saved = JSON.parse(raw);
     const teams = uniqueTeams();
+
+    const savedTourId = saved.tourId || localStorage.getItem(TOUR_ID_KEY) || createTourId();
+    setActiveTourId(savedTourId);
+    state.tourCreatedAt = saved.createdAt || new Date().toISOString();
+    state.tourStartDate = saved.tourStartDate || saved.createdAt || state.tourCreatedAt;
 
     if (saved.userTeam && teams.includes(saved.userTeam)) {
       $("userTeamSelect").value = saved.userTeam;
@@ -2277,7 +2431,19 @@ function restoreTourStateAfterDataLoad() {
     }
 
     if (saved.tourProgress) {
-      tourProgress = saved.tourProgress;
+      tourProgress = normalizeTourProgress(saved.tourProgress);
+      Object.keys(tourProgress.matchResults).forEach(matchIndex => {
+        const result = tourProgress.matchResults[matchIndex];
+        if (result?.tourId && result.tourId !== getActiveTourId()) {
+          delete tourProgress.matchResults[matchIndex];
+        }
+      });
+      tourProgress.completedMatchIndexes = tourProgress.completedMatchIndexes.filter(matchIndex => {
+        const result = tourProgress.matchResults[String(matchIndex)];
+        return !result || isResultForCurrentTour(result);
+      });
+    } else {
+      tourProgress = normalizeTourProgress();
     }
     if (saved.formatSquads) {
       state.formatSquads = saved.formatSquads;
