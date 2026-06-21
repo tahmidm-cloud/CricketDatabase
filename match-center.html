@@ -939,6 +939,318 @@
       background: rgba(15, 23, 42, 0.72);
     }
 
+
+
+    .scoreboard-dropdown-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 11px;
+      min-height: 32px;
+      border-radius: 12px;
+      border: 1px solid rgba(250, 204, 21, 0.24);
+      background: rgba(250, 204, 21, 0.08);
+      color: var(--gold);
+      box-shadow: none;
+      font-size: 14px;
+      font-weight: 1000;
+      letter-spacing: -0.02em;
+    }
+
+    .scoreboard-hub-box {
+      width: min(980px, 94vw);
+      max-height: min(86vh, 760px);
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 12px;
+      border-radius: 22px;
+      padding: 16px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.99), rgba(2, 6, 23, 0.99));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scoreboard-hub-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-right: 42px;
+    }
+
+    .scoreboard-hub-head h2 { margin: 0; color: var(--gold); font-size: 20px; letter-spacing: -0.03em; }
+    .scoreboard-hub-head p { margin: 4px 0 0; color: var(--muted); font-size: 12px; font-weight: 850; }
+
+    .scoreboard-tabbar {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .scoreboard-tabbar::-webkit-scrollbar { display: none; }
+    .scoreboard-tabbar button {
+      white-space: nowrap;
+      min-height: 34px;
+      padding: 8px 11px;
+      border-radius: 999px;
+      box-shadow: none;
+      background: rgba(255,255,255,0.065);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 1000;
+    }
+    .scoreboard-tabbar button.active {
+      color: #061018;
+      border-color: rgba(250,204,21,0.45);
+      background: linear-gradient(135deg, #facc15, #fb923c);
+    }
+
+    .scoreboard-hub-content {
+      min-height: 0;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .scoreboard-toggle-row {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .scoreboard-toggle-row button {
+      min-height: 32px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      box-shadow: none;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 1000;
+    }
+    .scoreboard-toggle-row button.active {
+      color: #fff;
+      border-color: rgba(56,189,248,0.45);
+      background: rgba(56,189,248,0.16);
+    }
+
+    .hub-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .hub-panel-card {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.045);
+      border-radius: 16px;
+      overflow: hidden;
+      min-width: 0;
+    }
+    .hub-panel-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 11px;
+      background: rgba(255,255,255,0.055);
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 1000;
+      color: var(--gold);
+    }
+    .hub-panel-title b { color: #fff; white-space: nowrap; }
+    .hub-panel-body { padding: 10px; }
+
+    .hub-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .hub-table th,
+    .hub-table td {
+      border-bottom: 1px solid rgba(255,255,255,0.075);
+      padding: 8px 5px;
+      font-size: 12px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .hub-table th:first-child,
+    .hub-table td:first-child { text-align: left; }
+    .hub-table th { color: var(--blue); font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .hub-table td small { display: block; color: var(--muted); font-size: 10px; margin-top: 2px; white-space: normal; }
+
+    .over-card-list { display: grid; gap: 8px; }
+    .over-card {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.045);
+      border-radius: 15px;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+    .over-card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 1000;
+      color: #fff;
+    }
+    .over-card-head span { color: var(--gold); }
+    .over-card-meta {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 7px;
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 900;
+    }
+    .over-card-meta b { display: block; margin-top: 2px; color: #f8fafc; font-size: 12px; }
+    .over-ball-row { display: flex; flex-wrap: wrap; gap: 5px; }
+    .over-ball-chip {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.08);
+      font-size: 11px;
+      font-weight: 1000;
+    }
+
+    .chart-wrap {
+      border: 1px solid var(--line);
+      background: rgba(2,6,23,0.38);
+      border-radius: 16px;
+      padding: 10px;
+      overflow: hidden;
+    }
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 950;
+    }
+    .chart-legend i {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      margin-right: 5px;
+      vertical-align: -1px;
+    }
+    .hub-svg { width: 100%; height: 230px; display: block; overflow: visible; }
+    .hub-axis { stroke: rgba(148,163,184,0.24); stroke-width: 1; }
+    .hub-grid-line { stroke: rgba(148,163,184,0.11); stroke-width: 1; }
+    .hub-chart-label { fill: #94a3b8; font-size: 10px; font-weight: 900; }
+    .hub-chart-value { fill: #f8fafc; font-size: 10px; font-weight: 1000; }
+
+    .manhattan-bars {
+      display: grid;
+      grid-template-columns: repeat(20, minmax(12px, 1fr));
+      align-items: end;
+      gap: 5px;
+      height: 230px;
+      padding: 14px 6px 22px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(2,6,23,0.38);
+    }
+    .manhattan-bar-wrap {
+      height: 100%;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 4px;
+      align-items: end;
+      min-width: 0;
+    }
+    .manhattan-bar {
+      width: 100%;
+      min-height: 5px;
+      border-radius: 8px 8px 3px 3px;
+      position: relative;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
+    }
+    .manhattan-bar small {
+      position: absolute;
+      left: 50%;
+      top: -15px;
+      transform: translateX(-50%);
+      font-size: 9px;
+      color: #f8fafc;
+      font-weight: 1000;
+    }
+    .manhattan-wicket-dot {
+      position: absolute;
+      right: -3px;
+      top: -7px;
+      width: 13px;
+      height: 13px;
+      border-radius: 999px;
+      background: #fb7185;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 8px;
+      font-weight: 1000;
+      border: 1px solid rgba(255,255,255,0.45);
+    }
+    .manhattan-over-label {
+      color: var(--muted);
+      font-size: 8px;
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .partnership-list, .fow-list { display: grid; gap: 8px; }
+    .mini-stat-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.045);
+      border-radius: 14px;
+      padding: 10px;
+      font-size: 12px;
+      font-weight: 950;
+    }
+    .mini-stat-row span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+    .mini-stat-row b { color: var(--gold); white-space: nowrap; }
+    .empty-hub-msg {
+      border: 1px dashed rgba(148,163,184,0.25);
+      background: rgba(255,255,255,0.035);
+      border-radius: 16px;
+      padding: 18px;
+      color: var(--muted);
+      font-weight: 900;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    @media (max-width: 760px) {
+      .scoreboard-hub-box {
+        width: 100vw;
+        height: 92vh;
+        max-height: 92vh;
+        align-self: end;
+        border-radius: 22px 22px 0 0;
+        padding: 14px;
+      }
+      .player-option-modal:has(.scoreboard-hub-box) { place-items: end center; }
+      .hub-card-grid { grid-template-columns: 1fr; }
+      .over-card-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hub-svg { height: 210px; }
+      .manhattan-bars { height: 210px; gap: 3px; }
+      .hub-table th, .hub-table td { font-size: 11px; padding: 7px 4px; }
+    }
+
     .save-exit-btn {
       background: linear-gradient(135deg, #22c55e, #facc15);
       color: #061018;
@@ -1344,7 +1656,7 @@
 
       <article class="card scorecard-panel">
         <div class="section-title">
-          <h3>Scorecard</h3>
+          <h3><button id="scoreboardDropdownBtn" class="scoreboard-dropdown-btn" type="button" onclick="openScoreboardHub('scorecard')">Scoreboard ▾</button></h3>
           <div class="scorecard-title-actions">
             <button id="scoreInnings1Tab" class="innings-tab active" type="button" onclick="selectScorecardInnings(1)"><span id="scoreInnings1TabName">1st Innings</span> <b id="scoreInnings1TabScore">0/0</b></button>
             <button id="scoreInnings2Tab" class="innings-tab" type="button" onclick="selectScorecardInnings(2)" disabled><span id="scoreInnings2TabName">2nd Innings</span> <b id="scoreInnings2TabScore">—</b></button>
@@ -1409,6 +1721,30 @@
         <button onclick="returnToSummaryPage()">Save & Exit</button>
         <button class="secondary" onclick="closeMatchCompleteModal()">Stay on Scorecard</button>
       </div>
+    </div>
+  </div>
+
+
+
+  <div id="scoreboardHubModal" class="player-option-modal hidden">
+    <div class="scoreboard-hub-box">
+      <button class="player-option-close" onclick="closeScoreboardHub()">×</button>
+      <div class="scoreboard-hub-head">
+        <div>
+          <h2>Scoreboard Center</h2>
+          <p id="scoreboardHubSub">Scorecard, over-by-over, worm, prediction, Manhattan, partnerships, and wickets.</p>
+        </div>
+      </div>
+      <div class="scoreboard-tabbar" id="scoreboardTabbar">
+        <button type="button" data-hub-tab="scorecard" onclick="selectScoreboardHubTab('scorecard')">Scorecard</button>
+        <button type="button" data-hub-tab="overs" onclick="selectScoreboardHubTab('overs')">Over by over</button>
+        <button type="button" data-hub-tab="worm" onclick="selectScoreboardHubTab('worm')">Run-rate worm</button>
+        <button type="button" data-hub-tab="prediction" onclick="selectScoreboardHubTab('prediction')">Prediction</button>
+        <button type="button" data-hub-tab="manhattan" onclick="selectScoreboardHubTab('manhattan')">Manhattan</button>
+        <button type="button" data-hub-tab="partnerships" onclick="selectScoreboardHubTab('partnerships')">Partnerships</button>
+        <button type="button" data-hub-tab="fow" onclick="selectScoreboardHubTab('fow')">FOW</button>
+      </div>
+      <div id="scoreboardHubContent" class="scoreboard-hub-content"></div>
     </div>
   </div>
 
@@ -1487,6 +1823,10 @@
     let isStressTesting = false;
     let commentaryHidden = false;
     let scorecardInningsNo = 1;
+    let scoreboardHubTab = "scorecard";
+    let scoreboardOverInningsNo = 1;
+    let scoreboardManhattanInningsNo = 1;
+    let scoreboardScorecardInningsNo = 1;
 
     function clamp(value, min, max) {
       const n = Number(value);
@@ -2668,6 +3008,10 @@
         battingStats,
         bowlingStats,
         currentOverEvents: [],
+        currentOverWickets: 0,
+        overSummaries: [],
+        fallOfWickets: [],
+        partnerships: [],
         partnershipRuns: 0,
         partnershipBalls: 0
       };
@@ -2680,7 +3024,7 @@
       const bowlingXI = getSelectedXI(currentMatch, first.bowlingSide);
 
       const state = {
-        version: "t20-skill-v3-scorecard-summary-exit",
+        version: "t20-skill-v3-scoreboard-hub-hotfix",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -3117,6 +3461,7 @@
       }
 
       if (outcome.type === "wicket") {
+        const partnerKeyBeforeWicket = inn.nonStrikerKey;
         inn.wickets += 1;
         batterStat.balls += 1;
         batterStat.out = true;
@@ -3128,6 +3473,8 @@
         inn.balls += 1;
         inn.legalBallsThisOver += 1;
         inn.partnershipBalls += 1;
+        inn.currentOverWickets = Number(inn.currentOverWickets || 0) + 1;
+        recordWicketAndPartnership(inn, batterStat, batter, partnerKeyBeforeWicket);
         chip = "W";
         typeClass = "wicket";
         textLine = makeWicketText(outcome.dismissal, batter, bowler);
@@ -3214,12 +3561,15 @@
 
     function finishOver() {
       const inn = currentInnings();
+      ensureScoreboardData(inn);
       const bowlerStat = ensureBowlerStat(inn.currentBowlerKey);
+      recordOverSummary(inn);
       if (inn.currentOverRuns === 0) bowlerStat.maidens += 1;
       bowlerStat.lastOverBowled = Math.floor((inn.balls - 1) / 6);
       inn.previousBowlerKey = inn.currentBowlerKey;
       inn.legalBallsThisOver = 0;
       inn.currentOverRuns = 0;
+      inn.currentOverWickets = 0;
       inn.currentOverEvents = [];
       rotateStrike();
       pickAutoNextBowler();
@@ -3272,6 +3622,10 @@
       const targetReached = inn.target !== null && inn.runs >= inn.target;
 
       if (!allOut && !oversDone && !targetReached) return;
+
+      if (inn.legalBallsThisOver > 0 && inn.currentOverEvents?.length) {
+        recordOverSummary(inn);
+      }
 
       if (matchState.inningsNo === 1) {
         matchState.phase = "break";
@@ -3705,11 +4059,13 @@
 
       const canRestore =
         saved &&
-        ["t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
+        ["t20-skill-v3-scoreboard-hub-hotfix", "t20-skill-v3-scoreboard-hub", "t20-skill-v3-two-color-prediction-bar", "t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
         saved.matchIdentity === currentIdentity &&
         saved.phase !== "completed";
 
       matchState = canRestore ? saved : createInitialMatchState(currentMatchCache);
+      hydrateScoreboardData(matchState);
+      matchState.version = "t20-skill-v3-scoreboard-hub-hotfix";
       persist();
       render();
     }
@@ -3754,7 +4110,7 @@
       const first = getStressFirstInningsInfo(currentMatch, teams);
 
       const state = {
-        version: "t20-skill-v3-two-color-prediction-bar",
+        version: "t20-skill-v3-scoreboard-hub-hotfix",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -4216,6 +4572,363 @@
 
 
     /* =========================================================
+       SCOREBOARD HUB DATA + RENDER HELPERS
+       Hotfix: these functions power the dropdown popup and prevent
+       hydrateScoreboardData / recordOverSummary reference errors.
+    ========================================================= */
+
+    function ensureScoreboardData(inn) {
+      if (!inn) return inn;
+      if (!Array.isArray(inn.overSummaries)) inn.overSummaries = [];
+      if (!Array.isArray(inn.fallOfWickets)) inn.fallOfWickets = [];
+      if (!Array.isArray(inn.partnerships)) inn.partnerships = [];
+      if (!Array.isArray(inn.currentOverEvents)) inn.currentOverEvents = [];
+      if (!inn.extras) inn.extras = { wides: 0, noBalls: 0, byes: 0, legByes: 0 };
+      inn.currentOverRuns = Number(inn.currentOverRuns || 0);
+      inn.currentOverWickets = Number(inn.currentOverWickets || 0);
+      inn.partnershipRuns = Number(inn.partnershipRuns || 0);
+      inn.partnershipBalls = Number(inn.partnershipBalls || 0);
+      return inn;
+    }
+
+    function hydrateScoreboardData(state) {
+      if (!state) return state;
+      (state.innings || []).forEach(ensureScoreboardData);
+      if (!Number.isFinite(Number(scoreboardOverInningsNo))) scoreboardOverInningsNo = 1;
+      if (!Number.isFinite(Number(scoreboardManhattanInningsNo))) scoreboardManhattanInningsNo = 1;
+      if (!Number.isFinite(Number(scoreboardScorecardInningsNo))) scoreboardScorecardInningsNo = 1;
+      const maxInn = Math.max(1, state.innings?.length || 1);
+      scoreboardOverInningsNo = clamp(Number(scoreboardOverInningsNo || 1), 1, maxInn);
+      scoreboardManhattanInningsNo = clamp(Number(scoreboardManhattanInningsNo || 1), 1, maxInn);
+      scoreboardScorecardInningsNo = clamp(Number(scoreboardScorecardInningsNo || 1), 1, maxInn);
+      return state;
+    }
+
+    function recordWicketAndPartnership(inn, batterStat, batter, partnerKeyBeforeWicket) {
+      if (!inn || !batterStat) return;
+      ensureScoreboardData(inn);
+      const inningsNo = (matchState?.innings || []).indexOf(inn) + 1 || matchState?.inningsNo || 1;
+      const wicketNo = Number(inn.wickets || 0);
+      const partner = getPlayerByKey(inn.battingXI, partnerKeyBeforeWicket);
+      const overText = ballsToOvers(inn.balls);
+      const outName = getPlayerName(batter);
+      const partnerName = partner ? getPlayerName(partner) : "Partner";
+      const partnership = {
+        innings: inningsNo,
+        wicket: wicketNo,
+        batterA: outName,
+        batterB: partnerName,
+        runs: Number(inn.partnershipRuns || 0),
+        balls: Number(inn.partnershipBalls || 0),
+        endedAt: `${inn.runs}/${wicketNo}`,
+        over: overText
+      };
+      inn.partnerships.push(partnership);
+      inn.fallOfWickets.push({
+        innings: inningsNo,
+        wicket: wicketNo,
+        score: `${inn.runs}/${wicketNo}`,
+        batter: outName,
+        over: overText,
+        howOut: batterStat.howOut || "out"
+      });
+    }
+
+    function getInningsByNo(no) {
+      if (!matchState?.innings?.length) return null;
+      const target = clamp(Number(no || 1), 1, matchState.innings.length);
+      return matchState.innings[target - 1] || null;
+    }
+
+    function getInningsToggleHTML(activeNo, onclickName) {
+      const first = matchState?.innings?.[0] || null;
+      const second = matchState?.innings?.[1] || null;
+      return `
+        <div class="scoreboard-toggle-row">
+          <button type="button" class="${activeNo === 1 ? "active" : ""}" ${first ? `onclick="${onclickName}(1)"` : "disabled"}>${first ? getTeamShortName(first.battingTeam) : "1st"}</button>
+          <button type="button" class="${activeNo === 2 ? "active" : ""}" ${second ? `onclick="${onclickName}(2)"` : "disabled"}>${second ? getTeamShortName(second.battingTeam) : "2nd"}</button>
+        </div>
+      `;
+    }
+
+    function getPredictionSnapshot() {
+      if (!matchState) return { userPct: 50, compPct: 50 };
+      const userRatings = getTeamRatings(matchState.userXI);
+      const compRatings = getTeamRatings(matchState.computerXI);
+      return calculateLivePrediction(matchState, userRatings, compRatings);
+    }
+
+    function recordOverSummary(inn) {
+      if (!inn || !matchState) return;
+      ensureScoreboardData(inn);
+      const inningsNo = (matchState.innings || []).indexOf(inn) + 1 || matchState.inningsNo || 1;
+      const over = Math.ceil(Number(inn.balls || 0) / 6);
+      if (!over) return;
+
+      const userRatings = getTeamRatings(matchState.userXI);
+      const compRatings = getTeamRatings(matchState.computerXI);
+      const battingRatings = getRatingsForSide(inn.battingSide, userRatings, compRatings);
+      const bowlingRatings = getRatingsForSide(inn.bowlingSide, userRatings, compRatings);
+      const prediction = calculateLivePrediction(matchState, userRatings, compRatings);
+      const projectedScore = inn.target
+        ? Math.max(0, inn.target - inn.runs)
+        : estimateProjectedScore(inn, battingRatings, bowlingRatings, matchState.maxBalls || 120);
+
+      const summary = {
+        innings: inningsNo,
+        battingTeam: inn.battingTeam,
+        bowlingTeam: inn.bowlingTeam,
+        over,
+        runs: Number(inn.currentOverRuns || 0),
+        wickets: Number(inn.currentOverWickets || 0),
+        balls: (inn.currentOverEvents || []).map(ev => ev.label || "•"),
+        score: Number(inn.runs || 0),
+        wicketsTotal: Number(inn.wickets || 0),
+        runRate: Number(runRate(inn.runs, inn.balls)),
+        projectedScore,
+        userWinPct: Number(prediction.userPct || 50),
+        compWinPct: Number(prediction.compPct || 50),
+        timestamp: Date.now()
+      };
+
+      const existingIndex = inn.overSummaries.findIndex(item => Number(item.over) === over);
+      if (existingIndex >= 0) inn.overSummaries[existingIndex] = summary;
+      else inn.overSummaries.push(summary);
+    }
+
+    function openScoreboardHub(tab = "scorecard") {
+      scoreboardHubTab = tab || scoreboardHubTab || "scorecard";
+      hydrateScoreboardData(matchState);
+      const modal = document.getElementById("scoreboardHubModal");
+      if (modal) modal.classList.remove("hidden");
+      renderScoreboardHub();
+    }
+
+    function closeScoreboardHub() {
+      document.getElementById("scoreboardHubModal")?.classList.add("hidden");
+    }
+
+    function selectScoreboardHubTab(tab) {
+      scoreboardHubTab = tab || "scorecard";
+      renderScoreboardHub();
+    }
+
+    function selectScoreboardOverInnings(no) {
+      scoreboardOverInningsNo = Number(no) || 1;
+      renderScoreboardHub();
+    }
+
+    function selectScoreboardManhattanInnings(no) {
+      scoreboardManhattanInningsNo = Number(no) || 1;
+      renderScoreboardHub();
+    }
+
+    function selectScoreboardScorecardInnings(no) {
+      scoreboardScorecardInningsNo = Number(no) || 1;
+      renderScoreboardHub();
+    }
+
+    function renderScoreboardHub() {
+      const modal = document.getElementById("scoreboardHubModal");
+      if (!modal || modal.classList.contains("hidden")) return;
+      hydrateScoreboardData(matchState);
+      document.querySelectorAll("[data-hub-tab]").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.hubTab === scoreboardHubTab);
+      });
+      const content = document.getElementById("scoreboardHubContent");
+      if (!content) return;
+      const tab = scoreboardHubTab || "scorecard";
+      const renderers = {
+        scorecard: renderHubScorecard,
+        overs: renderHubOvers,
+        worm: renderHubWorm,
+        prediction: renderHubPrediction,
+        manhattan: renderHubManhattan,
+        partnerships: renderHubPartnerships,
+        fow: renderHubFOW
+      };
+      content.innerHTML = (renderers[tab] || renderHubScorecard)();
+    }
+
+    function renderHubScorecard() {
+      const activeNo = clamp(Number(scoreboardScorecardInningsNo || 1), 1, matchState?.innings?.length || 1);
+      scoreboardScorecardInningsNo = activeNo;
+      const inn = getInningsByNo(activeNo);
+      if (!inn) return `<div class="empty-hub-msg">No scorecard yet.</div>`;
+      const batRows = inn.battingXI.map(player => {
+        const key = getPlayerKey(player);
+        const stat = inn.battingStats[key] || createBatterStat(player);
+        const status = stat.out ? stat.howOut : ((stat.runs || stat.balls) ? "not out" : "");
+        return `<tr><td>${escapeHTML(getPlayerName(player))}<small>${escapeHTML(status)}</small></td><td>${stat.runs}</td><td>${stat.balls}</td><td>${stat.fours}</td><td>${stat.sixes}</td><td>${strikeRate(stat.runs, stat.balls)}</td></tr>`;
+      }).join("");
+      const bowlRows = Object.values(inn.bowlingStats || {})
+        .filter(s => s.balls > 0 || s.wickets > 0)
+        .sort((a, b) => b.balls - a.balls)
+        .map(stat => {
+          const eco = stat.balls ? (stat.runs / (stat.balls / 6)).toFixed(2) : "0.00";
+          return `<tr><td>${escapeHTML(stat.name)}</td><td>${ballsToOvers(stat.balls)}</td><td>${stat.runs}</td><td>${stat.wickets}</td><td>${eco}</td></tr>`;
+        }).join("") || `<tr><td colspan="5">No bowling yet.</td></tr>`;
+      return `
+        ${getInningsToggleHTML(activeNo, "selectScoreboardScorecardInnings")}
+        <div class="hub-card-grid">
+          <div class="hub-panel-card">
+            <div class="hub-panel-title"><span>${escapeHTML(inn.battingTeam)} batting</span><b>${inn.runs}/${inn.wickets} (${ballsToOvers(inn.balls)})</b></div>
+            <div class="hub-panel-body"><table class="hub-table"><thead><tr><th>Batter</th><th>R</th><th>B</th><th>4s</th><th>6s</th><th>SR</th></tr></thead><tbody>${batRows}</tbody></table></div>
+          </div>
+          <div class="hub-panel-card">
+            <div class="hub-panel-title"><span>${escapeHTML(inn.bowlingTeam)} bowling</span><b>Figures</b></div>
+            <div class="hub-panel-body"><table class="hub-table"><thead><tr><th>Bowler</th><th>O</th><th>R</th><th>W</th><th>Eco</th></tr></thead><tbody>${bowlRows}</tbody></table></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHubOvers() {
+      const activeNo = clamp(Number(scoreboardOverInningsNo || 1), 1, matchState?.innings?.length || 1);
+      scoreboardOverInningsNo = activeNo;
+      const inn = getInningsByNo(activeNo);
+      if (!inn) return `<div class="empty-hub-msg">No innings selected.</div>`;
+      const overs = (inn.overSummaries || []).slice().sort((a, b) => b.over - a.over);
+      if (!overs.length) return `${getInningsToggleHTML(activeNo, "selectScoreboardOverInnings")}<div class="empty-hub-msg">Over-by-over appears after the first completed over.</div>`;
+      return `
+        ${getInningsToggleHTML(activeNo, "selectScoreboardOverInnings")}
+        <div class="over-card-list">
+          ${overs.map(item => `
+            <div class="over-card">
+              <div class="over-card-head"><span>Over ${item.over}</span><b>${item.runs} runs${item.wickets ? `, ${item.wickets} wicket${item.wickets > 1 ? "s" : ""}` : ""}</b></div>
+              <div class="over-ball-row">${(item.balls || []).map(ball => `<span class="over-ball-chip ${ball === "W" ? "wicket" : ""}">${escapeHTML(ball)}</span>`).join("")}</div>
+              <div class="over-card-meta">
+                <span>Score<b>${item.score}/${item.wicketsTotal}</b></span>
+                <span>Run rate<b>${Number(item.runRate || 0).toFixed(2)}</b></span>
+                <span>Projected<b>${item.projectedScore ?? "—"}</b></span>
+                <span>Win chance<b>${getTeamShortName(matchState.teams.userTeam)} ${item.userWinPct}%</b></span>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function getCombinedOverPoints() {
+      const first = matchState?.innings?.[0]?.overSummaries || [];
+      const second = matchState?.innings?.[1]?.overSummaries || [];
+      const maxOver = Math.max(1, ...first.map(o => Number(o.over || 0)), ...second.map(o => Number(o.over || 0)), 20);
+      const rows = [];
+      for (let over = 1; over <= maxOver; over += 1) {
+        rows.push({
+          over,
+          first: first.find(o => Number(o.over) === over) || null,
+          second: second.find(o => Number(o.over) === over) || null
+        });
+      }
+      return rows;
+    }
+
+    function svgLineChart({ rows, series, yMax = 100, yLabel = "" }) {
+      const width = 860;
+      const height = 250;
+      const padL = 42;
+      const padR = 18;
+      const padT = 18;
+      const padB = 30;
+      const plotW = width - padL - padR;
+      const plotH = height - padT - padB;
+      const maxX = Math.max(1, ...rows.map(r => Number(r.over || 0)));
+      const x = over => padL + ((Number(over || 0) - 1) / Math.max(1, maxX - 1)) * plotW;
+      const y = val => padT + (1 - clamp(Number(val || 0), 0, yMax) / yMax) * plotH;
+      const grid = [0, 25, 50, 75, 100].filter(v => v <= yMax).map(v => `
+        <line class="hub-grid-line" x1="${padL}" y1="${y(v)}" x2="${width - padR}" y2="${y(v)}"></line>
+        <text class="hub-chart-label" x="8" y="${y(v) + 4}">${v}</text>
+      `).join("");
+      const lines = series.map(s => {
+        const pts = rows
+          .map(r => ({ over: r.over, value: s.value(r) }))
+          .filter(p => p.value !== null && p.value !== undefined && Number.isFinite(Number(p.value)));
+        if (!pts.length) return "";
+        const d = pts.map((p, i) => `${i ? "L" : "M"}${x(p.over).toFixed(1)},${y(p.value).toFixed(1)}`).join(" ");
+        const last = pts[pts.length - 1];
+        return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="${x(last.over)}" cy="${y(last.value)}" r="4" fill="${s.color}"></circle>`;
+      }).join("");
+      return `<div class="chart-wrap"><svg class="hub-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHTML(yLabel)} chart">${grid}<line class="hub-axis" x1="${padL}" y1="${height - padB}" x2="${width - padR}" y2="${height - padB}"></line><line class="hub-axis" x1="${padL}" y1="${padT}" x2="${padL}" y2="${height - padB}"></line>${lines}<text class="hub-chart-label" x="${width / 2 - 20}" y="${height - 8}">Overs</text></svg></div>`;
+    }
+
+    function renderHubWorm() {
+      const first = matchState?.innings?.[0];
+      const second = matchState?.innings?.[1];
+      const rows = getCombinedOverPoints();
+      const hasData = rows.some(r => r.first || r.second);
+      if (!hasData) return `<div class="empty-hub-msg">Run-rate worm appears after completed overs.</div>`;
+      const colorA = getTeamPrimaryColor(first?.battingTeam || matchState.teams.userTeam, "#38bdf8");
+      const colorB = getTeamPrimaryColor(second?.battingTeam || matchState.teams.computerTeam, "#f6c453");
+      const allRates = rows.flatMap(r => [r.first?.runRate, r.second?.runRate].filter(v => Number.isFinite(Number(v))));
+      const yMax = Math.max(12, Math.ceil(Math.max(...allRates, 10) + 2));
+      return `
+        <div class="chart-legend"><span><i style="background:${colorA}"></i>${escapeHTML(first?.battingTeam || "1st innings")}</span>${second ? `<span><i style="background:${colorB}"></i>${escapeHTML(second.battingTeam)}</span>` : ""}</div>
+        ${svgLineChart({ rows, yMax, yLabel: "Run rate worm", series: [
+          { color: colorA, value: r => r.first?.runRate ?? null },
+          { color: colorB, value: r => r.second?.runRate ?? null }
+        ] })}
+      `;
+    }
+
+    function renderHubPrediction() {
+      const rows = getCombinedOverPoints();
+      const hasData = rows.some(r => r.first || r.second);
+      if (!hasData) return `<div class="empty-hub-msg">Prediction graph appears after completed overs.</div>`;
+      const teams = matchState.teams || {};
+      const colorA = getTeamPrimaryColor(teams.userTeam, "#38bdf8");
+      const colorB = getTeamPrimaryColor(teams.computerTeam, "#f6c453");
+      return `
+        <div class="chart-legend"><span><i style="background:${colorA}"></i>${escapeHTML(teams.userTeam || "Team A")}</span><span><i style="background:${colorB}"></i>${escapeHTML(teams.computerTeam || "Team B")}</span></div>
+        ${svgLineChart({ rows, yMax: 100, yLabel: "Win prediction", series: [
+          { color: colorA, value: r => r.second?.userWinPct ?? r.first?.userWinPct ?? null },
+          { color: colorB, value: r => r.second?.compWinPct ?? r.first?.compWinPct ?? null }
+        ] })}
+      `;
+    }
+
+    function renderHubManhattan() {
+      const activeNo = clamp(Number(scoreboardManhattanInningsNo || 1), 1, matchState?.innings?.length || 1);
+      scoreboardManhattanInningsNo = activeNo;
+      const inn = getInningsByNo(activeNo);
+      if (!inn) return `<div class="empty-hub-msg">No innings selected.</div>`;
+      const summaries = (inn.overSummaries || []).slice().sort((a, b) => a.over - b.over);
+      const maxRuns = Math.max(1, ...summaries.map(o => Number(o.runs || 0)), 18);
+      const teamColor = getTeamPrimaryColor(inn.battingTeam, "#38bdf8");
+      const bars = Array.from({ length: 20 }, (_, i) => {
+        const over = i + 1;
+        const item = summaries.find(o => Number(o.over) === over);
+        const runs = Number(item?.runs || 0);
+        const h = item ? clamp((runs / maxRuns) * 100, 4, 100) : 4;
+        const wicketCount = Number(item?.wickets || 0);
+        return `<div class="manhattan-bar-wrap"><div class="manhattan-bar" style="height:${h}%;background:${teamColor};opacity:${item ? 1 : 0.22}"><small>${item ? runs : ""}</small>${wicketCount ? `<span class="manhattan-wicket-dot">${wicketCount}</span>` : ""}</div><div class="manhattan-over-label">${over}</div></div>`;
+      }).join("");
+      return `${getInningsToggleHTML(activeNo, "selectScoreboardManhattanInnings")}<div class="manhattan-bars">${bars}</div>`;
+    }
+
+    function renderHubPartnerships() {
+      const chunks = (matchState?.innings || []).map((inn, idx) => {
+        ensureScoreboardData(inn);
+        const current = (!matchState.completed && idx === (matchState.inningsNo - 1))
+          ? [{ batterA: getPlayerName(getPlayerByKey(inn.battingXI, inn.strikerKey)), batterB: getPlayerName(getPlayerByKey(inn.battingXI, inn.nonStrikerKey)), runs: inn.partnershipRuns || 0, balls: inn.partnershipBalls || 0, current: true }]
+          : [];
+        const rows = [...current, ...(inn.partnerships || []).slice().reverse()];
+        return `<div class="hub-panel-card"><div class="hub-panel-title"><span>${escapeHTML(inn.battingTeam)} partnerships</span><b>${idx + 1}${idx === 0 ? "st" : "nd"}</b></div><div class="hub-panel-body partnership-list">${rows.length ? rows.map(p => `<div class="mini-stat-row"><span>${escapeHTML(p.batterA)} / ${escapeHTML(p.batterB)}${p.current ? " • current" : ""}</span><b>${p.runs} off ${p.balls}</b></div>`).join("") : `<div class="empty-hub-msg">No partnerships recorded yet.</div>`}</div></div>`;
+      }).join("");
+      return `<div class="hub-card-grid">${chunks || `<div class="empty-hub-msg">No innings yet.</div>`}</div>`;
+    }
+
+    function renderHubFOW() {
+      const chunks = (matchState?.innings || []).map((inn, idx) => {
+        ensureScoreboardData(inn);
+        const rows = (inn.fallOfWickets || []).slice().reverse();
+        return `<div class="hub-panel-card"><div class="hub-panel-title"><span>${escapeHTML(inn.battingTeam)} fall of wickets</span><b>${idx + 1}${idx === 0 ? "st" : "nd"}</b></div><div class="hub-panel-body fow-list">${rows.length ? rows.map(w => `<div class="mini-stat-row"><span>${escapeHTML(w.score)} ${escapeHTML(w.batter)}<small>${escapeHTML(w.howOut || "")}</small></span><b>${escapeHTML(w.over)} ov</b></div>`).join("") : `<div class="empty-hub-msg">No wickets yet.</div>`}</div></div>`;
+      }).join("");
+      return `<div class="hub-card-grid">${chunks || `<div class="empty-hub-msg">No innings yet.</div>`}</div>`;
+    }
+
+
+    /* =========================================================
        RENDERING
     ========================================================= */
 
@@ -4284,6 +4997,7 @@
       renderBowlerCard();
       renderCommentary();
       renderScorecard();
+      renderScoreboardHub();
       renderButtons();
       renderCommentaryVisibility();
       document.getElementById("out").textContent = JSON.stringify({
