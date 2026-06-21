@@ -1,8 +1,8 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#030712">
-  <title>T20 Skill Match Center</title>
+  <title>T20 Skill Match Center - Compact Controls</title>
   <style>
     :root {
       --bg: #030712;
@@ -26,6 +26,17 @@
     }
 
     * { box-sizing: border-box; }
+
+    html, body, button, a, input, select, textarea {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      overscroll-behavior: none;
+    }
 
     html, body {
       margin: 0;
@@ -100,113 +111,6 @@
     }
 
     .header-actions { justify-content: flex-end; }
-
-    .live-win-prob {
-      width: min(430px, 42vw);
-      min-width: 280px;
-      padding: 7px 9px;
-      border-radius: 16px;
-      border: 1px solid rgba(148, 163, 184, 0.20);
-      background:
-        linear-gradient(180deg, rgba(15,23,42,0.88), rgba(2,6,23,0.78));
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.055),
-        0 12px 28px rgba(0,0,0,0.22);
-    }
-
-    .win-prob-title {
-      text-align: center;
-      font-size: 9px;
-      line-height: 1;
-      color: var(--muted);
-      font-weight: 1000;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      margin-bottom: 5px;
-    }
-
-    .win-prob-row {
-      display: grid;
-      grid-template-columns: 58px minmax(120px, 1fr) 58px;
-      align-items: center;
-      gap: 7px;
-    }
-
-    .win-team {
-      min-width: 0;
-      font-size: 10px;
-      line-height: 1;
-      font-weight: 1000;
-      color: #f8fafc;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .win-team.left { text-align: right; }
-    .win-team.right { text-align: left; }
-
-    .win-bar {
-      position: relative;
-      height: 13px;
-      border-radius: 999px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.16);
-      background: var(--right-win-color, #f6c453);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.22),
-        inset 0 -6px 12px rgba(0,0,0,0.22),
-        0 0 16px rgba(0,0,0,0.18);
-    }
-
-    .win-fill-left {
-      position: absolute;
-      inset: 0 auto 0 0;
-      width: var(--left-win, 50%);
-      background: var(--left-win-color, #38bdf8);
-      border-radius: 999px 0 0 999px;
-      transition: width 0.28s ease;
-    }
-
-    .win-midline {
-      position: absolute;
-      top: -2px;
-      bottom: -2px;
-      left: var(--left-win, 50%);
-      width: 2px;
-      transform: translateX(-1px);
-      background: rgba(255,255,255,0.72);
-      box-shadow: 0 0 12px rgba(255,255,255,0.34);
-      transition: left 0.28s ease;
-    }
-
-    .win-prob-percent-row {
-      margin-top: 4px;
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      gap: 8px;
-      font-size: 10px;
-      line-height: 1;
-      color: var(--muted);
-      font-weight: 1000;
-    }
-
-    .win-prob-percent-row .left-percent {
-      text-align: left;
-      color: var(--left-win-color, #38bdf8);
-    }
-
-    .win-prob-percent-row .right-percent {
-      text-align: right;
-      color: var(--right-win-color, #f6c453);
-    }
-
-    .win-prob-percent-row span {
-      color: #e5e7eb;
-      font-size: 9px;
-      letter-spacing: 0.08em;
-    }
 
     .teams-vs {
       display: flex;
@@ -337,6 +241,8 @@
     }
 
     .score-micro-row b, .score-metrics-inline b, .score-bowling-team b { color: var(--text); }
+    #rrrWrap { color: var(--gold2); font-weight: 1000; }
+    #rrrWrap b { color: #fff7ed; }
     .score-bowling-team { justify-content: flex-end; }
     .score-bowling-team span { text-transform: uppercase; letter-spacing: 0.07em; font-size: 10px; }
 
@@ -345,51 +251,137 @@
       font-weight: 1000;
     }
 
-    .rating-row {
-      min-width: 260px;
+    .prediction-row {
+      min-width: 300px;
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 5px;
+      grid-template-columns: 1.35fr 0.72fr 0.72fr 0.86fr;
+      gap: 6px;
     }
 
-    .mini-stat {
-      border-radius: 10px;
+    .prediction-tile {
+      border-radius: 12px;
       background: rgba(255,255,255,0.055);
       border: 1px solid var(--line);
-      padding: 6px 7px;
+      padding: 7px 8px;
       min-width: 0;
+      overflow: hidden;
+      position: relative;
     }
 
-    .mini-stat span {
+    .prediction-tile::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.45;
+      background: radial-gradient(circle at 20% 0%, rgba(246, 196, 83, 0.17), transparent 55%);
+    }
+
+    .prediction-tile span {
+      position: relative;
+      display: block;
       color: var(--muted);
       font-size: 8px;
       font-weight: 1000;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-    }
-
-    .mini-stat b {
-      display: block;
-      margin-top: 2px;
-      font-size: 13px;
-      color: var(--gold);
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
     }
 
-    .live-strip {
-      min-height: 126px;
+    .prediction-tile b {
+      position: relative;
+      display: block;
+      margin-top: 3px;
+      font-size: 14px;
+      color: var(--gold);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      line-height: 1.05;
+    }
+
+    .prediction-main b { color: #f8fafc; }
+
+    .prediction-tile em {
+      position: relative;
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 9px;
+      font-style: normal;
+      font-weight: 800;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .prediction-winbar {
+      position: relative;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(300px, 0.92fr);
+      grid-template-columns: var(--user-win, 50%) 1fr;
+      gap: 2px;
+      height: 9px;
+      margin-top: 7px;
+      padding: 2px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(2, 6, 23, 0.62);
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .prediction-winbar i {
+      display: block;
+      height: 100%;
+      min-width: 2px;
+      border-radius: 999px;
+      transition: width .18s ease, filter .18s ease;
+    }
+
+    .prediction-user-fill {
+      background: linear-gradient(90deg, #22c55e, #f6c453);
+      box-shadow: 0 0 12px rgba(34,197,94,0.24);
+    }
+
+    .prediction-comp-fill {
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      box-shadow: 0 0 12px rgba(56,189,248,0.20);
+    }
+
+    .prediction-bar-labels {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
       gap: 8px;
-      padding: 8px 14px;
+      margin-top: 4px;
+    }
+
+    .prediction-bar-labels small {
+      min-width: 0;
+      color: var(--muted);
+      font-size: 8px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .live-strip {
+      min-height: 112px;
+      display: grid;
+      grid-template-columns: minmax(0, 0.86fr) minmax(0, 0.86fr) minmax(292px, 0.92fr);
+      gap: 8px;
+      padding: 7px 12px;
       border-bottom: 1px solid var(--line);
       background: rgba(2, 6, 23, 0.20);
     }
 
     .player-live-card, .current-bowler-box {
-      padding: 10px 11px;
+      padding: 8px 9px;
       border-radius: 14px;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.065), rgba(255,255,255,0.035)),
@@ -397,6 +389,12 @@
       border: 1px solid var(--line);
       min-width: 0;
       box-shadow: none;
+    }
+
+    .player-live-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .player-live-card.striker {
@@ -415,19 +413,46 @@
     }
 
     .player-live-card h3, .current-bowler-box strong {
-      margin: 6px 0 0;
-      font-size: 17px;
+      margin: 2px 0 0;
+      font-size: 15px;
+      line-height: 1.05;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
     }
 
     .player-live-card p {
-      margin: 6px 0 0;
+      margin: 2px 0 0;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 10px;
       font-weight: 850;
-      line-height: 1.35;
+      line-height: 1.15;
+    }
+
+    .batter-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .batter-stat-grid span {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 3px;
+      padding: 3px 5px;
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 8px;
+      background: rgba(2, 6, 23, 0.34);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .batter-stat-grid b {
+      color: var(--text);
+      font-size: 10px;
+      font-weight: 1000;
     }
 
     .live-card-top, .bowler-card-main, .bowler-small-row, .intent-head {
@@ -440,74 +465,94 @@
     .strike-star { color: var(--green); font-weight: 1000; }
     .small-action-btn { padding: 7px 10px; border-radius: 12px; font-size: 12px; }
 
-    .batter-intent-control { margin-top: 8px; display: grid; gap: 6px; }
-    .intent-head b { color: var(--gold); font-size: 11px; }
+    .batter-intent-control { margin-top: 3px; display: grid; gap: 4px; }
+    .intent-head b { color: var(--gold); font-size: 10px; }
 
-    .compact-intents { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+    .compact-intents {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 2px;
+      overflow: hidden;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(2, 6, 23, 0.62);
+      padding: 2px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 10px 22px rgba(0,0,0,0.18);
+    }
+
     .compact-intents button {
       position: relative;
       isolation: isolate;
       overflow: hidden;
-      padding: 8px 5px;
-      font-size: 9px;
+      padding: 5px 2px;
+      min-height: 24px;
+      font-size: 7.8px;
       font-weight: 1000;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.01em;
       border-radius: 999px;
-      color: #f8fafc;
-      border: 1px solid rgba(255,255,255,0.18);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 9px 20px rgba(0,0,0,0.18);
-      transition: transform .12s ease, filter .12s ease, box-shadow .12s ease, border-color .12s ease;
-    }
-    .compact-intents button::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: -1;
-      opacity: 0.95;
-    }
-    .compact-intents button:hover:not(:disabled) {
-      transform: translateY(-1px);
-      filter: brightness(1.08) saturate(1.05);
+      color: rgba(226,232,240,0.56);
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(15,23,42,0.74);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+      transition: filter .12s ease, box-shadow .12s ease, transform .12s ease, color .12s ease, background .12s ease;
     }
 
-    /* Aggression colors by button name/style */
-    .compact-intents button[data-intent="2"]::before {
-      background:
-        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.24), transparent 24%),
-        linear-gradient(135deg, #0284c7 0%, #0f766e 52%, #16a34a 100%);
+    .compact-intents button:hover:not(:disabled) {
+      filter: brightness(1.10) saturate(1.08);
+      transform: translateY(-1px);
     }
-    .compact-intents button[data-intent="5"]::before {
-      background:
-        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.22), transparent 24%),
-        linear-gradient(135deg, #16a34a 0%, #65a30d 45%, #eab308 100%);
+
+    /* Fill-style aggression meter: selected level fills 1, 2, 3, or 4 segments. The unfilled side stays dark. */
+    .compact-intents[data-level="1"] button:nth-child(-n+1) {
+      color: #f8fafc;
+      border-color: rgba(125,211,252,0.54);
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 52%, #0f766e 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 0 14px rgba(2,132,199,0.20);
     }
-    .compact-intents button[data-intent="7"]::before {
-      background:
-        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.23), transparent 24%),
-        linear-gradient(135deg, #eab308 0%, #f97316 48%, #ef4444 100%);
+
+    .compact-intents[data-level="2"] button:nth-child(-n+2) {
+      color: #f8fafc;
+      border-color: rgba(134,239,172,0.54);
+      background: linear-gradient(135deg, #15803d 0%, #16a34a 55%, #65a30d 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 0 14px rgba(22,163,74,0.20);
     }
-    .compact-intents button[data-intent="10"]::before {
-      background:
-        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.24), transparent 24%),
-        linear-gradient(135deg, #ef4444 0%, #db2777 48%, #7c3aed 100%);
+
+    .compact-intents[data-level="3"] button:nth-child(-n+3) {
+      color: #fff7ed;
+      border-color: rgba(253,186,116,0.58);
+      background: linear-gradient(135deg, #ca8a04 0%, #f97316 62%, #dc2626 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 0 14px rgba(249,115,22,0.20);
+    }
+
+    .compact-intents[data-level="4"] button:nth-child(-n+4) {
+      color: #fff7ed;
+      border-color: rgba(244,114,182,0.58);
+      background: linear-gradient(135deg, #dc2626 0%, #db2777 50%, #7c3aed 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 0 14px rgba(219,39,119,0.20);
     }
 
     .compact-intents button.active {
-      border-color: rgba(255,255,255,0.72);
+      z-index: 2;
+      filter: brightness(1.18) saturate(1.14);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.26),
-        0 0 0 2px rgba(246,196,83,0.26),
-        0 14px 28px rgba(0,0,0,0.26);
-      filter: brightness(1.12) saturate(1.08);
+        inset 0 0 0 2px rgba(255,255,255,0.82),
+        inset 0 -16px 26px rgba(255,255,255,0.09),
+        0 0 0 2px rgba(246,196,83,0.24);
     }
+
     .compact-intents button.active::after {
       content: "";
       position: absolute;
-      inset: 2px;
+      left: 18%;
+      right: 18%;
+      bottom: 4px;
+      height: 3px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.26);
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 0 10px rgba(255,255,255,0.65);
       pointer-events: none;
     }
+
     .compact-intents button:disabled,
     .small-action-btn:disabled {
       opacity: 0.42;
@@ -515,8 +560,9 @@
       filter: grayscale(0.42);
       transform: none;
     }
-    .batter-intent-control.locked .intent-head b {
-      color: var(--muted);
+
+    .batter-intent-control.locked {
+      display: none;
     }
 
     .bowler-meter {
@@ -557,6 +603,14 @@
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 10px;
       padding: 10px 14px;
+    }
+
+    .main-match-grid.commentary-hidden {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .main-match-grid.commentary-hidden .commentary-panel {
+      display: none;
     }
 
     .card {
@@ -720,6 +774,11 @@
 
     .ball-buttons { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
     .ball-buttons button { min-height: 42px; border-radius: 13px; }
+    #toggleCommentaryBtn.commentary-off {
+      border-color: rgba(148, 163, 184, 0.20);
+      color: var(--muted);
+      background: rgba(15, 23, 42, 0.72);
+    }
 
     .player-option-modal {
       position: fixed;
@@ -769,33 +828,7 @@
     .stress-card span { display: block; color: var(--muted); font-size: 9px; font-weight: 1000; text-transform: uppercase; letter-spacing: 0.08em; }
     .stress-card b { display: block; margin-top: 5px; color: var(--gold); font-size: 18px; }
     .stress-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-        .stress-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
-      font-size: 11px;
-      overflow: hidden;
-      border-radius: 12px;
-    }
-    .stress-table th,
-    .stress-table td {
-      border-bottom: 1px solid var(--line);
-      padding: 7px 8px;
-      text-align: left;
-      white-space: nowrap;
-    }
-    .stress-table th {
-      color: var(--gold);
-      background: rgba(255,255,255,0.055);
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    .stress-table td {
-      color: var(--text);
-    }
-
-.stress-output { max-height: 52vh; overflow: auto; border: 1px solid var(--line); background: rgba(0,0,0,0.22); border-radius: 14px; padding: 10px; }
+    .stress-output { max-height: 52vh; overflow: auto; border: 1px solid var(--line); background: rgba(0,0,0,0.22); border-radius: 14px; padding: 10px; }
     .stress-table { width: 100%; border-collapse: collapse; font-size: 12px; }
     .stress-table th, .stress-table td { border-bottom: 1px solid var(--line); padding: 7px 5px; text-align: right; white-space: nowrap; }
     .stress-table th:first-child, .stress-table td:first-child { text-align: left; }
@@ -810,7 +843,8 @@
       .scorebar { grid-template-columns: 1fr; align-items: stretch; }
       .score-meta-block { justify-items: start; text-align: left; }
       .score-bowling-team { justify-content: flex-start; }
-      .live-strip { grid-template-columns: 1fr; }
+      .live-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .current-bowler-box { grid-column: 1 / -1; }
       .main-match-grid { grid-template-columns: 1fr; }
       .commentary-panel, .scorecard-panel { min-height: 330px; }
       .bottom-control-bar { min-height: 118px; padding: 10px 8px; }
@@ -818,10 +852,23 @@
 
     @media (max-width: 720px) {
       .match-page { padding-bottom: 145px; }
-      .rating-row { grid-template-columns: repeat(3, 1fr); min-width: 0; }
+      .prediction-row { grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; }
+      .prediction-main { grid-column: 1 / -1; }
+      .live-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 7px; }
+      .current-bowler-box { grid-column: 1 / -1; }
+      .batter-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .ball-buttons button { flex: 1 1 auto; font-size: 12px; padding: 9px 10px; }
       .teams-vs { flex-wrap: wrap; }
       .team-pill, .team-pill.away { flex-direction: row; justify-content: center; }
+    }
+
+    @media (max-width: 470px) {
+      .live-strip { grid-template-columns: 1fr; }
+      .current-bowler-box { grid-column: auto; }
+      .batter-stat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .batter-stat-grid span { padding: 3px 4px; font-size: 9px; }
+      .batter-stat-grid b { font-size: 9px; }
+      .compact-intents button { font-size: 7.4px; }
     }
   </style>
 </head>
@@ -852,22 +899,7 @@
       </div>
 
       <div class="header-actions">
-        <div class="live-win-prob" id="matchNumberText" style="--left-win: 48%; --left-win-color: #38bdf8; --right-win-color: #f6c453;">
-        <div class="win-prob-title">Live Win Probability <span style="color:var(--muted);font-size:10px;font-weight:1000;">Initial: 48/50 from 50 trial matches</span></div>
-        <div class="win-prob-row">
-          <span class="win-team left">SX</span>
-          <div class="win-bar" aria-label="Live win probability">
-            <div class="win-fill-left"></div>
-            <div class="win-midline"></div>
-          </div>
-          <span class="win-team right">AX</span>
-        </div>
-        <div class="win-prob-percent-row">
-          <b class="left-percent">48%</b>
-          <span>48/52</span>
-          <b class="right-percent">52%</b>
-        </div>
-      </div>
+        <div class="pill" id="matchNumberText">T20 Skill Engine</div>
       </div>
     </header>
 
@@ -887,7 +919,8 @@
         </div>
         <div class="score-micro-row">
           <span>CRR: <b id="runRate">0.00</b></span>
-          <span id="targetPill">Raw skill vs skill</span>
+          <span id="rrrWrap" style="display: none;">RRR: <b id="requiredRate">—</b></span>
+          <span id="targetPill">Live prediction</span>
         </div>
       </div>
 
@@ -900,13 +933,32 @@
         </div>
       </div>
 
-      <div class="rating-row">
-        <div class="mini-stat"><span>A Bat</span><b id="teamABat">56</b></div>
-        <div class="mini-stat"><span>A Bowl</span><b id="teamABowl">49</b></div>
-        <div class="mini-stat"><span>A Field</span><b id="teamAField">63</b></div>
-        <div class="mini-stat"><span>B Bat</span><b id="teamBBat">55</b></div>
-        <div class="mini-stat"><span>B Bowl</span><b id="teamBBowl">49</b></div>
-        <div class="mini-stat"><span>B Field</span><b id="teamBField">63</b></div>
+      <div class="prediction-row" id="predictionPanel">
+        <div class="prediction-tile prediction-main">
+          <span>Prediction</span>
+          <b id="predictionLeader">SX 52%</b>
+          <em id="predictionNote">SX projected score</em>
+          <div class="prediction-winbar" aria-label="Win probability bar" style="--user-win: 52%;">
+            <i id="predictionUserBar" class="prediction-user-fill" style="width: 52%;"></i>
+            <i id="predictionCompBar" class="prediction-comp-fill" style="width: 48%;"></i>
+          </div>
+          <div class="prediction-bar-labels">
+            <small id="predictionBarUserLabel">SX 52%</small>
+            <small id="predictionBarCompLabel">AX 48%</small>
+          </div>
+        </div>
+        <div class="prediction-tile">
+          <span id="predictionTeamAName">SX</span>
+          <b id="predictionTeamA">52%</b>
+        </div>
+        <div class="prediction-tile">
+          <span id="predictionTeamBName">AX</span>
+          <b id="predictionTeamB">48%</b>
+        </div>
+        <div class="prediction-tile">
+          <span id="predictionContextLabel">Projected</span>
+          <b id="predictionContext">157</b>
+        </div>
       </div>
     </section>
 
@@ -914,10 +966,10 @@
       <article class="player-live-card striker">
         <div class="live-card-top"><div class="label">On Strike</div><div class="strike-star">*</div></div>
         <h3 id="strikerName">Aarav Khan</h3>
-        <p id="strikerInfo">0 runs • 0 balls • Skill 85 • Conf 50 • Fatigue 0</p>
-        <div class="batter-intent-control" data-slot="striker">
+        <p id="strikerInfo" class="batter-stat-grid"><span>R<b>0</b></span><span>B<b>0</b></span><span>4s<b>0</b></span><span>6s<b>0</b></span><span>SR<b>0.00</b></span><span>Skill<b>85</b></span><span>Conf<b>50</b></span><span>Fat<b>0</b></span></p>
+        <div class="batter-intent-control" data-slot="striker" aria-hidden="false">
           <div class="intent-head"><span>Aggression</span><b id="strikerAggressionLabel">Aggressive 7</b></div>
-          <div class="intent-buttons compact-intents">
+          <div class="intent-buttons compact-intents" data-level="3">
             <button type="button" data-slot="striker" data-intent="2" onclick="setBatterAggression('striker', 2)" title="">Defensive</button>
             <button type="button" data-slot="striker" data-intent="5" onclick="setBatterAggression('striker', 5)" title="">Balanced</button>
             <button type="button" data-slot="striker" data-intent="7" onclick="setBatterAggression('striker', 7)" class="active" title="">Aggressive</button>
@@ -929,10 +981,10 @@
       <article class="player-live-card">
         <div class="live-card-top"><div class="label">Non-Striker</div></div>
         <h3 id="nonStrikerName">Rayan Malik</h3>
-        <p id="nonStrikerInfo">0 runs • 0 balls • Skill 80 • Conf 50 • Fatigue 0</p>
-        <div class="batter-intent-control" data-slot="nonStriker">
+        <p id="nonStrikerInfo" class="batter-stat-grid"><span>R<b>0</b></span><span>B<b>0</b></span><span>4s<b>0</b></span><span>6s<b>0</b></span><span>SR<b>0.00</b></span><span>Skill<b>80</b></span><span>Conf<b>50</b></span><span>Fat<b>0</b></span></p>
+        <div class="batter-intent-control" data-slot="nonStriker" aria-hidden="false">
           <div class="intent-head"><span>Aggression</span><b id="nonStrikerAggressionLabel">Aggressive 7</b></div>
-          <div class="intent-buttons compact-intents">
+          <div class="intent-buttons compact-intents" data-level="3">
             <button type="button" data-slot="nonStriker" data-intent="2" onclick="setBatterAggression('nonStriker', 2)" title="">Defensive</button>
             <button type="button" data-slot="nonStriker" data-intent="5" onclick="setBatterAggression('nonStriker', 5)" title="">Balanced</button>
             <button type="button" data-slot="nonStriker" data-intent="7" onclick="setBatterAggression('nonStriker', 7)" class="active" title="">Aggressive</button>
@@ -962,14 +1014,14 @@
       </article>
     </section>
 
-    <section class="main-match-grid">
-      <article class="card commentary-panel">
+    <section class="main-match-grid" id="mainMatchGrid">
+      <article class="card commentary-panel" id="commentaryPanel" aria-hidden="false">
         <div class="panel-head">
           <h3>Commentary</h3>
           <span id="commentaryOverLabel">Over 0</span>
         </div>
         <div class="commentary-body">
-          <div class="commentary-list" id="commentaryList"><div class="commentary-item note"><strong>AI</strong><p>Attribute XI bowling AI selected: Death-Over Lockdown.</p><small>Bowl AI: Death-Over Lockdown (A:Rishi Kapoor B:Adil Qureshi C:Taran Mehta D:Manav Jain E:Vik Rao)</small></div><div class="commentary-item note"><strong>0.0</strong><p>T20 skill engine ready. This version uses raw attributes only: batter skill vs bowler skill.</p><small>Initial prediction from 50 silent trial matches: Skill XI 48% / Attribute XI 50%. No country boost. No real-world stat shortcut. No hidden team help.</small></div></div>
+          <div class="commentary-list" id="commentaryList"><div class="commentary-item note"><strong>AI</strong><p>Attribute XI bowling AI selected: Death-Over Lockdown.</p><small>Bowl AI: Death-Over Lockdown (A:Rishi Kapoor B:Adil Qureshi C:Taran Mehta D:Manav Jain E:Vik Rao)</small></div><div class="commentary-item note"><strong>0.0</strong><p>T20 skill engine ready. This version uses raw attributes only: batter skill vs bowler skill.</p><small>No country boost. No real-world stat shortcut. No hidden team help.</small></div></div>
           <div class="over-timeline" id="overTimeline"></div>
         </div>
       </article>
@@ -1131,7 +1183,7 @@
     <div class="ball-buttons">
       <button id="nextBallBtn" type="button" onclick="playNextBall()">▶ <span>Next Ball</span></button>
       <button id="playOverBtn" class="secondary" type="button" onclick="playOver()">⏩ <span>Next Over</span></button>
-      <button id="autoPlayBtn" class="secondary" type="button" onclick="toggleAutoPlay()">Auto Play</button>
+      <button id="toggleCommentaryBtn" class="secondary" type="button" onclick="toggleCommentaryPanel()" aria-pressed="false">Hide Commentary</button>
       <button id="simInningsBtn" class="secondary" type="button" onclick="simulateCurrentInnings()">Simulate Innings</button>
       <button id="simMatchBtn" class="secondary" type="button" onclick="simulateWholeMatch()">Simulate Match</button>
       <button id="nextInningsBtn" class="secondary" type="button" onclick="startNextInnings()" disabled="">Next Innings</button>
@@ -1164,14 +1216,12 @@
   <div id="stressTestModal" class="player-option-modal hidden">
     <div class="player-option-box" style="width:min(880px,94vw)">
       <button class="player-option-close" onclick="closeStressTestModal()">×</button>
-      <h2>T20 Engine Testing Lab</h2>
-      <p>Runs silent AI-vs-AI simulations and ball-by-ball win probability reports. Your live match is restored after testing.</p>
+      <h2>T20 Engine Stress Test V3 Fixed</h2>
+      <p>Runs silent AI-vs-AI simulations using the same attribute-vs-attribute ball engine. Your live match is restored after testing.</p>
       <div class="stress-actions">
         <button onclick="runStressTest(50)">Run 50</button>
         <button onclick="runStressTest(200)">Run 200</button>
         <button onclick="runStressTest(1000)">Run 1000</button>
-        <button class="secondary" onclick="runBallByBallProbabilityReport()">Run Ball-by-Ball Prob Report</button>
-        <button class="secondary" onclick="downloadBallByBallProbabilityCSV()">Download Ball-by-Ball CSV</button>
         <button class="secondary" onclick="downloadStressSummaryCSV()">Download Summary CSV</button>
         <button class="secondary" onclick="downloadStressCSVChunks()">Download Detail CSV Chunks</button>
       </div>
@@ -1182,6 +1232,31 @@
   </div>
 
   <script>
+    (function lockPageZoom() {
+      let lastTouchEnd = 0;
+      document.addEventListener("touchend", function(event) {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) event.preventDefault();
+        lastTouchEnd = now;
+      }, { passive: false });
+
+      ["gesturestart", "gesturechange", "gestureend"].forEach(eventName => {
+        document.addEventListener(eventName, function(event) {
+          event.preventDefault();
+        }, { passive: false });
+      });
+
+      document.addEventListener("wheel", function(event) {
+        if (event.ctrlKey) event.preventDefault();
+      }, { passive: false });
+
+      document.addEventListener("keydown", function(event) {
+        if ((event.ctrlKey || event.metaKey) && ["+", "-", "=", "0"].includes(event.key)) {
+          event.preventDefault();
+        }
+      });
+    })();
+
     /* =========================================================
        T20 SKILL MATCH CENTER V1
        Purpose:
@@ -1195,15 +1270,14 @@
     const TOUR_STORAGE_KEY = "cricketTourSetupSave_v1";
     const TOUR_ID_KEY = "currentTourId_v1";
     const TOSS_KEY = "currentTossResult";
-    const STATE_PREFIX = "skillT20MatchState_v3_trial_report_fixed_";
+    const STATE_PREFIX = "skillT20MatchState_v3_compact_no_autoplay_";
 
     let matchState = null;
     let currentMatchCache = null;
     let autoPlayTimer = null;
     let latestStressResults = null;
-    let latestBallByBallReport = null;
     let isStressTesting = false;
-    let isInitialTrialPredictionRunning = false;
+    let commentaryHidden = false;
 
     function clamp(value, min, max) {
       const n = Number(value);
@@ -1227,6 +1301,43 @@
     function text(id, value) {
       const el = document.getElementById(id);
       if (el) el.textContent = value;
+    }
+
+    function setHTML(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = value;
+    }
+
+    function statCell(label, value) {
+      return `<span>${label}<b>${value}</b></span>`;
+    }
+
+    function getCommentaryHiddenKey() {
+      return `${STATE_PREFIX}commentaryHidden`;
+    }
+
+    function loadCommentaryPreference() {
+      commentaryHidden = !!readJSON(getCommentaryHiddenKey(), false);
+    }
+
+    function toggleCommentaryPanel() {
+      commentaryHidden = !commentaryHidden;
+      writeJSON(getCommentaryHiddenKey(), commentaryHidden);
+      renderCommentaryVisibility();
+    }
+
+    function renderCommentaryVisibility() {
+      const grid = document.getElementById("mainMatchGrid");
+      const panel = document.getElementById("commentaryPanel");
+      const btn = document.getElementById("toggleCommentaryBtn");
+
+      if (grid) grid.classList.toggle("commentary-hidden", commentaryHidden);
+      if (panel) panel.setAttribute("aria-hidden", commentaryHidden ? "true" : "false");
+      if (btn) {
+        btn.textContent = commentaryHidden ? "Show Commentary" : "Hide Commentary";
+        btn.classList.toggle("commentary-off", commentaryHidden);
+        btn.setAttribute("aria-pressed", commentaryHidden ? "true" : "false");
+      }
     }
 
     function getPath(obj, path, fallback = 0) {
@@ -1384,6 +1495,113 @@
         bat: Math.round(weightedAverage(players.map(p => [battingSkill(p).overall, 1]))),
         bowl: Math.round(weightedAverage(players.map(p => [bowlingSkill(p).overall, 1]))),
         field: Math.round(weightedAverage(players.map(p => [fieldingSkill(p), 1])))
+      };
+    }
+
+
+    function teamMatchStrength(ratings) {
+      if (!ratings) return 0;
+      return weightedAverage([
+        [ratings.bat || 0, 0.43],
+        [ratings.bowl || 0, 0.38],
+        [ratings.field || 0, 0.19]
+      ]);
+    }
+
+    function logisticPercent(edge, spread = 11.5) {
+      return clamp(Math.round(100 / (1 + Math.exp(-edge / spread))), 3, 97);
+    }
+
+    function getRatingsForSide(side, userRatings, compRatings) {
+      return side === "user" ? userRatings : compRatings;
+    }
+
+    function getTeamNameForSide(side, teams) {
+      return side === "user" ? teams.userTeam : teams.computerTeam;
+    }
+
+    function estimateExpectedRunRate(battingRatings, bowlingRatings) {
+      const bat = Number(battingRatings?.bat || 0);
+      const bowl = Number(bowlingRatings?.bowl || 0);
+      const field = Number(bowlingRatings?.field || 0);
+      return clamp(7.65 + (bat - bowl) * 0.045 - (field - 55) * 0.012, 5.2, 10.4);
+    }
+
+    function estimateProjectedScore(inn, battingRatings, bowlingRatings, maxBalls = 120) {
+      if (!inn) return 0;
+      const balls = Math.max(0, Number(inn.balls || 0));
+      const runs = Math.max(0, Number(inn.runs || 0));
+      const wickets = clamp(Number(inn.wickets || 0), 0, 10);
+      const ballsLeft = Math.max(0, maxBalls - balls);
+      const expectedRR = estimateExpectedRunRate(battingRatings, bowlingRatings);
+      const currentRR = balls > 0 ? (runs / balls) * 6 : expectedRR;
+      const sampleWeight = clamp(balls / 42, 0, 0.72);
+      const blendedRR = expectedRR * (1 - sampleWeight) + currentRR * sampleWeight;
+      const wicketDrag = 1 - Math.min(0.36, wickets * 0.035 + (wickets >= 6 ? 0.07 : 0));
+      return Math.round(runs + ballsLeft * (blendedRR / 6) * wicketDrag);
+    }
+
+    function calculateLivePrediction(state, userRatings, compRatings) {
+      const teams = state?.teams || { userTeam: "Team A", computerTeam: "Team B" };
+      const baseEdge = teamMatchStrength(userRatings) - teamMatchStrength(compRatings);
+      let userPct = logisticPercent(baseEdge);
+      let contextLabel = "Projected";
+      let context = "—";
+      let note = "Score, wickets, balls, and raw ratings";
+
+      if (state?.completed) {
+        const result = String(state.resultText || "");
+        if (result.includes(`${teams.userTeam} won`)) userPct = 100;
+        else if (result.includes(`${teams.computerTeam} won`)) userPct = 0;
+        else userPct = 50;
+        contextLabel = "Result";
+        context = result || "Complete";
+        note = "Final result";
+      } else {
+        const inn = state?.innings?.[state.inningsNo - 1];
+        const maxBalls = state?.maxBalls || 120;
+        if (inn) {
+          const battingRatings = getRatingsForSide(inn.battingSide, userRatings, compRatings);
+          const bowlingRatings = getRatingsForSide(inn.bowlingSide, userRatings, compRatings);
+
+          if (state.phase === "innings1" || state.inningsNo === 1) {
+            const projected = estimateProjectedScore(inn, battingRatings, bowlingRatings, maxBalls);
+            const par = Math.round(154 + (battingRatings.bat - bowlingRatings.bowl) * 0.28);
+            const scorePressure = clamp((projected - par) * 0.52, -18, 18);
+            userPct = inn.battingSide === "user"
+              ? clamp(Math.round(userPct + scorePressure), 3, 97)
+              : clamp(Math.round(userPct - scorePressure), 3, 97);
+            contextLabel = "Projected";
+            context = `${projected}`;
+            note = `${getTeamShortName(inn.battingTeam)} projected score`;
+          } else if (inn.target) {
+            const need = Math.max(0, inn.target - inn.runs);
+            const ballsLeft = Math.max(0, maxBalls - inn.balls);
+            const wicketsLeft = Math.max(0, 10 - inn.wickets);
+            const requiredRR = ballsLeft > 0 ? (need / ballsLeft) * 6 : (need <= 0 ? 0 : 99);
+            const expectedRR = estimateExpectedRunRate(battingRatings, bowlingRatings);
+            let chasePct = 50 + (expectedRR - requiredRR) * 7.5 + (wicketsLeft - 5) * 3.4;
+            if (need <= 0) chasePct = 100;
+            if (inn.wickets >= 10 && need > 0) chasePct = 0;
+            chasePct = clamp(Math.round(chasePct), 2, 98);
+            userPct = inn.battingSide === "user" ? chasePct : 100 - chasePct;
+            contextLabel = "RRR";
+            context = need <= 0 ? "Done" : requiredRR.toFixed(2);
+            note = `${getTeamShortName(inn.battingTeam)} need ${need} from ${ballsLeft} balls`;
+          }
+        }
+      }
+
+      const compPct = clamp(100 - userPct, 0, 100);
+      const leaderName = userPct === compPct ? "Even match" : (userPct > compPct ? teams.userTeam : teams.computerTeam);
+      const leaderPct = Math.max(userPct, compPct);
+      return {
+        userPct,
+        compPct,
+        leader: userPct === compPct ? "Even match" : `${getTeamShortName(leaderName)} ${leaderPct}%`,
+        contextLabel,
+        context,
+        note
       };
     }
 
@@ -2208,82 +2426,6 @@
       };
     }
 
-    function getWinnerFromResultText(resultText, teams) {
-      const result = String(resultText || "");
-      if (result.includes("Match tied")) return "tie";
-      if (result.includes(teams.userTeam)) return "user";
-      if (result.includes(teams.computerTeam)) return "computer";
-      return "";
-    }
-
-    function calculateInitialTrialPrediction(currentMatch, trials = 50) {
-      const teams = getFullTeamNames(currentMatch);
-      const savedState = matchState ? JSON.stringify(matchState) : null;
-      const savedCache = currentMatchCache;
-      const savedStress = isStressTesting;
-      const savedTrialFlag = isInitialTrialPredictionRunning;
-
-      const results = [];
-      let userWins = 0;
-      let computerWins = 0;
-      let ties = 0;
-
-      isInitialTrialPredictionRunning = true;
-
-      try {
-        for (let i = 0; i < trials; i += 1) {
-          const result = runOneStressMatch(currentMatch);
-          results.push(result);
-
-          const winner = getWinnerFromResultText(result?.result, teams);
-          if (winner === "user") userWins += 1;
-          else if (winner === "computer") computerWins += 1;
-          else ties += 1;
-        }
-
-        const userWinPct = Math.round((userWins / trials) * 100);
-        const computerWinPct = Math.round((computerWins / trials) * 100);
-        const tiePct = Math.max(0, 100 - userWinPct - computerWinPct);
-
-        return {
-          method: "50 silent trial matches",
-          trials,
-          userTeam: teams.userTeam,
-          computerTeam: teams.computerTeam,
-          userWins,
-          computerWins,
-          ties,
-          userWinPct,
-          computerWinPct,
-          tiePct,
-          avgFirstRuns: Number(avg(results, "firstRuns").toFixed(1)),
-          avgSecondRuns: Number(avg(results, "secondRuns").toFixed(1)),
-          avgFirstWickets: Number(avg(results, "firstWickets").toFixed(1)),
-          avgSecondWickets: Number(avg(results, "secondWickets").toFixed(1)),
-          createdAt: new Date().toISOString()
-        };
-      } catch (error) {
-        console.warn("Initial trial prediction failed:", error);
-        return null;
-      } finally {
-        matchState = savedState ? JSON.parse(savedState) : null;
-        currentMatchCache = savedCache;
-        isStressTesting = savedStress;
-        isInitialTrialPredictionRunning = savedTrialFlag;
-      }
-    }
-
-    function getOrCreateInitialTrialPrediction(currentMatch) {
-      if (matchState?.initialTrialPrediction) return matchState.initialTrialPrediction;
-      if (isInitialTrialPredictionRunning) return null;
-
-      const prediction = calculateInitialTrialPrediction(currentMatch, 50);
-      if (matchState && prediction) {
-        matchState.initialTrialPrediction = prediction;
-      }
-      return prediction;
-    }
-
     function createInitialMatchState(currentMatch) {
       const teams = getFullTeamNames(currentMatch);
       const first = getBattingFromToss(currentMatch, teams);
@@ -2291,7 +2433,7 @@
       const bowlingXI = getSelectedXI(currentMatch, first.bowlingSide);
 
       const state = {
-        version: "t20-skill-v3-trial-report-fixed",
+        version: "t20-skill-v3-compact-no-autoplay",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -2317,19 +2459,13 @@
         ],
         commentary: [],
         aggressionByKey: {},
-        lastBattle: null,
-        initialTrialPrediction: calculateInitialTrialPrediction(currentMatch, 50)
+        lastBattle: null
       };
 
       const inn = state.innings[0];
       state.aggressionByKey[inn.strikerKey] = 7;
       state.aggressionByKey[inn.nonStrikerKey] = 7;
-      const trial = state.initialTrialPrediction;
-      const trialText = trial
-        ? `Initial prediction from ${trial.trials} silent trial matches: ${teams.userTeam} ${trial.userWinPct}% / ${teams.computerTeam} ${trial.computerWinPct}%.`
-        : "Initial prediction uses raw attributes because trial prediction was unavailable.";
-
-      addCommentary(state, "0.0", "T20 skill engine ready. This version uses raw attributes only: batter skill vs bowler skill.", "note", `${trialText} No country boost. No real-world stat shortcut. No hidden team help.`);
+      addCommentary(state, "0.0", "T20 skill engine ready. This version uses raw attributes only: batter skill vs bowler skill.", "note", "No country boost. No real-world stat shortcut. No hidden team help.");
       addInningsAIIntro(state, inn);
       return state;
     }
@@ -2391,6 +2527,14 @@
       if (v <= 6) return `Balanced ${v}`;
       if (v <= 8) return `Aggressive ${v}`;
       return `Attack ${v}`;
+    }
+
+    function aggressionMeterLevel(value) {
+      const v = clamp(value, 1, 10);
+      if (v <= 3) return 1;
+      if (v <= 6) return 2;
+      if (v <= 8) return 3;
+      return 4;
     }
 
     /* =========================================================
@@ -2746,9 +2890,6 @@
       inn.currentOverRuns += outcome.runs || 0;
       inn.currentOverEvents.push({ label: chip, type: typeClass });
 
-      // Count deliveries for testing/reporting; probability itself is not force-capped per ball.
-      matchState.winProbBallTick = (matchState.winProbBallTick || 0) + 1;
-
       const note = `Battle: bat attack ${outcome.battle.batAttack} / control ${outcome.battle.batControl} vs bowl control ${outcome.battle.bowlControl} / threat ${outcome.battle.bowlThreat}. Edge ${outcome.battle.skillEdge}.`;
       addCommentary(matchState, deliveryLabel, textLine, typeClass, note);
 
@@ -2886,18 +3027,6 @@
       if (!allOut && !oversDone && !targetReached) return;
 
       if (matchState.inningsNo === 1) {
-        // Preserve the first-innings probability into the innings break.
-        // The second innings should start from this target pressure, not reset to pre-match ratings.
-        matchState.firstInningsEndWinProbability = getLiveWinProbability();
-        matchState.firstInningsEndScore = {
-          battingTeam: inn.battingTeam,
-          bowlingTeam: inn.bowlingTeam,
-          runs: inn.runs,
-          wickets: inn.wickets,
-          balls: inn.balls,
-          target: inn.runs + 1
-        };
-
         matchState.phase = "break";
         addCommentary(matchState, ballsToOvers(inn.balls), `${inn.battingTeam} finish on ${inn.runs}/${inn.wickets}. Target will be ${inn.runs + 1}.`, "note", "Click Next Innings to begin the chase.");
       } else {
@@ -2914,30 +3043,6 @@
       const bowlingTeam = first.battingTeam;
       const battingXI = battingSide === "user" ? matchState.userXI : matchState.computerXI;
       const bowlingXI = bowlingSide === "user" ? matchState.userXI : matchState.computerXI;
-
-      if (!matchState.firstInningsEndWinProbability) {
-        matchState.firstInningsEndWinProbability = getLiveWinProbability();
-        matchState.firstInningsEndScore = {
-          battingTeam: first.battingTeam,
-          bowlingTeam: first.bowlingTeam,
-          runs: first.runs,
-          wickets: first.wickets,
-          balls: first.balls,
-          target: first.runs + 1
-        };
-      }
-
-      if (!matchState.firstInningsEndWinProbability) {
-        matchState.firstInningsEndWinProbability = getLiveWinProbability();
-        matchState.firstInningsEndScore = {
-          battingTeam: first.battingTeam,
-          bowlingTeam: first.bowlingTeam,
-          runs: first.runs,
-          wickets: first.wickets,
-          balls: first.balls,
-          target: first.runs + 1
-        };
-      }
 
       matchState.innings.push(buildInnings({
         battingTeam,
@@ -3250,6 +3355,7 @@
     }
 
     function init() {
+      loadCommentaryPreference();
       const activeTourId = getActiveTourId();
       clearOldTourMatchCenterState(activeTourId);
       currentMatchCache = loadCurrentMatch();
@@ -3258,7 +3364,7 @@
 
       const canRestore =
         saved &&
-        saved.version === "t20-skill-v3-trial-report-fixed" &&
+        saved.version === "t20-skill-v3-compact-no-autoplay" &&
         saved.matchIdentity === currentIdentity &&
         saved.phase !== "completed";
 
@@ -3307,7 +3413,7 @@
       const first = getStressFirstInningsInfo(currentMatch, teams);
 
       const state = {
-        version: "t20-skill-v3-trial-report-fixed",
+        version: "t20-skill-v3-compact-no-autoplay",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -3427,16 +3533,8 @@
       const b2 = sumBoundaries(i2);
       const chaseWon = !!(i2 && i2.target && i2.runs >= i2.target);
       const tie = !!(i1 && i2 && i1.runs === i2.runs && !chaseWon);
-      const teams = state?.teams || {};
-      const winnerSide = getWinnerFromResultText(state.resultText, teams);
-      const winnerTeam =
-        winnerSide === "user" ? teams.userTeam :
-        winnerSide === "computer" ? teams.computerTeam :
-        winnerSide === "tie" ? "Tie" : "";
       return {
         result: state.resultText,
-        winnerSide,
-        winnerTeam,
         firstTeam: i1?.battingTeam || "",
         secondTeam: i2?.battingTeam || "",
         firstRuns: i1?.runs || 0,
@@ -3607,14 +3705,7 @@
 
       const count = results.length;
       const chaseWins = results.filter(r => r.chaseWon).length;
-      const currentMatch = currentMatchCache || loadCurrentMatch();
-      const teams = getFullTeamNames(currentMatch);
-      const userWins = results.filter(r => r.winnerSide === "user").length;
-      const computerWins = results.filter(r => r.winnerSide === "computer").length;
-      const ties = results.filter(r => r.tie || r.winnerSide === "tie").length;
-      const initial = getOrCreateInitialTrialPrediction(currentMatch);
-      const stressUserPct = count ? Math.round((userWins / count) * 100) : 0;
-      const stressCompPct = count ? Math.round((computerWins / count) * 100) : 0;
+      const ties = results.filter(r => r.tie).length;
       const firstBands = countBy(results, r => bandScore(r.firstRuns));
       const secondBands = countBy(results, r => bandScore(r.secondRuns));
       const avgFirst = avg(results, "firstRuns");
@@ -3628,7 +3719,7 @@
       const highChase = Math.max(...results.map(r => r.secondRuns));
       const lowChase = Math.min(...results.map(r => r.secondRuns));
       const bands = ["<120", "120-139", "140-159", "160-179", "180-199", "200+"];
-      const targetProfile = getStressTargetProfile(currentMatch, results);
+      const targetProfile = getStressTargetProfile(currentMatchCache || loadCurrentMatch(), results);
       const targetRecommendation = getTargetAwareRecommendation({
         avgFirst,
         avgFirstWkts,
@@ -3640,9 +3731,6 @@
       output.innerHTML = `
         <div class="stress-grid">
           <div class="stress-card"><span>Matches</span><b>${count}</b></div>
-          <div class="stress-card"><span>${shortTeamLabel(teams.userTeam)} Wins</span><b>${pct(userWins, count)}</b></div>
-          <div class="stress-card"><span>${shortTeamLabel(teams.computerTeam)} Wins</span><b>${pct(computerWins, count)}</b></div>
-          <div class="stress-card"><span>Initial 50-Trial</span><b>${initial ? `${initial.userWinPct}/${initial.computerWinPct}` : "—"}</b></div>
           <div class="stress-card"><span>Avg 1st Inns</span><b>${avgFirst.toFixed(1)}</b></div>
           <div class="stress-card"><span>Avg Chase</span><b>${avgSecond.toFixed(1)}</b></div>
           <div class="stress-card"><span>Chase Wins</span><b>${pct(chaseWins, count)}</b></div>
@@ -3664,10 +3752,6 @@
           <tbody>
             <tr><td>1st innings range</td><td>${lowFirst} to ${highFirst}</td></tr>
             <tr><td>Chase innings range</td><td>${lowChase} to ${highChase}</td></tr>
-            <tr><td>${teams.userTeam} wins</td><td>${userWins} / ${count} (${pct(userWins, count)})</td></tr>
-            <tr><td>${teams.computerTeam} wins</td><td>${computerWins} / ${count} (${pct(computerWins, count)})</td></tr>
-            <tr><td>Initial 50-trial prediction</td><td>${initial ? `${teams.userTeam} ${initial.userWinPct}% / ${teams.computerTeam} ${initial.computerWinPct}%` : "Not available"}</td></tr>
-            <tr><td>Stress vs initial</td><td>${initial ? `${teams.userTeam}: ${stressUserPct - initial.userWinPct >= 0 ? "+" : ""}${stressUserPct - initial.userWinPct} pts, ${teams.computerTeam}: ${stressCompPct - initial.computerWinPct >= 0 ? "+" : ""}${stressCompPct - initial.computerWinPct} pts` : "—"}</td></tr>
             <tr><td>Ties</td><td>${ties}</td></tr>
             <tr><td>Matchup profile</td><td>${targetProfile.label}</td></tr>
             <tr><td>Target first-innings average</td><td>${targetProfile.targetLow}-${targetProfile.targetHigh}</td></tr>
@@ -3698,14 +3782,7 @@
     function buildStressSummaryRows(results) {
       const count = results.length;
       const chaseWins = results.filter(r => r.chaseWon).length;
-      const currentMatch = currentMatchCache || loadCurrentMatch();
-      const teams = getFullTeamNames(currentMatch);
-      const userWins = results.filter(r => r.winnerSide === "user").length;
-      const computerWins = results.filter(r => r.winnerSide === "computer").length;
-      const ties = results.filter(r => r.tie || r.winnerSide === "tie").length;
-      const initial = getOrCreateInitialTrialPrediction(currentMatch);
-      const stressUserPct = count ? Math.round((userWins / count) * 100) : 0;
-      const stressCompPct = count ? Math.round((computerWins / count) * 100) : 0;
+      const ties = results.filter(r => r.tie).length;
       const firstBands = countBy(results, r => bandScore(r.firstRuns));
       const secondBands = countBy(results, r => bandScore(r.secondRuns));
       const bands = ["<120", "120-139", "140-159", "160-179", "180-199", "200+"];
@@ -3713,10 +3790,6 @@
       return [
         ["Metric", "Value"],
         ["Matches", count],
-        [`${teams.userTeam} wins`, `${userWins} / ${count} (${pct(userWins, count)})`],
-        [`${teams.computerTeam} wins`, `${computerWins} / ${count} (${pct(computerWins, count)})`],
-        ["Initial 50-trial prediction", initial ? `${teams.userTeam} ${initial.userWinPct}% / ${teams.computerTeam} ${initial.computerWinPct}%` : "Not available"],
-        ["Stress vs initial", initial ? `${teams.userTeam}: ${stressUserPct - initial.userWinPct >= 0 ? "+" : ""}${stressUserPct - initial.userWinPct} pts, ${teams.computerTeam}: ${stressCompPct - initial.computerWinPct >= 0 ? "+" : ""}${stressCompPct - initial.computerWinPct} pts` : "—"],
         ["Average 1st innings", avg(results, "firstRuns").toFixed(2)],
         ["Average chase innings", avg(results, "secondRuns").toFixed(2)],
         ["Chase wins", pct(chaseWins, count)],
@@ -3729,215 +3802,6 @@
         ["Score band", "1st innings", "Chase innings"],
         ...bands.map(band => [band, firstBands[band] || 0, secondBands[band] || 0])
       ];
-    }
-
-    function outcomeReportLabel(outcome) {
-      if (!outcome) return "";
-      if (outcome.type === "runs") return String(outcome.runs);
-      if (outcome.type === "wicket") return "W";
-      if (outcome.type === "extra") return outcome.extraType === "wide" ? "Wd" : "Nb";
-      return outcome.type || "";
-    }
-
-    function createBallReportRow(ballNo, inningsNo, deliveryLabel, inn, batter, bowler, outcome, probs) {
-      return {
-        ballNo,
-        innings: inningsNo,
-        over: deliveryLabel,
-        battingTeam: inn?.battingTeam || "",
-        bowlingTeam: inn?.bowlingTeam || "",
-        batter: getPlayerName(batter),
-        bowler: getPlayerName(bowler),
-        outcome: outcomeReportLabel(outcome),
-        runsThisBall: Number(outcome?.runs) || 0,
-        legal: outcome?.legal ? "Y" : "N",
-        score: `${inn?.runs || 0}/${inn?.wickets || 0}`,
-        balls: inn?.balls || 0,
-        overs: ballsToOvers(inn?.balls || 0),
-        phase: getPhase(inn?.balls || 0),
-        target: inn?.target || "",
-        need: inn?.target ? Math.max(0, Number(inn.target) - Number(inn.runs || 0)) : "",
-        ballsLeft: inn?.target ? Math.max(0, matchState.maxBalls - Number(inn.balls || 0)) : "",
-        wicketsLeft: Math.max(0, 10 - Number(inn?.wickets || 0)),
-        crr: Number(runRate(inn?.runs || 0, inn?.balls || 0)),
-        rrr: inn?.target ? Number((Math.max(0, Number(inn.target) - Number(inn.runs || 0)) / Math.max(1, (matchState.maxBalls - Number(inn.balls || 0)) / 6)).toFixed(2)) : "",
-        chasePressure: inn?.target ? chasePressureIndex(inn).toFixed(3) : "",
-        anchorWeight: inn?.target ? getSecondInningsAnchorWeight(inn).toFixed(3) : "",
-        initialUserTrialPct: matchState?.initialTrialPrediction?.userWinPct ?? "",
-        initialComputerTrialPct: matchState?.initialTrialPrediction?.computerWinPct ?? "",
-        initialTrialCount: matchState?.initialTrialPrediction?.trials ?? "",
-        userWinPct: probs.user,
-        computerWinPct: probs.computer,
-        tiePct: probs.tie,
-        resultText: matchState?.resultText || "",
-        batAggression: outcome?.battle?.aggression ?? "",
-        batAttack: outcome?.battle?.batAttack ?? "",
-        batControl: outcome?.battle?.batControl ?? "",
-        bowlControl: outcome?.battle?.bowlControl ?? "",
-        bowlThreat: outcome?.battle?.bowlThreat ?? "",
-        skillEdge: outcome?.battle?.skillEdge ?? ""
-      };
-    }
-
-    function playNextBallForProbabilityReport(reportRows, ballNo) {
-      if (!matchState || matchState.completed || matchState.phase === "break") return ballNo;
-
-      const inn = currentInnings();
-      const beforeBalls = inn.balls;
-      const beforeLegal = inn.legalBallsThisOver;
-      const inningsNo = matchState.inningsNo;
-      const batter = getCurrentBatter();
-      const bowler = getCurrentBowler();
-      const outcome = simulateSkillBall();
-      const deliveryLabel = `${Math.floor(beforeBalls / 6)}.${beforeLegal + (outcome.legal ? 1 : 0)}`;
-
-      applyOutcome(outcome);
-
-      const probs = getLiveWinProbability();
-      reportRows.push(createBallReportRow(
-        ballNo + 1,
-        inningsNo,
-        deliveryLabel,
-        inn,
-        batter,
-        bowler,
-        outcome,
-        probs
-      ));
-
-      return ballNo + 1;
-    }
-
-    function runOneBallByBallProbabilityReport(currentMatch) {
-      isStressTesting = true;
-      try {
-        const initialPrediction = getOrCreateInitialTrialPrediction(currentMatch);
-        matchState = createStressInitialMatchState(currentMatch);
-        if (initialPrediction) {
-          matchState.initialTrialPrediction = initialPrediction;
-        }
-        const rows = [];
-        let ballNo = 0;
-        let safety = 500;
-
-        while (safety-- > 0 && matchState && !matchState.completed) {
-          if (matchState.phase === "break") {
-            startNextInningsSilent();
-            continue;
-          }
-          ballNo = playNextBallForProbabilityReport(rows, ballNo);
-        }
-
-        return {
-          rows,
-          result: collectStressMatchResult(matchState),
-          initialTrialPrediction: matchState.initialTrialPrediction || null,
-          finalState: JSON.parse(JSON.stringify(matchState))
-        };
-      } finally {
-        isStressTesting = false;
-      }
-    }
-
-    function renderBallByBallProbabilityReport(report) {
-      const output = document.getElementById("stressSummary");
-      if (!output || !report) return;
-
-      const rows = report.rows || [];
-      const result = report.result || {};
-      const initial = report.initialTrialPrediction || rows.find(row => row.initialTrialCount)?.initialTrialCount ? {
-        trials: rows.find(row => row.initialTrialCount)?.initialTrialCount,
-        userWinPct: rows.find(row => row.initialUserTrialPct)?.initialUserTrialPct,
-        computerWinPct: rows.find(row => row.initialComputerTrialPct)?.initialComputerTrialPct
-      } : null;
-      const firstRows = rows.slice(0, 12);
-      const lastRows = rows.slice(-12);
-      const previewRows = rows.length > 28
-        ? [...firstRows, { gap: true }, ...lastRows]
-        : rows;
-
-      const tableRows = previewRows.map(row => {
-        if (row.gap) {
-          return `<tr><td colspan="9" style="text-align:center;color:var(--muted);font-weight:1000;">... middle balls hidden in preview ...</td></tr>`;
-        }
-        return `
-          <tr>
-            <td>${row.ballNo}</td>
-            <td>${row.innings}</td>
-            <td>${row.over}</td>
-            <td>${row.battingTeam}</td>
-            <td>${row.score}</td>
-            <td>${row.outcome}</td>
-            <td>${row.userWinPct}%</td>
-            <td>${row.computerWinPct}%</td>
-            <td>${row.tiePct}%</td>
-          </tr>
-        `;
-      }).join("");
-
-      output.innerHTML = `
-        <div class="stress-grid">
-          <div class="stress-card"><span>Result</span><b>${result.result || "Complete"}</b></div>
-          <div class="stress-card"><span>Balls recorded</span><b>${rows.length}</b></div>
-          <div class="stress-card"><span>Initial 50-Trial</span><b>${initial ? `${initial.userWinPct}/${initial.computerWinPct}` : "—"}</b></div>
-          <div class="stress-card"><span>1st inns</span><b>${result.firstRuns}/${result.firstWickets}</b></div>
-          <div class="stress-card"><span>Chase</span><b>${result.secondRuns}/${result.secondWickets}</b></div>
-        </div>
-        <table class="stress-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Inn</th>
-              <th>Over</th>
-              <th>Batting</th>
-              <th>Score</th>
-              <th>Ball</th>
-              <th>User %</th>
-              <th>Computer %</th>
-              <th>Tie %</th>
-            </tr>
-          </thead>
-          <tbody>${tableRows}</tbody>
-        </table>
-        <p class="stress-note">
-          Preview shows first and last balls only. Use Download Ball-by-Ball CSV for the full report with batter, bowler, score, outcome, and probability after every ball.
-        </p>
-      `;
-    }
-
-    function runBallByBallProbabilityReport() {
-      const modal = document.getElementById("stressTestModal");
-      const output = document.getElementById("stressSummary");
-      if (modal) modal.classList.remove("hidden");
-      if (output) output.innerHTML = `<p class="stress-note">Running one silent ball-by-ball probability report...</p>`;
-
-      setTimeout(() => {
-        const savedState = matchState ? JSON.stringify(matchState) : null;
-        const savedCache = currentMatchCache;
-        const currentMatch = currentMatchCache || loadCurrentMatch();
-
-        latestBallByBallReport = runOneBallByBallProbabilityReport(currentMatch);
-
-        matchState = savedState ? JSON.parse(savedState) : null;
-        currentMatchCache = savedCache;
-        renderBallByBallProbabilityReport(latestBallByBallReport);
-        render();
-      }, 30);
-    }
-
-    function downloadBallByBallProbabilityCSV() {
-      if (!latestBallByBallReport?.rows?.length) {
-        runBallByBallProbabilityReport();
-        setTimeout(downloadBallByBallProbabilityCSV, 250);
-        return;
-      }
-
-      const rows = latestBallByBallReport.rows;
-      const headers = Object.keys(rows[0]);
-      downloadCSVFile(
-        `t20_ball_by_ball_probability_${rows.length}_balls.csv`,
-        [headers, ...rows.map(row => headers.map(key => row[key] ?? ""))]
-      );
     }
 
     function downloadCSVFile(filename, rows) {
@@ -4014,648 +3878,6 @@
        RENDERING
     ========================================================= */
 
-    function teamWinColor(teamName, side = "left") {
-      const name = String(teamName || "").toLowerCase();
-
-      const colors = [
-        ["england", "#0b1f4d"],       // navy blue
-        ["australia", "#facc15"],     // yellow
-        ["india", "#38bdf8"],         // sky blue
-        ["bangladesh", "#166534"],    // slightly light dark green
-        ["pakistan", "#16a34a"],      // green
-        ["south africa", "#14532d"],  // darker green shade
-        ["new zealand", "#020617"],   // black
-        ["sri lanka", "#1e3a8a"],     // dark blue
-        ["west indies", "#7f1d1d"],   // maroon
-        ["afghanistan", "#2563eb"],
-        ["ireland", "#16a34a"],
-        ["zimbabwe", "#dc2626"],
-        ["italy", "#22c55e"],
-        ["netherlands", "#f97316"],
-        ["usa", "#1d4ed8"],
-        ["canada", "#dc2626"],
-        ["nepal", "#dc2626"],
-        ["scotland", "#1d4ed8"]
-      ];
-
-      const found = colors.find(([key]) => name.includes(key));
-      if (found) return found[1];
-
-      return side === "left" ? "#38bdf8" : "#f6c453";
-    }
-
-    function shortTeamLabel(teamName) {
-      const full = String(teamName || "Team").trim();
-      const known = {
-        "England": "ENG",
-        "Australia": "AUS",
-        "India": "IND",
-        "Bangladesh": "BAN",
-        "Pakistan": "PAK",
-        "South Africa": "SA",
-        "New Zealand": "NZ",
-        "Sri Lanka": "SL",
-        "West Indies": "WI",
-        "Afghanistan": "AFG",
-        "Ireland": "IRE",
-        "Zimbabwe": "ZIM",
-        "Italy": "ITA",
-        "Netherlands": "NED",
-        "United States": "USA",
-        "USA": "USA",
-        "Canada": "CAN",
-        "Nepal": "NEP",
-        "Scotland": "SCO"
-      };
-
-      const match = Object.keys(known).find(key => full.toLowerCase().includes(key.toLowerCase()));
-      if (match) return known[match];
-
-      return getTeamShortName(full);
-    }
-
-    function logisticWinPercent(edge) {
-      return 100 / (1 + Math.exp(-edge / 22));
-    }
-
-    function baseTeamEdge() {
-      // Opening prediction comes from 50 silent trial matches with the selected XIs.
-      // During those silent trials, this falls back to attributes so we do not recurse forever.
-      const trial = matchState?.initialTrialPrediction;
-      if (!isInitialTrialPredictionRunning && trial && Number.isFinite(Number(trial.userWinPct))) {
-        return probabilityPercentToEdge(trial.userWinPct);
-      }
-
-      const userRatings = getTeamRatings(matchState.userXI);
-      const compRatings = getTeamRatings(matchState.computerXI);
-
-      const userScore =
-        userRatings.bat * 0.39 +
-        userRatings.bowl * 0.39 +
-        userRatings.field * 0.14 +
-        ((userRatings.bat + userRatings.bowl) / 2) * 0.08;
-
-      const compScore =
-        compRatings.bat * 0.39 +
-        compRatings.bowl * 0.39 +
-        compRatings.field * 0.14 +
-        ((compRatings.bat + compRatings.bowl) / 2) * 0.08;
-
-      return clamp(userScore - compScore, -36, 36);
-    }
-
-    function inningsExpectedRunRate(inn) {
-      if (!inn) return 8.2;
-      const battingRatings = getTeamRatings(inn.battingXI);
-      const bowlingRatings = getTeamRatings(inn.bowlingXI);
-      const skillGap = battingRatings.bat - bowlingRatings.bowl;
-      const base = 8.05 + skillGap * 0.030;
-      const wicketPenalty = Math.max(0, inn.wickets - 3) * 0.22;
-      const deathBoost = getPhase(inn.balls) === "Death" ? 0.52 : 0;
-      return clamp(base - wicketPenalty + deathBoost, 5.2, 10.3);
-    }
-
-    function evidenceWeight(progress, inningsNo) {
-      const p = clamp(progress, 0, 1);
-
-      if (inningsNo === 1) {
-        // First innings has uncertainty for longer because no target exists yet.
-        return Math.pow(p, 1.45);
-      }
-
-      // Chase information becomes meaningful earlier, then very meaningful late.
-      return 0.18 + Math.pow(p, 1.28) * 0.82;
-    }
-
-    function closeLateChaseMultiplier(inn) {
-      if (!inn || !inn.target) return 1;
-
-      const ballsLeft = Math.max(0, matchState.maxBalls - inn.balls);
-      const need = Math.max(0, inn.target - inn.runs);
-
-      if (ballsLeft <= 6 && need <= 14) return 1.55;
-      if (ballsLeft <= 12 && need <= 26) return 1.32;
-      if (ballsLeft <= 18 && need <= 38) return 1.16;
-      return 1;
-    }
-
-    function projectedFirstInningsScore(inn) {
-      if (!inn) return 165;
-      const balls = Math.max(1, inn.balls);
-      const currentProjection = (inn.runs / balls) * matchState.maxBalls;
-      const expectedRemaining = ((matchState.maxBalls - inn.balls) / 6) * inningsExpectedRunRate(inn);
-      const skillProjection = inn.runs + expectedRemaining;
-
-      if (inn.balls < 24) return skillProjection * 0.88 + currentProjection * 0.12;
-      if (inn.balls < 60) return skillProjection * 0.74 + currentProjection * 0.26;
-      if (inn.balls < 96) return skillProjection * 0.58 + currentProjection * 0.42;
-      return skillProjection * 0.42 + currentProjection * 0.58;
-    }
-
-    function batterProbabilityValue(player) {
-      if (!player) return 55;
-      const bat = battingSkill(player);
-      return weightedAverage([
-        [bat.overall, 1.05],
-        [bat.boundary, 0.85],
-        [bat.six, 0.55],
-        [bat.rotation, 0.75],
-        [bat.defense, 0.65],
-        [bat.mental, 0.75]
-      ]);
-    }
-
-    function dismissedBatterResourceLoss(inn) {
-      if (!inn?.battingStats || !Array.isArray(inn.battingXI)) return 0;
-
-      let loss = 0;
-
-      Object.entries(inn.battingStats).forEach(([key, stat]) => {
-        if (!stat?.out) return;
-
-        const batter = getPlayerByKey(inn.battingXI, key);
-        const value = batterProbabilityValue(batter);
-        const battingIndex = Math.max(0, inn.battingXI.findIndex(player => getPlayerKey(player) === key));
-
-        // Every wicket matters, but a top-order/high-value batter matters more.
-        // This is not country-based. It reads the actual dismissed player's batting attributes.
-        let wicketLoss = 1.00 + clamp((value - 58) / 16, -0.35, 2.45);
-
-        if (battingIndex >= 0 && battingIndex <= 2) wicketLoss += 0.55;
-        else if (battingIndex <= 4) wicketLoss += 0.30;
-        else if (battingIndex >= 8) wicketLoss -= 0.22;
-
-        loss += clamp(wicketLoss, 0.55, 3.95);
-      });
-
-      return loss;
-    }
-
-    function firstInningsLiveEdge(inn) {
-      const progress = clamp(inn.balls / matchState.maxBalls, 0, 1);
-      const info = evidenceWeight(progress, 1);
-
-      const projected = projectedFirstInningsScore(inn);
-      const neutralPar = 165;
-      const scoreSignal = (projected - neutralPar) * 0.34 * info;
-
-      // Wicket resources should matter throughout the innings.
-      // Early wickets matter a little; later wickets matter more.
-      const basicWicketLoss = inn.wickets * (0.48 + info * 0.95);
-      const highWicketLoss = Math.max(0, inn.wickets - 4) * 1.85 * info;
-
-      // Losing a high-value/top-order batter should move probability more than losing a tailender.
-      const dismissedValueLoss = dismissedBatterResourceLoss(inn) * (0.42 + info * 1.05);
-
-      // Having wickets in hand is still a positive resource, but it should not erase early top-order loss.
-      const wicketResourceBonus = (10 - inn.wickets) * 0.18 * info;
-
-      const battingLiveEdge =
-        scoreSignal -
-        basicWicketLoss -
-        highWicketLoss -
-        dismissedValueLoss +
-        wicketResourceBonus;
-
-      return inn.battingSide === "user" ? battingLiveEdge : -battingLiveEdge;
-    }
-
-    function terminalChaseBattingEdge(inn) {
-      if (!inn || !inn.target) return null;
-
-      const ballsLeft = Math.max(0, matchState.maxBalls - inn.balls);
-      const wicketsLeft = Math.max(0, 10 - inn.wickets);
-      const need = Math.max(0, Number(inn.target || 0) - inn.runs);
-
-      if (need <= 0) return 120;
-      if (ballsLeft <= 0 || wicketsLeft <= 0) return -120;
-
-      const reqPerBall = need / ballsLeft;
-
-      // Cricket math: if the target is beyond legal sixes, the chase is basically gone.
-      // This is not a per-ball movement cap. It is a terminal match-state rule.
-      if (need > ballsLeft * 6) return -140;
-
-      // Final over: required balls/runs dominate more than ratings.
-      if (ballsLeft <= 6) {
-        const wicketPenalty =
-          wicketsLeft <= 1 ? -32 :
-          wicketsLeft === 2 ? -22 :
-          wicketsLeft <= 4 ? -10 : 0;
-
-        let edge =
-          (3.05 - reqPerBall) * 27 +
-          (ballsLeft - 3) * 1.2 +
-          wicketPenalty;
-
-        // Requiring all remaining balls to be sixes is barely alive.
-        if (need === ballsLeft * 6) edge = Math.min(edge, -86);
-
-        // One-ball endgame should be decisive.
-        if (ballsLeft === 1) {
-          if (need >= 7) edge = -140;
-          else if (need === 6) edge = -72 + wicketPenalty * 0.35;
-          else if (need === 5) edge = -50 + wicketPenalty * 0.35;
-          else if (need === 4) edge = -28 + wicketPenalty * 0.35;
-          else if (need <= 2) edge = 36 + wicketPenalty * 0.20;
-          else edge = 8 + wicketPenalty * 0.25;
-        }
-
-        return clamp(edge, -140, 120);
-      }
-
-      // Last two overs: use required rate + wicket resource, but do not overtrust team ratings.
-      if (ballsLeft <= 12) {
-        const wicketPenalty =
-          wicketsLeft <= 1 ? -26 :
-          wicketsLeft === 2 ? -18 :
-          wicketsLeft <= 4 ? -8 : 0;
-
-        let edge =
-          (2.35 - reqPerBall) * 23 +
-          (wicketsLeft - 4) * 2.2 +
-          wicketPenalty;
-
-        if (need > ballsLeft * 5) edge -= 32;
-        if (need > ballsLeft * 5.5) edge -= 48;
-
-        return clamp(edge, -120, 110);
-      }
-
-      // 13-18 balls left: start blending toward terminal chase logic.
-      if (ballsLeft <= 18) {
-        const wicketPenalty =
-          wicketsLeft <= 1 ? -18 :
-          wicketsLeft === 2 ? -12 :
-          wicketsLeft <= 4 ? -5 : 0;
-
-        const edge =
-          (1.95 - reqPerBall) * 18 +
-          (wicketsLeft - 4) * 1.8 +
-          wicketPenalty;
-
-        return clamp(edge, -95, 95);
-      }
-
-      return null;
-    }
-
-    function secondInningsLiveEdge(inn) {
-      const m = chaseStateMetrics(inn);
-
-      if (m.need <= 0) {
-        return inn.battingSide === "user" ? 120 : -120;
-      }
-
-      if (m.ballsLeft <= 0 || m.wicketsLeft <= 0) {
-        return inn.battingSide === "user" ? -120 : 120;
-      }
-
-      // Second innings core:
-      // CRR, RRR, remaining runs, balls remaining, wickets left, and chase pressure.
-      const progressWeight = evidenceWeight(m.progress, 2);
-
-      const expectedRemaining = (m.ballsLeft / 6) * m.expectedRate;
-      const runEquationSignal = (expectedRemaining - m.need) * 0.48;
-      const currentRateSignal = clamp(m.crr - m.rrr, -10, 8) * (0.80 + m.progress * 1.20);
-      const expectedRateSignal = clamp(m.expectedGap, -9, 7) * 1.72;
-      const remainingRunsSignal = clamp((m.ballsLeft * 1.45) - m.need, -75, 55) * 0.23;
-      const wicketResourceSignal = (m.wicketsLeft - 5) * (1.55 + m.progress * 0.85);
-
-      const chaseComfort = comfortableChaseIndex(m);
-      const wicketPressureFactor = 1.0 - chaseComfort * 0.48;
-
-      const wicketPressureSignal =
-        (
-          -m.wickets * (1.55 + m.progress * 2.35) -
-          Math.max(0, m.wickets - 2) * (3.4 + m.progress * 2.8)
-        ) * wicketPressureFactor;
-
-      // Chase collapse logic:
-      // 3 down in the powerplay = serious trouble.
-      // 5 down around over 6 = bowling team should usually be around 75-85%.
-      // It fades smoothly after the powerplay instead of switching off at ball 43.
-      const collapseWeight = smoothChaseCollapseWeight(m);
-      const collapseSignal =
-        (
-          -Math.max(0, m.wickets - 1) * 6.4
-          -Math.max(0, m.wickets - 3) * 9.2
-          -Math.max(0, m.wickets - 4) * 13.5
-          -clamp(m.rrr - m.crr, 0, 8) * Math.max(0, m.wickets - 2) * 2.0
-        ) * collapseWeight;
-
-      const pressureSignal = -chasePressureIndex(inn) * 18.0;
-      const dismissedValueSignal =
-        dismissedBatterResourceLoss(inn) *
-        (0.24 + progressWeight * 0.64) *
-        (1.0 - chaseComfort * 0.42);
-
-      let battingLiveEdge =
-        (
-          runEquationSignal +
-          currentRateSignal +
-          expectedRateSignal +
-          remainingRunsSignal +
-          wicketResourceSignal +
-          wicketPressureSignal +
-          collapseSignal +
-          pressureSignal -
-          dismissedValueSignal
-        ) * progressWeight;
-
-      // Death overs: exact target math dominates averages.
-      const terminalEdge = terminalChaseBattingEdge(inn);
-      if (terminalEdge !== null) {
-        const terminalWeight =
-          m.ballsLeft <= 6 ? 0.94 :
-          m.ballsLeft <= 12 ? 0.76 :
-          m.ballsLeft <= 18 ? 0.46 : 0;
-
-        battingLiveEdge =
-          battingLiveEdge * (1 - terminalWeight) +
-          terminalEdge * terminalWeight;
-      }
-
-      if (m.ballsLeft <= 18 && m.reqPerBall > 4.75) {
-        battingLiveEdge -= (m.reqPerBall - 4.75) * 22;
-      }
-
-      // Comfortable chase boost:
-      // This is a smooth advantage signal, not a hard floor that turns on/off at one ball.
-      if (chaseComfort > 0) {
-        const comfortEdge =
-          18 +
-          chaseComfort * 42 +
-          clamp(m.crr - m.rrr, -1, 6) * 3.0 +
-          Math.max(0, m.wicketsLeft - 4) * 2.4;
-
-        battingLiveEdge = battingLiveEdge * (1 - chaseComfort * 0.48) + comfortEdge * (chaseComfort * 0.48);
-      }
-
-      // Severe early-collapse correction:
-      // Smoothly fades after the powerplay; no one-ball cliff at 6.6/7.1.
-      if (collapseWeight > 0 && m.wickets >= 4) {
-        const targetCollapseEdge =
-          m.wickets >= 5
-            ? (
-                -34
-                - Math.max(0, m.wickets - 5) * 11
-                - clamp(m.rrr - m.crr, 0, 8) * 3.2
-                - clamp(m.need - m.ballsLeft * 1.45, 0, 80) * 0.12
-              )
-            : (
-                -22
-                - clamp(m.rrr - m.crr, 0, 8) * 2.4
-                - clamp(m.need - m.ballsLeft * 1.55, 0, 80) * 0.08
-              );
-
-        const collapseBlend = clamp(collapseWeight * (m.wickets >= 5 ? 0.86 : 0.62), 0, 0.86);
-        const blendedCollapseEdge = battingLiveEdge * (1 - collapseBlend) + targetCollapseEdge * collapseBlend;
-        battingLiveEdge = Math.min(battingLiveEdge, blendedCollapseEdge);
-      }
-
-      return inn.battingSide === "user" ? battingLiveEdge : -battingLiveEdge;
-    }
-
-    function probabilityPercentToEdge(percent) {
-      const p = clamp(Number(percent) || 50, 1, 99) / 100;
-      return Math.log(p / (1 - p)) * 22;
-    }
-
-    function getFirstInningsEndAnchorEdge() {
-      const anchor = matchState?.firstInningsEndWinProbability;
-      if (!anchor || !Number.isFinite(Number(anchor.user))) return null;
-      return probabilityPercentToEdge(anchor.user);
-    }
-
-    function chaseStateMetrics(inn) {
-      const balls = Number(inn?.balls) || 0;
-      const runs = Number(inn?.runs) || 0;
-      const wickets = Number(inn?.wickets) || 0;
-      const target = Number(inn?.target) || 0;
-      const ballsLeft = Math.max(0, matchState.maxBalls - balls);
-      const wicketsLeft = Math.max(0, 10 - wickets);
-      const need = Math.max(0, target - runs);
-
-      const crr = balls > 0 ? runs / (balls / 6) : 0;
-      const rrr = ballsLeft > 0 ? need / (ballsLeft / 6) : 99;
-      const reqPerBall = ballsLeft > 0 ? need / ballsLeft : 99;
-      const progress = clamp(balls / matchState.maxBalls, 0, 1);
-      const expectedRate = inningsExpectedRunRate(inn);
-      const rateGap = crr - rrr;
-      const expectedGap = expectedRate - rrr;
-
-      return {
-        balls,
-        runs,
-        wickets,
-        target,
-        ballsLeft,
-        wicketsLeft,
-        need,
-        crr,
-        rrr,
-        reqPerBall,
-        progress,
-        expectedRate,
-        rateGap,
-        expectedGap
-      };
-    }
-
-    function smoothChaseCollapseWeight(m) {
-      // 1.0 up to six overs, then fades gradually toward over 12.
-      if (!m) return 0;
-      if (m.balls <= 36) return 1;
-      return clamp((72 - m.balls) / 36, 0, 1);
-    }
-
-    function comfortableChaseIndex(m) {
-      if (!m || !m.target || m.ballsLeft <= 0) return 0;
-
-      const runComfort = clamp(((m.ballsLeft * 1.35) - m.need) / Math.max(12, m.ballsLeft * 0.65), 0, 1);
-      const wicketComfort = clamp((m.wicketsLeft - 3) / 5, 0, 1);
-      const rateComfort = clamp((m.crr - m.rrr + 0.60) / 2.40, 0, 1);
-      const lateWeight = clamp((66 - m.ballsLeft) / 36, 0, 1);
-
-      return clamp((runComfort * 0.50 + rateComfort * 0.30 + wicketComfort * 0.20) * wicketComfort * lateWeight, 0, 1);
-    }
-
-    function chasePressureIndex(inn) {
-      const m = chaseStateMetrics(inn);
-      let pressure = 0;
-
-      // Required run rate vs expected scoring rate.
-      pressure += clamp(m.rrr - m.expectedRate, -3, 8) * 0.11;
-
-      // CRR falling behind RRR matters more as balls are used.
-      pressure += clamp(m.rrr - m.crr, -4, 10) * (0.035 + m.progress * 0.12);
-
-      // Wickets lost are immediate chase pressure.
-      pressure += m.wickets * (0.045 + m.progress * 0.070);
-
-      // Early collapse should break the first-innings anchor quickly,
-      // but it must fade smoothly after the powerplay instead of switching off at one ball.
-      const collapsePressureWeight = smoothChaseCollapseWeight(m);
-      if (collapsePressureWeight > 0) {
-        pressure += (
-          Math.max(0, m.wickets - 1) * 0.18 +
-          Math.max(0, m.wickets - 3) * 0.24 +
-          Math.max(0, m.wickets - 4) * 0.28
-        ) * collapsePressureWeight;
-      }
-
-      // Death-over chase equation.
-      if (m.ballsLeft <= 18) pressure += clamp(m.reqPerBall - 2.0, -1, 5) * 0.16;
-      if (m.ballsLeft <= 12) pressure += clamp(m.reqPerBall - 2.5, -1, 5) * 0.24;
-      if (m.ballsLeft <= 6) pressure += clamp(m.reqPerBall - 3.0, -1, 6) * 0.34;
-
-      // Very low wicket resource.
-      if (m.wicketsLeft <= 2) pressure += 0.25;
-      if (m.wicketsLeft <= 1) pressure += 0.35;
-
-      // If the chase equation is comfortable, reduce generic pressure smoothly.
-      const comfort = comfortableChaseIndex(m);
-      pressure *= (1 - comfort * 0.58);
-
-      return clamp(pressure, 0, 1.35);
-    }
-
-    function getSecondInningsAnchorWeight(inn) {
-      if (!inn || matchState?.inningsNo !== 2) return 0;
-
-      const m = chaseStateMetrics(inn);
-
-      // 0/0 starts from the first-innings target assessment.
-      // After that, CRR/RRR/wickets/runs remaining take over.
-      let base;
-      if (m.progress <= 0.10) base = 0.92 - m.progress * 1.05;
-      else if (m.progress <= 0.35) base = 0.81 - (m.progress - 0.10) * 1.28;
-      else if (m.progress <= 0.70) base = 0.49 - (m.progress - 0.35) * 0.93;
-      else base = 0.17 - (m.progress - 0.70) * 0.56;
-
-      const pressure = chasePressureIndex(inn);
-
-      const collapseBreaker =
-        (
-          Math.max(0, m.wickets - 2) * 0.16 +
-          Math.max(0, m.wickets - 4) * 0.22 +
-          clamp(m.rrr - m.crr, 0, 8) * Math.max(0, m.wickets - 3) * 0.025
-        ) * smoothChaseCollapseWeight(m);
-
-      const rateBreaker =
-        m.balls >= 12
-          ? clamp(m.rrr - Math.max(m.crr, m.expectedRate), 0, 8) * 0.035
-          : 0;
-
-      return clamp(base - pressure * 0.36 - collapseBreaker - rateBreaker, 0, 0.92);
-    }
-
-    function getLiveWinProbability() {
-      if (!matchState) return { user: 50, computer: 50, tie: 0 };
-
-      if (matchState.completed && matchState.resultText) {
-        const result = String(matchState.resultText || "");
-        const userWon = result.includes(matchState.teams.userTeam);
-        const compWon = result.includes(matchState.teams.computerTeam);
-
-        if (userWon && !compWon) return { user: 100, computer: 0, tie: 0 };
-        if (compWon && !userWon) return { user: 0, computer: 100, tie: 0 };
-        return { user: 0, computer: 0, tie: 100 };
-      }
-
-      const inn = currentInnings();
-      const priorEdge = baseTeamEdge();
-
-      if (!inn) {
-        const user = clamp(Math.round(logisticWinPercent(priorEdge)), 5, 95);
-        return { user, computer: 100 - user, tie: 0 };
-      }
-
-      const progress = clamp(((matchState.innings?.[0]?.balls || 0) + (matchState.innings?.[1]?.balls || 0)) / (matchState.maxBalls * 2), 0, 1);
-
-      // Natural model:
-      // - Early match is mostly team-strength prior.
-      // - Live evidence gradually takes over.
-      // - No hard "only move X percent per ball" cap.
-      const priorWeight = matchState.inningsNo === 1
-        ? 1 - evidenceWeight(inn.balls / matchState.maxBalls, 1) * 0.48
-        : 0.24 - Math.pow(clamp(inn.balls / matchState.maxBalls, 0, 1), 1.25) * 0.20;
-
-      const liveEdge = matchState.inningsNo === 1
-        ? firstInningsLiveEdge(inn)
-        : secondInningsLiveEdge(inn);
-
-      let adjustedPriorWeight = priorWeight;
-      let edge = priorEdge * clamp(adjustedPriorWeight, 0.00, 1) + liveEdge;
-
-      if (matchState.inningsNo === 2) {
-        const ballsLeft = Math.max(0, matchState.maxBalls - inn.balls);
-        if (ballsLeft <= 12) adjustedPriorWeight *= 0.45;
-        if (ballsLeft <= 6) adjustedPriorWeight *= 0.20;
-
-        const anchorEdge = getFirstInningsEndAnchorEdge();
-        const anchorWeight = clamp(getSecondInningsAnchorWeight(inn), 0, 0.92);
-
-        if (anchorEdge !== null && anchorWeight > 0) {
-          const liveChaseEdge = priorEdge * clamp(adjustedPriorWeight, 0.00, 1) + liveEdge;
-          edge = anchorEdge * anchorWeight + liveChaseEdge * (1 - anchorWeight);
-        } else {
-          edge = priorEdge * clamp(adjustedPriorWeight, 0.00, 1) + liveEdge;
-        }
-      }
-
-      let user = clamp(Math.round(logisticWinPercent(edge)), 1, 99);
-
-      const closeGame = Math.abs(50 - user) <= 5;
-      const tie = closeGame && progress > 0.20 ? 1 : 0;
-
-      if (tie && user >= 50) user -= 1;
-
-      return {
-        user,
-        computer: Math.max(0, 100 - user - tie),
-        tie
-      };
-    }
-
-    function renderLiveWinProbability() {
-      const box = document.getElementById("matchNumberText");
-      if (!box || !matchState?.teams) return;
-
-      const probs = getLiveWinProbability();
-      const userTeam = matchState.teams.userTeam;
-      const computerTeam = matchState.teams.computerTeam;
-      const userColor = teamWinColor(userTeam, "left");
-      const computerColor = teamWinColor(computerTeam, "right");
-
-      box.style.setProperty("--left-win", `${probs.user}%`);
-      box.style.setProperty("--left-win-color", userColor);
-      box.style.setProperty("--right-win-color", computerColor);
-
-      const trial = matchState.initialTrialPrediction;
-      const trialNote = trial
-        ? `<span style="color:var(--muted);font-size:10px;font-weight:1000;">Initial: ${trial.userWinPct}/${trial.computerWinPct} from ${trial.trials} trial matches</span>`
-        : "";
-
-      box.innerHTML = `
-        <div class="win-prob-title">Live Win Probability ${trialNote}</div>
-        <div class="win-prob-row">
-          <span class="win-team left">${shortTeamLabel(userTeam)}</span>
-          <div class="win-bar" aria-label="Live win probability">
-            <div class="win-fill-left"></div>
-            <div class="win-midline"></div>
-          </div>
-          <span class="win-team right">${shortTeamLabel(computerTeam)}</span>
-        </div>
-        <div class="win-prob-percent-row">
-          <b class="left-percent">${probs.user}%</b>
-          <span>${probs.user}/${probs.computer}${probs.tie ? ` • T ${probs.tie}` : ""}</span>
-          <b class="right-percent">${probs.computer}%</b>
-        </div>
-      `;
-    }
-
     function render() {
       if (!matchState) return;
       const inn = currentInnings();
@@ -4669,13 +3891,9 @@
       text("teamBSub", getCaptainName(currentMatchCache, matchState.computerXI, "computer"));
       text("teamABadge", getTeamShortName(teams.userTeam));
       text("teamBBadge", getTeamShortName(teams.computerTeam));
-      text("teamABat", userRatings.bat);
-      text("teamABowl", userRatings.bowl);
-      text("teamAField", userRatings.field);
-      text("teamBBat", compRatings.bat);
-      text("teamBBowl", compRatings.bowl);
-      text("teamBField", compRatings.field);
-      renderLiveWinProbability();
+      text("predictionTeamAName", getTeamShortName(teams.userTeam));
+      text("predictionTeamBName", getTeamShortName(teams.computerTeam));
+      text("matchNumberText", matchState.resultText || "T20 Skill Engine");
 
       if (!inn) return;
 
@@ -4685,10 +3903,30 @@
       text("mainScore", `${inn.runs}/${inn.wickets}`);
       text("mainOvers", `(${ballsToOvers(inn.balls)})`);
       text("runRate", runRate(inn.runs, inn.balls));
+      const rrrWrap = document.getElementById("rrrWrap");
+      const rrr = inn.target ? getRequiredRate(inn) : null;
+      if (rrrWrap) rrrWrap.style.display = rrr === null ? "none" : "inline-flex";
+      text("requiredRate", rrr === null ? "—" : rrr.toFixed(2));
       text("inningsLabel", matchState.inningsNo === 1 ? "1st Innings" : "2nd Innings");
       text("formatBox", "T20");
       text("phaseBox", getPhase(inn.balls));
       text("partnershipBox", `${inn.partnershipRuns} off ${inn.partnershipBalls}`);
+
+      const prediction = calculateLivePrediction(matchState, userRatings, compRatings);
+      text("predictionLeader", prediction.leader);
+      text("predictionNote", prediction.note);
+      text("predictionTeamA", `${prediction.userPct}%`);
+      text("predictionTeamB", `${prediction.compPct}%`);
+      text("predictionContextLabel", prediction.contextLabel);
+      text("predictionContext", prediction.context);
+      text("predictionBarUserLabel", `${getTeamShortName(teams.userTeam)} ${prediction.userPct}%`);
+      text("predictionBarCompLabel", `${getTeamShortName(teams.computerTeam)} ${prediction.compPct}%`);
+      const winBar = document.querySelector(".prediction-winbar");
+      const userBar = document.getElementById("predictionUserBar");
+      const compBar = document.getElementById("predictionCompBar");
+      if (winBar) winBar.style.setProperty("--user-win", `${clamp(prediction.userPct, 1, 99)}%`);
+      if (userBar) userBar.style.width = `${clamp(prediction.userPct, 1, 99)}%`;
+      if (compBar) compBar.style.width = `${clamp(prediction.compPct, 1, 99)}%`;
 
       if (matchState.completed) text("targetPill", matchState.resultText);
       else if (matchState.phase === "break") text("targetPill", `Target: ${matchState.innings[0].runs + 1}`);
@@ -4697,7 +3935,7 @@
         const ballsLeft = Math.max(0, matchState.maxBalls - inn.balls);
         text("targetPill", `Need ${need} from ${ballsLeft} balls`);
       } else {
-        text("targetPill", "Raw skill vs skill");
+        text("targetPill", "Live prediction");
       }
 
       renderBatterCards();
@@ -4705,6 +3943,7 @@
       renderCommentary();
       renderScorecard();
       renderButtons();
+      renderCommentaryVisibility();
       document.getElementById("out").textContent = JSON.stringify({
         phase: matchState.phase,
         inningsNo: matchState.inningsNo,
@@ -4730,13 +3969,28 @@
       const skill = battingSkill(player);
       const agg = getAggression(key);
       text(`${slot}Name`, getPlayerName(player));
-      text(`${slot}Info`, `${stat.runs} runs • ${stat.balls} balls • Skill ${Math.round(skill.overall)} • Conf ${Math.round(stat.confidence)} • Fatigue ${Math.round(stat.fatigue)}`);
+      const strikeRate = stat.balls ? ((stat.runs / stat.balls) * 100).toFixed(2) : "0.00";
+      setHTML(`${slot}Info`, [
+        statCell("R", stat.runs),
+        statCell("B", stat.balls),
+        statCell("4s", stat.fours || 0),
+        statCell("6s", stat.sixes || 0),
+        statCell("SR", strikeRate),
+        statCell("Skill", Math.round(skill.overall)),
+        statCell("Conf", Math.round(stat.confidence)),
+        statCell("Fat", Math.round(stat.fatigue))
+      ].join(""));
       const inn = currentInnings();
       const locked = inn?.battingSide === "computer";
-      text(`${slot}AggressionLabel`, locked ? `AI ${aggressionLabel(agg)}` : aggressionLabel(agg));
+      text(`${slot}AggressionLabel`, locked ? "" : aggressionLabel(agg));
 
       const control = document.querySelector(`.batter-intent-control[data-slot="${slot}"]`);
-      if (control) control.classList.toggle("locked", locked);
+      if (control) {
+        control.classList.toggle("locked", locked);
+        control.setAttribute("aria-hidden", locked ? "true" : "false");
+        const meter = control.querySelector(".compact-intents");
+        if (meter) meter.dataset.level = locked ? "0" : String(aggressionMeterLevel(agg));
+      }
 
       document.querySelectorAll(`button[data-slot="${slot}"]`).forEach(btn => {
         btn.classList.toggle("active", Number(btn.dataset.intent) === Number(agg));
@@ -4853,7 +4107,8 @@
       const inningsPhase = matchState?.phase === "innings1" || matchState?.phase === "innings2";
       document.getElementById("nextBallBtn").disabled = completed || !inningsPhase;
       document.getElementById("playOverBtn").disabled = completed || !inningsPhase;
-      document.getElementById("autoPlayBtn").disabled = completed || !inningsPhase;
+      const autoPlayBtn = document.getElementById("autoPlayBtn");
+      if (autoPlayBtn) autoPlayBtn.disabled = completed || !inningsPhase;
       document.getElementById("simInningsBtn").disabled = completed || !inningsPhase;
       document.getElementById("simMatchBtn").disabled = completed;
       document.getElementById("nextInningsBtn").disabled = !breakPhase || completed;
