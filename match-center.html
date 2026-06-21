@@ -1,8 +1,10 @@
-<html lang="en"><head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#030712">
-  <title>T20 Skill Match Center - Compact Controls</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#030712" />
+  <title>T20 Skill Match Center - Scorecard Summary</title>
   <style>
     :root {
       --bg: #030712;
@@ -252,9 +254,9 @@
     }
 
     .prediction-row {
-      min-width: 300px;
+      min-width: 282px;
       display: grid;
-      grid-template-columns: 1.35fr 0.72fr 0.72fr 0.86fr;
+      grid-template-columns: minmax(0, 1fr);
       gap: 6px;
     }
 
@@ -304,6 +306,48 @@
 
     .prediction-main b { color: #f8fafc; }
 
+    .prediction-topline {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .prediction-topline span,
+    .prediction-topline b {
+      margin: 0;
+      min-width: 0;
+    }
+
+    .prediction-topline b {
+      text-align: right;
+      color: var(--gold);
+      font-size: 13px;
+    }
+
+    .prediction-context-inline {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 8px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .prediction-context-inline b {
+      display: inline;
+      margin: 0;
+      color: var(--gold);
+      font-size: 11px;
+      line-height: 1;
+    }
+
     .prediction-tile em {
       position: relative;
       display: block;
@@ -341,13 +385,13 @@
     }
 
     .prediction-user-fill {
-      background: linear-gradient(90deg, #22c55e, #f6c453);
-      box-shadow: 0 0 12px rgba(34,197,94,0.24);
+      background: linear-gradient(90deg, #0f4c81, #38bdf8);
+      box-shadow: 0 0 12px rgba(56,189,248,0.24);
     }
 
     .prediction-comp-fill {
-      background: linear-gradient(90deg, #38bdf8, #818cf8);
-      box-shadow: 0 0 12px rgba(56,189,248,0.20);
+      background: linear-gradient(90deg, #7c2d12, #f6c453);
+      box-shadow: 0 0 12px rgba(246,196,83,0.22);
     }
 
     .prediction-bar-labels {
@@ -429,24 +473,89 @@
       line-height: 1.15;
     }
 
-    .batter-stat-grid {
+    .batter-name-line {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 4px;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 7px;
+      margin-top: 2px;
+      min-width: 0;
+    }
+
+    .batter-name-line h3 {
+      margin: 0;
+      min-width: 0;
+    }
+
+    .batter-mini-bars {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex: 0 0 auto;
+    }
+
+    .batter-mini-meter {
+      display: grid;
+      grid-template-columns: auto 34px;
+      align-items: center;
+      gap: 3px;
+      color: var(--muted);
+      font-size: 7px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .batter-mini-meter i {
+      display: block;
+      width: 34px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(2, 6, 23, 0.70);
+      border: 1px solid rgba(255,255,255,0.12);
+      overflow: hidden;
+    }
+
+    .batter-mini-meter b {
+      display: block;
+      height: 100%;
+      width: 50%;
+      border-radius: 999px;
+      transition: width .18s ease;
+    }
+
+    .confidence-fill {
+      background: linear-gradient(90deg, #22c55e, #86efac);
+      box-shadow: 0 0 8px rgba(34,197,94,0.26);
+    }
+
+    .fatigue-fill {
+      background: linear-gradient(90deg, #fb923c, #fb7185);
+      box-shadow: 0 0 8px rgba(251,146,60,0.22);
+    }
+
+    .batter-stat-grid {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      overflow: hidden;
     }
 
     .batter-stat-grid span {
       min-width: 0;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 3px;
-      padding: 3px 5px;
-      border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 8px;
-      background: rgba(2, 6, 23, 0.34);
+      gap: 2px;
       color: var(--muted);
       white-space: nowrap;
+    }
+
+    .batter-stat-grid span:not(:last-child)::after {
+      content: "•";
+      margin-left: 5px;
+      color: rgba(159,179,200,0.52);
+      font-weight: 900;
     }
 
     .batter-stat-grid b {
@@ -780,6 +889,141 @@
       background: rgba(15, 23, 42, 0.72);
     }
 
+    .save-exit-btn {
+      background: linear-gradient(135deg, #22c55e, #facc15);
+      color: #061018;
+      box-shadow: 0 14px 32px rgba(34, 197, 94, 0.22);
+    }
+    .save-exit-btn.is-hidden { display: none; }
+
+    .match-summary-card {
+      display: grid;
+      gap: 10px;
+      margin: 12px 0 14px;
+      max-height: 62vh;
+      overflow: auto;
+      padding-right: 2px;
+    }
+    .summary-banner {
+      border-radius: 16px;
+      padding: 12px;
+      text-align: center;
+      font-weight: 1000;
+      color: #061018;
+      background: linear-gradient(135deg, #facc15, #fb923c);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.40);
+      letter-spacing: -0.02em;
+    }
+    .summary-score-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.055);
+      border-radius: 16px;
+      padding: 10px;
+    }
+    .summary-team-score {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+    .summary-team-score:last-child { text-align: right; }
+    .summary-team-score span {
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .summary-team-score b {
+      color: var(--text);
+      font-size: 18px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .summary-vs {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: rgba(2, 6, 23, 0.70);
+      border: 1px solid var(--line);
+      color: var(--gold);
+      font-weight: 1000;
+      font-size: 12px;
+    }
+    .summary-innings-block {
+      border: 1px solid var(--line);
+      background: rgba(2, 6, 23, 0.38);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .summary-innings-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 11px;
+      font-size: 12px;
+      font-weight: 1000;
+      color: #061018;
+      background: linear-gradient(135deg, #38bdf8, #22c55e);
+    }
+    .summary-innings-block:nth-child(4) .summary-innings-head {
+      background: linear-gradient(135deg, #fb923c, #facc15);
+    }
+    .summary-innings-head b { white-space: nowrap; }
+    .summary-performances {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 9px;
+    }
+    .summary-perf-list {
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.045);
+      border-radius: 13px;
+      overflow: hidden;
+    }
+    .summary-perf-list h4 {
+      margin: 0;
+      padding: 7px 8px;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gold);
+      background: rgba(255,255,255,0.055);
+    }
+    .summary-perf-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 8px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .summary-perf-row span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text);
+    }
+    .summary-perf-row b {
+      color: #f8fafc;
+      white-space: nowrap;
+    }
+    @media (max-width: 560px) {
+      .summary-performances { grid-template-columns: 1fr; }
+      .summary-score-row { grid-template-columns: 1fr; text-align: center; }
+      .summary-team-score:last-child { text-align: center; }
+      .summary-vs { justify-self: center; }
+    }
+
     .player-option-modal {
       position: fixed;
       inset: 0;
@@ -852,11 +1096,10 @@
 
     @media (max-width: 720px) {
       .match-page { padding-bottom: 145px; }
-      .prediction-row { grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; }
-      .prediction-main { grid-column: 1 / -1; }
+      .prediction-row { grid-template-columns: minmax(0, 1fr); min-width: 0; }
       .live-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 7px; }
       .current-bowler-box { grid-column: 1 / -1; }
-      .batter-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .batter-stat-grid { gap: 4px; }
       .ball-buttons button { flex: 1 1 auto; font-size: 12px; padding: 9px 10px; }
       .teams-vs { flex-wrap: wrap; }
       .team-pill, .team-pill.away { flex-direction: row; justify-content: center; }
@@ -865,9 +1108,13 @@
     @media (max-width: 470px) {
       .live-strip { grid-template-columns: 1fr; }
       .current-bowler-box { grid-column: auto; }
-      .batter-stat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-      .batter-stat-grid span { padding: 3px 4px; font-size: 9px; }
-      .batter-stat-grid b { font-size: 9px; }
+      .batter-name-line { grid-template-columns: minmax(0, 1fr); align-items: start; gap: 3px; }
+      .batter-mini-bars { gap: 4px; }
+      .batter-mini-meter { grid-template-columns: auto 28px; font-size: 6.5px; }
+      .batter-mini-meter i { width: 28px; height: 5px; }
+      .batter-stat-grid { gap: 3px; font-size: 8px; }
+      .batter-stat-grid span:not(:last-child)::after { margin-left: 3px; }
+      .batter-stat-grid b { font-size: 8.5px; }
       .compact-intents button { font-size: 7.4px; }
     }
   </style>
@@ -882,18 +1129,18 @@
 
       <div class="teams-vs">
         <div class="team-pill home">
-          <div class="badge" id="teamABadge">SX</div>
+          <div class="badge" id="teamABadge">A</div>
           <div>
-            <strong id="teamAName">Skill XI</strong>
-            <span id="teamASub">Imran Shah</span>
+            <strong id="teamAName">Team A</strong>
+            <span id="teamASub">Captain</span>
           </div>
         </div>
         <span class="vs-label">vs</span>
         <div class="team-pill away">
-          <div class="badge" id="teamBBadge">AX</div>
+          <div class="badge" id="teamBBadge">B</div>
           <div>
-            <strong id="teamBName">Attribute XI</strong>
-            <span id="teamBSub">Vik Rao</span>
+            <strong id="teamBName">Team B</strong>
+            <span id="teamBSub">Captain</span>
           </div>
         </div>
       </div>
@@ -905,9 +1152,9 @@
 
     <section class="scorebar">
       <div class="score-team-block">
-        <div class="badge score-badge" id="scoreBattingBadge">SX</div>
+        <div class="badge score-badge" id="scoreBattingBadge">BAT</div>
         <div>
-          <div class="score-team-name" id="scoreBattingName">Skill XI</div>
+          <div class="score-team-name" id="scoreBattingName">Batting Team</div>
           <div class="score-subline" id="inningsLabel">1st Innings</div>
         </div>
       </div>
@@ -919,13 +1166,13 @@
         </div>
         <div class="score-micro-row">
           <span>CRR: <b id="runRate">0.00</b></span>
-          <span id="rrrWrap" style="display: none;">RRR: <b id="requiredRate">—</b></span>
+          <span id="rrrWrap">RRR: <b id="requiredRate">—</b></span>
           <span id="targetPill">Live prediction</span>
         </div>
       </div>
 
       <div class="score-meta-block">
-        <div class="score-bowling-team"><span>Bowling</span><b id="scoreBowlingName">Attribute XI</b></div>
+        <div class="score-bowling-team"><span>Bowling</span><b id="scoreBowlingName">Team</b></div>
         <div class="score-metrics-inline">
           <span><b id="formatBox">T20</b></span>
           <span id="phaseBox">Powerplay</span>
@@ -935,29 +1182,23 @@
 
       <div class="prediction-row" id="predictionPanel">
         <div class="prediction-tile prediction-main">
-          <span>Prediction</span>
-          <b id="predictionLeader">SX 52%</b>
-          <em id="predictionNote">SX projected score</em>
-          <div class="prediction-winbar" aria-label="Win probability bar" style="--user-win: 52%;">
-            <i id="predictionUserBar" class="prediction-user-fill" style="width: 52%;"></i>
-            <i id="predictionCompBar" class="prediction-comp-fill" style="width: 48%;"></i>
+          <div class="prediction-topline">
+            <span>Prediction</span>
+            <b id="predictionLeader">Even match</b>
+          </div>
+          <div class="prediction-winbar" aria-label="Win probability bar">
+            <i id="predictionUserBar" class="prediction-user-fill"></i>
+            <i id="predictionCompBar" class="prediction-comp-fill"></i>
           </div>
           <div class="prediction-bar-labels">
-            <small id="predictionBarUserLabel">SX 52%</small>
-            <small id="predictionBarCompLabel">AX 48%</small>
+            <small id="predictionBarUserLabel">Team A 50%</small>
+            <small id="predictionBarCompLabel">Team B 50%</small>
           </div>
-        </div>
-        <div class="prediction-tile">
-          <span id="predictionTeamAName">SX</span>
-          <b id="predictionTeamA">52%</b>
-        </div>
-        <div class="prediction-tile">
-          <span id="predictionTeamBName">AX</span>
-          <b id="predictionTeamB">48%</b>
-        </div>
-        <div class="prediction-tile">
-          <span id="predictionContextLabel">Projected</span>
-          <b id="predictionContext">157</b>
+          <em id="predictionNote">Live win chance from score and raw attributes</em>
+          <div class="prediction-context-inline">
+            <span id="predictionContextLabel">Projected</span>
+            <b id="predictionContext">—</b>
+          </div>
         </div>
       </div>
     </section>
@@ -965,30 +1206,42 @@
     <section class="live-strip">
       <article class="player-live-card striker">
         <div class="live-card-top"><div class="label">On Strike</div><div class="strike-star">*</div></div>
-        <h3 id="strikerName">Aarav Khan</h3>
-        <p id="strikerInfo" class="batter-stat-grid"><span>R<b>0</b></span><span>B<b>0</b></span><span>4s<b>0</b></span><span>6s<b>0</b></span><span>SR<b>0.00</b></span><span>Skill<b>85</b></span><span>Conf<b>50</b></span><span>Fat<b>0</b></span></p>
-        <div class="batter-intent-control" data-slot="striker" aria-hidden="false">
+        <div class="batter-name-line">
+          <h3 id="strikerName">Opening Batter</h3>
+          <div class="batter-mini-bars" aria-label="Batter confidence and fatigue">
+            <span class="batter-mini-meter">Conf<i><b id="strikerConfidenceFill" class="confidence-fill"></b></i></span>
+            <span class="batter-mini-meter">Fat<i><b id="strikerFatigueFill" class="fatigue-fill"></b></i></span>
+          </div>
+        </div>
+        <p id="strikerInfo" class="batter-stat-grid">R 0 • B 0 • 4s 0 • 6s 0 • SR 0.00</p>
+        <div class="batter-intent-control" data-slot="striker">
           <div class="intent-head"><span>Aggression</span><b id="strikerAggressionLabel">Aggressive 7</b></div>
-          <div class="intent-buttons compact-intents" data-level="3">
-            <button type="button" data-slot="striker" data-intent="2" onclick="setBatterAggression('striker', 2)" title="">Defensive</button>
-            <button type="button" data-slot="striker" data-intent="5" onclick="setBatterAggression('striker', 5)" title="">Balanced</button>
-            <button type="button" data-slot="striker" data-intent="7" onclick="setBatterAggression('striker', 7)" class="active" title="">Aggressive</button>
-            <button type="button" data-slot="striker" data-intent="10" onclick="setBatterAggression('striker', 10)" title="">Attack</button>
+          <div class="intent-buttons compact-intents">
+            <button type="button" data-slot="striker" data-intent="2" onclick="setBatterAggression('striker', 2)">Defensive</button>
+            <button type="button" data-slot="striker" data-intent="5" onclick="setBatterAggression('striker', 5)">Balanced</button>
+            <button type="button" data-slot="striker" data-intent="7" onclick="setBatterAggression('striker', 7)">Aggressive</button>
+            <button type="button" data-slot="striker" data-intent="10" onclick="setBatterAggression('striker', 10)">Attack</button>
           </div>
         </div>
       </article>
 
       <article class="player-live-card">
         <div class="live-card-top"><div class="label">Non-Striker</div></div>
-        <h3 id="nonStrikerName">Rayan Malik</h3>
-        <p id="nonStrikerInfo" class="batter-stat-grid"><span>R<b>0</b></span><span>B<b>0</b></span><span>4s<b>0</b></span><span>6s<b>0</b></span><span>SR<b>0.00</b></span><span>Skill<b>80</b></span><span>Conf<b>50</b></span><span>Fat<b>0</b></span></p>
-        <div class="batter-intent-control" data-slot="nonStriker" aria-hidden="false">
+        <div class="batter-name-line">
+          <h3 id="nonStrikerName">Opening Batter</h3>
+          <div class="batter-mini-bars" aria-label="Batter confidence and fatigue">
+            <span class="batter-mini-meter">Conf<i><b id="nonStrikerConfidenceFill" class="confidence-fill"></b></i></span>
+            <span class="batter-mini-meter">Fat<i><b id="nonStrikerFatigueFill" class="fatigue-fill"></b></i></span>
+          </div>
+        </div>
+        <p id="nonStrikerInfo" class="batter-stat-grid">R 0 • B 0 • 4s 0 • 6s 0 • SR 0.00</p>
+        <div class="batter-intent-control" data-slot="nonStriker">
           <div class="intent-head"><span>Aggression</span><b id="nonStrikerAggressionLabel">Aggressive 7</b></div>
-          <div class="intent-buttons compact-intents" data-level="3">
-            <button type="button" data-slot="nonStriker" data-intent="2" onclick="setBatterAggression('nonStriker', 2)" title="">Defensive</button>
-            <button type="button" data-slot="nonStriker" data-intent="5" onclick="setBatterAggression('nonStriker', 5)" title="">Balanced</button>
-            <button type="button" data-slot="nonStriker" data-intent="7" onclick="setBatterAggression('nonStriker', 7)" class="active" title="">Aggressive</button>
-            <button type="button" data-slot="nonStriker" data-intent="10" onclick="setBatterAggression('nonStriker', 10)" title="">Attack</button>
+          <div class="intent-buttons compact-intents">
+            <button type="button" data-slot="nonStriker" data-intent="2" onclick="setBatterAggression('nonStriker', 2)">Defensive</button>
+            <button type="button" data-slot="nonStriker" data-intent="5" onclick="setBatterAggression('nonStriker', 5)">Balanced</button>
+            <button type="button" data-slot="nonStriker" data-intent="7" onclick="setBatterAggression('nonStriker', 7)">Aggressive</button>
+            <button type="button" data-slot="nonStriker" data-intent="10" onclick="setBatterAggression('nonStriker', 10)">Attack</button>
           </div>
         </div>
       </article>
@@ -997,31 +1250,31 @@
         <div class="bowler-card-main">
           <div>
             <span>Current Bowler</span>
-            <strong id="currentBowlerName">Rishi Kapoor</strong>
-            <span id="currentBowlerFigures">0.0-0-0 • Eco 0.00 • Skill 80</span>
+            <strong id="currentBowlerName">Bowler</strong>
+            <span id="currentBowlerFigures">0.0-0-0</span>
           </div>
-          <button id="changeBowlerBtn" class="secondary small-action-btn" type="button" onclick="openBowlerChangeModal()" disabled="" title="Computer is bowling. Bowler changes are controlled by AI.">AI</button>
+          <button id="changeBowlerBtn" class="secondary small-action-btn" type="button" onclick="openBowlerChangeModal()">Change</button>
         </div>
-        <div class="bowler-meter" title="Bowler stamina"><div class="bowler-meter-fill" id="currentBowlerStaminaFill" style="width: 83.5%;"></div></div>
+        <div class="bowler-meter" title="Bowler stamina"><div class="bowler-meter-fill" id="currentBowlerStaminaFill"></div></div>
         <div class="bowler-small-row">
-          <span id="currentBowlerStamina">Stamina: 84% • Fatigue 0</span>
+          <span id="currentBowlerStamina">Stamina: 100%</span>
           <span id="currentBowlerLimit">Limit: 0.0 / 4.0</span>
         </div>
         <div class="bowler-plan-box">
           <span>Engine Rule</span>
-          <strong id="bowlingPlanText">Bowl AI: Death-Over Lockdown (A:Rishi Kapoor B:Adil Qureshi C:Taran Mehta D:Manav Jain E:Vik Rao)</strong>
+          <strong id="bowlingPlanText">T20 only • no country boost • raw batter attributes vs bowler attributes</strong>
         </div>
       </article>
     </section>
 
     <section class="main-match-grid" id="mainMatchGrid">
-      <article class="card commentary-panel" id="commentaryPanel" aria-hidden="false">
+      <article class="card commentary-panel" id="commentaryPanel">
         <div class="panel-head">
           <h3>Commentary</h3>
           <span id="commentaryOverLabel">Over 0</span>
         </div>
         <div class="commentary-body">
-          <div class="commentary-list" id="commentaryList"><div class="commentary-item note"><strong>AI</strong><p>Attribute XI bowling AI selected: Death-Over Lockdown.</p><small>Bowl AI: Death-Over Lockdown (A:Rishi Kapoor B:Adil Qureshi C:Taran Mehta D:Manav Jain E:Vik Rao)</small></div><div class="commentary-item note"><strong>0.0</strong><p>T20 skill engine ready. This version uses raw attributes only: batter skill vs bowler skill.</p><small>No country boost. No real-world stat shortcut. No hidden team help.</small></div></div>
+          <div class="commentary-list" id="commentaryList"></div>
           <div class="over-timeline" id="overTimeline"></div>
         </div>
       </article>
@@ -1030,14 +1283,14 @@
         <div class="section-title">
           <h3>Scorecard</h3>
           <div class="scorecard-title-actions">
-            <button class="innings-tab active" type="button"><span id="scoreBattingTabName">Skill XI</span> <b id="scoreBattingTabScore">0/0</b></button>
-            <button class="innings-tab" type="button" disabled=""><span id="scoreBowlingTabName">Attribute XI</span></button>
+            <button id="scoreInnings1Tab" class="innings-tab active" type="button" onclick="selectScorecardInnings(1)"><span id="scoreInnings1TabName">1st Innings</span> <b id="scoreInnings1TabScore">0/0</b></button>
+            <button id="scoreInnings2Tab" class="innings-tab" type="button" onclick="selectScorecardInnings(2)" disabled><span id="scoreInnings2TabName">2nd Innings</span> <b id="scoreInnings2TabScore">—</b></button>
           </div>
         </div>
         <div class="scorecard-body">
           <div class="scorecard-heading-line">
             <div>
-              <h3 id="scorecardInningsTitle">Skill XI Innings</h3>
+              <h3 id="scorecardInningsTitle">Innings</h3>
               <p id="scorecardScoreLine">0/0 (0.0 ov)</p>
             </div>
           </div>
@@ -1047,132 +1300,22 @@
                 <th>Batter</th><th>R</th><th>B</th><th>4s</th><th>6s</th><th>SR</th>
               </tr>
             </thead>
-            <tbody id="battingTableBody"><tr>
-          <td><strong>Aarav Khan *</strong><br><span style="color:var(--muted);font-size:10px">not out</span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Rayan Malik</strong><br><span style="color:var(--muted);font-size:10px">not out</span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Samir Das</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Imran Shah</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Zahid Ali</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Kamal Roy</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Nabil Chowdhury</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Farhan Mir</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Rafi Islam</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Sohan Patel</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr><tr>
-          <td><strong>Arman Gill</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>0</td>
-          <td>-</td>
-        </tr></tbody>
+            <tbody id="battingTableBody"></tbody>
           </table>
           <div class="extras-total-box">
             <div><span>Extras</span><b id="extrasLine">0 (wd 0, nb 0, b 0, lb 0)</b></div>
             <div><span>Total</span><b id="scorecardTotalLine">0/0 (0.0 ov)</b></div>
           </div>
           <div class="bowling-card-block">
-            <h4 id="bowlingCardTitle">Attribute XI Bowling</h4>
+            <h4 id="bowlingCardTitle">Bowling</h4>
             <table class="score-table bowling-table">
               <thead><tr><th>Bowler</th><th>O</th><th>R</th><th>W</th><th>Eco</th></tr></thead>
-              <tbody id="bowlingTableBody"><tr>
-            <td>Rishi Kapoor</td>
-            <td>0.0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0.00</td>
-          </tr></tbody>
+              <tbody id="bowlingTableBody"></tbody>
             </table>
           </div>
           <details class="debug-box">
             <summary>Debug State</summary>
-            <pre id="out">{
-  "phase": "innings1",
-  "inningsNo": 1,
-  "score": "0/0 (0.0)",
-  "battingAI": null,
-  "bowlingAI": {
-    "type": "bowling",
-    "modelKey": "DEATH_LOCK",
-    "modelName": "Death-Over Lockdown",
-    "description": "Keeps best death skills available for overs 16-20.",
-    "pattern": "CDEABCEDABCDEABCDABE",
-    "slots": {
-      "A": "Rishi_Kapoor",
-      "B": "Adil_Qureshi",
-      "C": "Taran_Mehta",
-      "D": "Manav_Jain",
-      "E": "Vik_Rao"
-    },
-    "names": {
-      "A": "Rishi Kapoor",
-      "B": "Adil Qureshi",
-      "C": "Taran Mehta",
-      "D": "Manav Jain",
-      "E": "Vik Rao"
-    }
-  },
-  "lastBattle": null
-}</pre>
+            <pre id="out">{}</pre>
           </details>
         </div>
       </article>
@@ -1183,22 +1326,24 @@
     <div class="ball-buttons">
       <button id="nextBallBtn" type="button" onclick="playNextBall()">▶ <span>Next Ball</span></button>
       <button id="playOverBtn" class="secondary" type="button" onclick="playOver()">⏩ <span>Next Over</span></button>
-      <button id="toggleCommentaryBtn" class="secondary" type="button" onclick="toggleCommentaryPanel()" aria-pressed="false">Hide Commentary</button>
+      <button id="toggleCommentaryBtn" class="secondary" type="button" onclick="toggleCommentaryPanel()">Hide Commentary</button>
       <button id="simInningsBtn" class="secondary" type="button" onclick="simulateCurrentInnings()">Simulate Innings</button>
       <button id="simMatchBtn" class="secondary" type="button" onclick="simulateWholeMatch()">Simulate Match</button>
-      <button id="nextInningsBtn" class="secondary" type="button" onclick="startNextInnings()" disabled="">Next Innings</button>
+      <button id="nextInningsBtn" class="secondary" type="button" onclick="startNextInnings()">Next Innings</button>
+      <button id="saveExitBtn" class="save-exit-btn is-hidden" type="button" onclick="showMatchCompleteModal()">Save & Exit</button>
       <button class="secondary" type="button" onclick="openStressTestModal()">Stress Test</button>
       <button class="danger" type="button" onclick="resetMatchCenterState()">Reset</button>
     </div>
   </footer>
 
   <div id="matchCompleteModal" class="player-option-modal hidden">
-    <div class="player-option-box" style="width:min(560px,92vw)">
+    <div class="player-option-box" style="width:min(720px,94vw)">
       <button class="player-option-close" onclick="closeMatchCompleteModal()">×</button>
-      <h2 id="matchCompleteTitle">Match completed</h2>
+      <h2 id="matchCompleteTitle">Match Summary</h2>
       <p id="matchCompleteScore">Scoreline</p>
+      <div id="matchSummaryCard" class="match-summary-card"></div>
       <div class="player-option-actions" style="display:grid;gap:9px">
-        <button onclick="returnToSummaryPage()">Save &amp; Return to Summary</button>
+        <button onclick="returnToSummaryPage()">Save & Exit</button>
         <button class="secondary" onclick="closeMatchCompleteModal()">Stay on Scorecard</button>
       </div>
     </div>
@@ -1278,6 +1423,7 @@
     let latestStressResults = null;
     let isStressTesting = false;
     let commentaryHidden = false;
+    let scorecardInningsNo = 1;
 
     function clamp(value, min, max) {
       const n = Number(value);
@@ -1324,6 +1470,7 @@
       commentaryHidden = !commentaryHidden;
       writeJSON(getCommentaryHiddenKey(), commentaryHidden);
       renderCommentaryVisibility();
+      if (matchState) renderBatterCards();
     }
 
     function renderCommentaryVisibility() {
@@ -2433,7 +2580,7 @@
       const bowlingXI = getSelectedXI(currentMatch, first.bowlingSide);
 
       const state = {
-        version: "t20-skill-v3-compact-no-autoplay",
+        version: "t20-skill-v3-scorecard-summary-exit",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -3055,6 +3202,7 @@
       }));
       matchState.inningsNo = 2;
       matchState.phase = "innings2";
+      scorecardInningsNo = 2;
       const inn = currentInnings();
       matchState.aggressionByKey[inn.strikerKey] = 7;
       matchState.aggressionByKey[inn.nonStrikerKey] = 7;
@@ -3193,11 +3341,105 @@
       window.location.href = getSummaryReturnUrl();
     }
 
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>'"]/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "'": "&#39;",
+        '"': "&quot;"
+      }[char]));
+    }
+
+    function formatBatterSummary(stat) {
+      const sr = strikeRate(stat.runs, stat.balls);
+      return `${stat.runs} (${stat.balls}) • SR ${sr}`;
+    }
+
+    function formatBowlerSummary(stat) {
+      const eco = stat.balls ? (stat.runs / (stat.balls / 6)).toFixed(2) : "0.00";
+      return `${stat.wickets}/${stat.runs} • ${ballsToOvers(stat.balls)} ov • Eco ${eco}`;
+    }
+
+    function topBattingPerformers(inn, count = 2) {
+      return Object.values(inn?.battingStats || {})
+        .filter(stat => stat.runs > 0 || stat.balls > 0)
+        .sort((a, b) => (b.runs - a.runs) || (Number(strikeRate(b.runs, b.balls)) - Number(strikeRate(a.runs, a.balls))) || (b.fours + b.sixes - a.fours - a.sixes))
+        .slice(0, count);
+    }
+
+    function topBowlingPerformers(inn, count = 2) {
+      return Object.values(inn?.bowlingStats || {})
+        .filter(stat => stat.balls > 0 || stat.wickets > 0)
+        .sort((a, b) => (b.wickets - a.wickets) || (a.runs - b.runs) || (b.balls - a.balls))
+        .slice(0, count);
+    }
+
+    function summaryPerfRows(rows, formatter, emptyText = "—") {
+      if (!rows.length) {
+        return `<div class="summary-perf-row"><span>${emptyText}</span><b>—</b></div>`;
+      }
+      return rows.map(stat => `
+        <div class="summary-perf-row">
+          <span>${escapeHTML(stat.name)}</span>
+          <b>${escapeHTML(formatter(stat))}</b>
+        </div>
+      `).join("");
+    }
+
+    function buildInningsSummaryHTML(inn, label) {
+      if (!inn) return "";
+      const topBatters = topBattingPerformers(inn, 2);
+      const topBowlers = topBowlingPerformers(inn, 2);
+      return `
+        <section class="summary-innings-block">
+          <div class="summary-innings-head">
+            <span>${escapeHTML(label)} • ${escapeHTML(inn.battingTeam)}</span>
+            <b>${inn.runs}/${inn.wickets} (${ballsToOvers(inn.balls)})</b>
+          </div>
+          <div class="summary-performances">
+            <div class="summary-perf-list">
+              <h4>Top batting</h4>
+              ${summaryPerfRows(topBatters, formatBatterSummary, "No batting card")}
+            </div>
+            <div class="summary-perf-list">
+              <h4>${escapeHTML(inn.bowlingTeam)} bowling</h4>
+              ${summaryPerfRows(topBowlers, formatBowlerSummary, "No bowling card")}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function buildMatchSummaryHTML(state = matchState) {
+      if (!state?.innings?.length) return `<div class="summary-banner">No match data yet</div>`;
+      const first = state.innings[0];
+      const second = state.innings[1];
+      return `
+        <div class="summary-banner">${escapeHTML(state.resultText || "Match completed")}</div>
+        <div class="summary-score-row">
+          <div class="summary-team-score">
+            <span>${escapeHTML(first?.battingTeam || "1st innings")}</span>
+            <b>${first ? `${first.runs}/${first.wickets}` : "—"}</b>
+          </div>
+          <div class="summary-vs">VS</div>
+          <div class="summary-team-score">
+            <span>${escapeHTML(second?.battingTeam || "2nd innings")}</span>
+            <b>${second ? `${second.runs}/${second.wickets}` : "—"}</b>
+          </div>
+        </div>
+        ${buildInningsSummaryHTML(first, "1st innings")}
+        ${buildInningsSummaryHTML(second, "2nd innings")}
+      `;
+    }
+
     function showMatchCompleteModal() {
       const modal = document.getElementById("matchCompleteModal");
       if (!modal) return;
-      text("matchCompleteTitle", matchState?.resultText || "Match completed");
+      text("matchCompleteTitle", "Match Summary");
       text("matchCompleteScore", buildMatchScoreText(matchState));
+      const summary = document.getElementById("matchSummaryCard");
+      if (summary) summary.innerHTML = buildMatchSummaryHTML(matchState);
       modal.classList.remove("hidden");
     }
 
@@ -3226,7 +3468,6 @@
       if (!isStressTesting) {
         saveCompletedMatchToTourSummary();
         persist();
-        showMatchCompleteModal();
       }
     }
 
@@ -3364,7 +3605,7 @@
 
       const canRestore =
         saved &&
-        saved.version === "t20-skill-v3-compact-no-autoplay" &&
+        ["t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-prediction-winbar-meter-hide-commentary"].includes(saved.version) &&
         saved.matchIdentity === currentIdentity &&
         saved.phase !== "completed";
 
@@ -3413,7 +3654,7 @@
       const first = getStressFirstInningsInfo(currentMatch, teams);
 
       const state = {
-        version: "t20-skill-v3-compact-no-autoplay",
+        version: "t20-skill-v3-prediction-winbar-meter",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -3970,16 +4211,26 @@
       const agg = getAggression(key);
       text(`${slot}Name`, getPlayerName(player));
       const strikeRate = stat.balls ? ((stat.runs / stat.balls) * 100).toFixed(2) : "0.00";
-      setHTML(`${slot}Info`, [
+      const batterCells = [
         statCell("R", stat.runs),
         statCell("B", stat.balls),
         statCell("4s", stat.fours || 0),
         statCell("6s", stat.sixes || 0),
-        statCell("SR", strikeRate),
-        statCell("Skill", Math.round(skill.overall)),
-        statCell("Conf", Math.round(stat.confidence)),
-        statCell("Fat", Math.round(stat.fatigue))
-      ].join(""));
+        statCell("SR", strikeRate)
+      ];
+      if (!commentaryHidden) batterCells.push(statCell("Skill", Math.round(skill.overall)));
+      setHTML(`${slot}Info`, batterCells.join(""));
+
+      const confFill = document.getElementById(`${slot}ConfidenceFill`);
+      const fatFill = document.getElementById(`${slot}FatigueFill`);
+      if (confFill) {
+        confFill.style.width = `${clamp(stat.confidence, 0, 100)}%`;
+        confFill.title = `Confidence ${Math.round(stat.confidence)}%`;
+      }
+      if (fatFill) {
+        fatFill.style.width = `${clamp(stat.fatigue, 0, 100)}%`;
+        fatFill.title = `Fatigue ${Math.round(stat.fatigue)}%`;
+      }
       const inn = currentInnings();
       const locked = inn?.battingSide === "computer";
       text(`${slot}AggressionLabel`, locked ? "" : aggressionLabel(agg));
@@ -4052,14 +4303,48 @@
       });
     }
 
+    function selectScorecardInnings(no) {
+      const targetNo = Number(no);
+      if (!matchState?.innings?.[targetNo - 1]) return;
+      scorecardInningsNo = targetNo;
+      renderScorecard();
+    }
+
+    function getScorecardInnings() {
+      if (!matchState?.innings?.length) return null;
+      if (!matchState.innings[scorecardInningsNo - 1]) {
+        scorecardInningsNo = matchState.inningsNo || matchState.innings.length || 1;
+      }
+      return matchState.innings[scorecardInningsNo - 1] || currentInnings();
+    }
+
+    function renderScorecardTabs() {
+      const first = matchState?.innings?.[0] || null;
+      const second = matchState?.innings?.[1] || null;
+      const tab1 = document.getElementById("scoreInnings1Tab");
+      const tab2 = document.getElementById("scoreInnings2Tab");
+
+      text("scoreInnings1TabName", first ? `${getTeamShortName(first.battingTeam)} 1st` : "1st Innings");
+      text("scoreInnings1TabScore", first ? `${first.runs}/${first.wickets}` : "0/0");
+      text("scoreInnings2TabName", second ? `${getTeamShortName(second.battingTeam)} 2nd` : "2nd Innings");
+      text("scoreInnings2TabScore", second ? `${second.runs}/${second.wickets}` : "—");
+
+      if (tab1) {
+        tab1.disabled = !first;
+        tab1.classList.toggle("active", scorecardInningsNo === 1);
+      }
+      if (tab2) {
+        tab2.disabled = !second;
+        tab2.classList.toggle("active", scorecardInningsNo === 2);
+      }
+    }
+
     function renderScorecard() {
-      const inn = currentInnings();
+      const inn = getScorecardInnings();
       if (!inn) return;
-      text("scoreBattingTabName", inn.battingTeam);
-      text("scoreBattingTabScore", `${inn.runs}/${inn.wickets}`);
-      text("scoreBowlingTabName", inn.bowlingTeam);
+      renderScorecardTabs();
       text("scorecardInningsTitle", `${inn.battingTeam} Innings`);
-      text("scorecardScoreLine", `${inn.runs}/${inn.wickets} (${ballsToOvers(inn.balls)} ov)`);
+      text("scorecardScoreLine", `${inn.runs}/${inn.wickets} (${ballsToOvers(inn.balls)} ov) vs ${inn.bowlingTeam}`);
       text("extrasLine", `${inn.extras.wides + inn.extras.noBalls + inn.extras.byes + inn.extras.legByes} (wd ${inn.extras.wides}, nb ${inn.extras.noBalls}, b ${inn.extras.byes}, lb ${inn.extras.legByes})`);
       text("scorecardTotalLine", `${inn.runs}/${inn.wickets} (${ballsToOvers(inn.balls)} ov)`);
       text("bowlingCardTitle", `${inn.bowlingTeam} Bowling`);
@@ -4072,7 +4357,7 @@
         const active = key === inn.strikerKey || key === inn.nonStrikerKey;
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td><strong>${getPlayerName(player)}${key === inn.strikerKey ? " *" : ""}</strong><br><span style="color:var(--muted);font-size:10px">${stat.out ? stat.howOut : active ? "not out" : stat.balls || stat.runs ? "not out" : ""}</span></td>
+          <td><strong>${getPlayerName(player)}${key === inn.strikerKey && scorecardInningsNo === matchState.inningsNo && !matchState.completed ? " *" : ""}</strong><br><span style="color:var(--muted);font-size:10px">${stat.out ? stat.howOut : active && scorecardInningsNo === matchState.inningsNo && !matchState.completed ? "not out" : stat.balls || stat.runs ? "not out" : ""}</span></td>
           <td>${stat.runs}</td>
           <td>${stat.balls}</td>
           <td>${stat.fours}</td>
@@ -4085,7 +4370,7 @@
       const bowlingBody = document.getElementById("bowlingTableBody");
       bowlingBody.innerHTML = "";
       Object.values(inn.bowlingStats)
-        .filter(s => s.balls > 0 || s.key === inn.currentBowlerKey)
+        .filter(s => s.balls > 0 || (s.key === inn.currentBowlerKey && scorecardInningsNo === matchState.inningsNo && !matchState.completed))
         .sort((a, b) => b.balls - a.balls)
         .forEach(stat => {
           const eco = stat.balls ? (stat.runs / (stat.balls / 6)).toFixed(2) : "0.00";
@@ -4112,11 +4397,15 @@
       document.getElementById("simInningsBtn").disabled = completed || !inningsPhase;
       document.getElementById("simMatchBtn").disabled = completed;
       document.getElementById("nextInningsBtn").disabled = !breakPhase || completed;
+      const saveExitBtn = document.getElementById("saveExitBtn");
+      if (saveExitBtn) {
+        saveExitBtn.classList.toggle("is-hidden", !completed);
+        saveExitBtn.disabled = !completed;
+      }
       if (completed) text("targetPill", matchState.resultText || "Match completed");
     }
 
     init();
   </script>
-
-
-</body></html>
+</body>
+</html>
