@@ -295,9 +295,23 @@
       border-color: rgba(248, 113, 113, 0.65);
     }
 
-    .score-over-chip-row.completed-over .ball-chip {
-      opacity: 0.82;
-      filter: saturate(0.92);
+    .score-over-chip-row .ball-chip.wide,
+    .score-over-chip-row .ball-chip.noBall {
+      background: linear-gradient(180deg, rgba(251, 191, 36, 0.30), rgba(180, 83, 9, 0.16));
+      color: #fef3c7;
+      border-color: rgba(251, 191, 36, 0.50);
+    }
+
+    .score-over-chip-row .ball-chip.bye {
+      background: linear-gradient(180deg, rgba(148, 163, 184, 0.26), rgba(51, 65, 85, 0.16));
+      color: #f1f5f9;
+      border-color: rgba(148, 163, 184, 0.48);
+    }
+
+    .score-over-chip-row .ball-chip.legBye {
+      background: linear-gradient(180deg, rgba(45, 212, 191, 0.26), rgba(13, 148, 136, 0.16));
+      color: #ccfbf1;
+      border-color: rgba(45, 212, 191, 0.46);
     }
 
     @media (max-width: 640px) {
@@ -959,6 +973,9 @@
     .ball-chip.four { background: rgba(56,189,248,0.18); color: #7dd3fc; border-color: rgba(56,189,248,0.35); }
     .ball-chip.six { background: rgba(192,132,252,0.18); color: #d8b4fe; border-color: rgba(192,132,252,0.35); }
     .ball-chip.wicket { background: rgba(251,113,133,0.20); color: #fecdd3; border-color: rgba(251,113,133,0.4); }
+    .ball-chip.wide, .ball-chip.noBall { background: rgba(251,191,36,0.16); color: #fde68a; border-color: rgba(251,191,36,0.34); }
+    .ball-chip.bye { background: rgba(148,163,184,0.16); color: #e2e8f0; border-color: rgba(148,163,184,0.36); }
+    .ball-chip.legBye { background: rgba(45,212,191,0.15); color: #99f6e4; border-color: rgba(45,212,191,0.34); }
 
     .scorecard-title-actions { display: flex; align-items: center; gap: 8px; }
     .innings-tab { padding: 7px 10px; font-size: 12px; box-shadow: none; background: rgba(255,255,255,0.07); color: var(--muted); border: 1px solid var(--line); }
@@ -1218,6 +1235,12 @@
       font-size: 11px;
       font-weight: 1000;
     }
+    .over-ball-chip.four { background: rgba(56,189,248,0.18); color: #7dd3fc; border-color: rgba(56,189,248,0.35); }
+    .over-ball-chip.six { background: rgba(192,132,252,0.18); color: #d8b4fe; border-color: rgba(192,132,252,0.35); }
+    .over-ball-chip.wicket { background: rgba(251,113,133,0.20); color: #fecdd3; border-color: rgba(251,113,133,0.4); }
+    .over-ball-chip.wide, .over-ball-chip.noBall { background: rgba(251,191,36,0.16); color: #fde68a; border-color: rgba(251,191,36,0.34); }
+    .over-ball-chip.bye { background: rgba(148,163,184,0.16); color: #e2e8f0; border-color: rgba(148,163,184,0.36); }
+    .over-ball-chip.legBye { background: rgba(45,212,191,0.15); color: #99f6e4; border-color: rgba(45,212,191,0.34); }
 
     .chart-wrap {
       border: 1px solid var(--line);
@@ -1877,13 +1900,15 @@
         <button class="secondary" onclick="runAggressionMatrixTest(100, { equalSkill: true })">Equal Skill 100 / Level</button>
         <button class="secondary" onclick="runOutcomeWeightProbe(5000)">Weight Probe 5k Balls/Phase</button>
         <button class="secondary" onclick="runOutcomeWeightProbe(5000, { equalSkill: true })">Equal Weight Probe 5k</button>
+        <button class="secondary" onclick="runEqualBellCurveBalanceTest(1000)">Equal Bell Curve 1000</button>
+        <button class="secondary" onclick="runEqualBellCurveBalanceTest(300)">Quick Bell 300</button>
         <button class="secondary" onclick="runAIAggressionPlanTest()">AI Plan Test</button>
         <button class="secondary" onclick="downloadOutcomeWeightProbeCSV()">Download Weight CSV</button>
         <button class="secondary" onclick="downloadStressSummaryCSV()">Download Summary CSV</button>
         <button class="secondary" onclick="downloadStressCSVChunks()">Download Detail CSV Chunks</button>
       </div>
       <div id="stressSummary" class="stress-output">
-        <p class="stress-note">Run a normal stress test, an aggression matrix, a weight probe, or the AI Plan Test. The weight probe isolates ball-outcome weights. The AI Plan Test checks whether the computer is choosing sensible 0-10 aggression levels while setting and chasing targets. First-innings governor is removed in this version.</p>
+        <p class="stress-note">Run a normal stress test, aggression matrix, weight probe, AI Plan Test, or Equal Bell Curve test. The Equal Bell Curve test checks whether equal teams average 170-185, lose 6-8 wickets, split wins around 50/50, and produce a bell-shaped score distribution without forcing collapses into par scores.</p>
       </div>
     </div>
   </div>
@@ -2056,34 +2081,35 @@
     // These are not direct wicket percentages. They multiply the existing skill-vs-skill wicket weight.
     // Skill, confidence, fatigue, phase, fielding, and bowling quality still matter after this curve.
     const AGG_WICKET_RISK_BY_LEVEL = [
-      0.38, // 0 no intent: low scoring, lowest wicket pressure
+      0.38, // 0 no intent: lowest scoring and lowest wicket pressure
       0.45, // 1
       0.53, // 2 Test default
       0.63, // 3
       0.76, // 4
       0.93, // 5 ODI default
       1.12, // 6
-      1.34, // 7 controlled T20 aggression, riskier than 6
-      1.58, // 8 T20 default
-      2.05, // 9 heavy attack
-      2.65  // 10+ ultra/death: high risk, not cartoonish
+      1.35, // 7 controlled T20 aggression
+      1.62, // 8 T20 default
+      1.92, // 9 heavy attack, but not arcade mode
+      2.28  // 10+ ultra/death: high risk, high reward
     ];
 
-    const AGG_WICKET_FLOOR_BY_LEVEL = [0.34, 0.40, 0.47, 0.56, 0.68, 0.84, 1.02, 1.20, 1.42, 1.82, 2.35];
+    const AGG_WICKET_FLOOR_BY_LEVEL = [0.34, 0.40, 0.47, 0.56, 0.68, 0.84, 1.02, 1.22, 1.48, 1.72, 2.02];
 
-    // Final wicket-weight guardrails are monotonic. Level 10 must stay dangerous even when a batter is set.
-    const AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL = [0.55, 0.70, 0.90, 1.15, 1.45, 1.85, 2.40, 3.05, 4.10, 6.40, 9.80];
-    const AGG_WICKET_WEIGHT_CAP_BY_LEVEL = [6.0, 6.8, 7.6, 8.6, 9.8, 11.2, 13.0, 14.4, 16.0, 18.8, 22.5];
+    // Final wicket-weight guardrails are monotonic, but tuned for natural 170-185 equal-team T20s.
+    // Level 10 should collapse often, but not turn every phase into 17+ RPO arcade cricket.
+    const AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL = [0.55, 0.70, 0.90, 1.15, 1.45, 1.85, 2.40, 3.15, 4.55, 6.40, 8.10];
+    const AGG_WICKET_WEIGHT_CAP_BY_LEVEL = [6.0, 6.8, 7.6, 8.6, 9.8, 11.2, 13.0, 15.0, 18.2, 20.5, 23.0];
 
     // Tempo alignment: this is the scoring side of the aggression bar.
-    // Important: at high intent, runs must come from 4/6/W pressure, not safe 1/2/3 rotation.
-    const AGG_RUN_TEMPO_BY_LEVEL = [0.36, 0.42, 0.50, 0.58, 0.68, 0.76, 0.84, 0.92, 0.98, 1.08, 1.16];
-    const AGG_SAFE_ROTATION_TEMPO_BY_LEVEL = [0.36, 0.42, 0.50, 0.58, 0.66, 0.72, 0.76, 0.76, 0.68, 0.56, 0.48];
-    const AGG_TWO_TEMPO_BY_LEVEL = [0.34, 0.40, 0.47, 0.55, 0.62, 0.67, 0.70, 0.68, 0.58, 0.42, 0.34];
-    const AGG_THREE_TEMPO_BY_LEVEL = [0.25, 0.30, 0.36, 0.42, 0.50, 0.55, 0.58, 0.55, 0.48, 0.34, 0.24];
-    const AGG_BOUNDARY_TEMPO_BY_LEVEL = [0.12, 0.18, 0.26, 0.34, 0.48, 0.64, 0.78, 0.92, 1.02, 1.34, 1.72];
-    const AGG_DOT_TEMPO_BY_LEVEL = [2.70, 2.35, 2.05, 1.82, 1.58, 1.36, 1.18, 1.04, 0.96, 0.84, 0.72];
-    const AGG_DOT_CAP_BY_LEVEL = [78, 72, 66, 62, 56, 51, 47, 44, 41, 37, 34];
+    // Levels 0-8 create the main T20 bell curve. Levels 9-10 are explosive but controlled.
+    const AGG_RUN_TEMPO_BY_LEVEL = [0.36, 0.42, 0.50, 0.60, 0.70, 0.78, 0.88, 0.98, 1.08, 1.16, 1.25];
+    const AGG_SAFE_ROTATION_TEMPO_BY_LEVEL = [0.36, 0.42, 0.50, 0.58, 0.66, 0.72, 0.78, 0.82, 0.78, 0.56, 0.48];
+    const AGG_TWO_TEMPO_BY_LEVEL = [0.34, 0.40, 0.47, 0.55, 0.62, 0.68, 0.72, 0.74, 0.70, 0.48, 0.40];
+    const AGG_THREE_TEMPO_BY_LEVEL = [0.25, 0.30, 0.36, 0.42, 0.50, 0.56, 0.60, 0.60, 0.56, 0.40, 0.32];
+    const AGG_BOUNDARY_TEMPO_BY_LEVEL = [0.12, 0.18, 0.26, 0.36, 0.50, 0.68, 0.86, 1.03, 1.28, 1.62, 2.05];
+    const AGG_DOT_TEMPO_BY_LEVEL = [2.70, 2.35, 2.05, 1.78, 1.52, 1.30, 1.12, 0.98, 0.88, 0.72, 0.62];
+    const AGG_DOT_CAP_BY_LEVEL = [78, 72, 66, 61, 55, 50, 46, 43, 38, 34, 31];
 
     function getAggressionZone(value) {
       const v = clamp(Math.round(value ?? 8), 0, 10);
@@ -2730,7 +2756,7 @@
       const fieldEdge = Number(bowling.field || 0) - 58;
       const power = averageSkill(inn?.battingXI || [], p => battingSkill(p).boundary + battingSkill(p).six);
       const powerEdge = (power / 2) - 64;
-      return clamp(Math.round(164 + batEdge * 0.52 - fieldEdge * 0.16 + powerEdge * 0.18), 130, 205);
+      return clamp(Math.round(176 + batEdge * 0.46 - fieldEdge * 0.14 + powerEdge * 0.16), 145, 215);
     }
 
     function getAIProjectedScore(inn) {
@@ -2769,14 +2795,19 @@
 
     function getFirstInningsBaseIntent(aiKey, phase, wickets) {
       const model = aiKey || "PAR_BUILDER";
-      let desired = 7.0;
-      if (model === "WICKET_BANK") desired = phase === "Powerplay" ? 4.8 : phase === "Middle" ? 5.8 : 9.2;
-      else if (model === "FRONT_LOAD") desired = phase === "Powerplay" ? 8.5 : phase === "Middle" ? 6.4 : 9.0;
-      else if (model === "MAX_PRESSURE") desired = phase === "Powerplay" ? 8.6 : phase === "Middle" ? 7.5 : 11.1;
-      else desired = phase === "Powerplay" ? 6.5 : phase === "Middle" ? 6.8 : 9.5;
+      let desired = 8.0;
 
-      if (wickets >= 7 && phase !== "Death") desired -= 1.4;
-      else if (wickets >= 5 && phase === "Middle") desired -= 0.8;
+      // New target-setting AI: equal teams should naturally aim around 170-185,
+      // not 150 par cricket and not 220 arcade cricket.
+      if (model === "WICKET_BANK") desired = phase === "Powerplay" ? 7.1 : phase === "Middle" ? 7.6 : 9.4;
+      else if (model === "FRONT_LOAD") desired = phase === "Powerplay" ? 8.4 : phase === "Middle" ? 7.7 : 9.3;
+      else if (model === "MAX_PRESSURE") desired = phase === "Powerplay" ? 8.8 : phase === "Middle" ? 8.4 : 10.0;
+      else desired = phase === "Powerplay" ? 7.8 : phase === "Middle" ? 8.0 : 9.5;
+
+      // Still protect collapses. This is not a governor: it only changes future intent.
+      if (wickets >= 7 && phase !== "Death") desired -= 1.6;
+      else if (wickets >= 5 && phase === "Middle") desired -= 0.9;
+      else if (wickets <= 2 && phase === "Death") desired += 0.45;
       return desired;
     }
 
@@ -2791,15 +2822,15 @@
       let desired = getFirstInningsBaseIntent(ai?.modelKey, phase, wickets);
 
       const parGap = par - projected;
-      if (balls >= 18) desired += clamp(parGap / 18, -1.2, 1.35);
+      if (balls >= 18) desired += clamp(parGap / 22, -0.95, 1.05);
       if (currentRR !== null && balls >= 30) {
         const liveParRR = ((par - Number(inn.runs || 0)) / ballsLeft) * 6;
-        desired = desired * 0.68 + clamp(liveParRR, 3.2, 13.4) * 0.32;
+        desired = desired * 0.74 + clamp(liveParRR, 4.2, 12.2) * 0.26;
       }
 
       if (phase === "Death") {
-        if (wickets <= 3) desired = Math.max(desired + 0.35, 9.4);
-        if (wickets >= 6) desired = Math.min(desired - 1.1, 8.4);
+        if (wickets <= 3) desired += 0.8;
+        if (wickets >= 6) desired -= 0.9;
       }
 
       const pressure = getBatterPressureProfile(batterStat);
@@ -2822,10 +2853,10 @@
 
       // New meter chase logic: required rate is the anchor, phase controls urgency.
       if (phase === "Powerplay") desired = requiredRR <= 7.2 ? requiredRR - 0.5 : requiredRR + 0.1;
-      if (phase === "Middle") desired = requiredRR <= 7.2 ? requiredRR - 0.2 : requiredRR + 0.25;
-      if (phase === "Death") desired = requiredRR + 0.45;
-      if (ballsLeft <= 24) desired = Math.max(desired, requiredRR + 0.65);
-      if (ballsLeft <= 12) desired = Math.max(desired, requiredRR + 1.15);
+      if (phase === "Middle") desired = requiredRR <= 7.2 ? requiredRR - 0.2 : requiredRR + 0.35;
+      if (phase === "Death") desired = requiredRR + 0.55;
+      if (ballsLeft <= 24) desired = Math.max(desired, requiredRR + 0.85);
+      if (ballsLeft <= 12) desired = Math.max(desired, requiredRR + 1.35);
 
       switch (ai?.modelKey) {
         case "WICKET_CHASE":
@@ -2847,7 +2878,7 @@
       if (wicketsLeft <= 3 && ballsLeft > 18) desired -= 1.0;
       else if (wicketsLeft <= 5 && ballsLeft > 30) desired -= 0.45;
       if (need <= 18 && ballsLeft >= 18) desired -= 0.9;
-      if (requiredRR >= 12.0) desired += 0.35;
+      if (requiredRR >= 12.0) desired += 0.45;
       if (requiredRR >= 14.0) desired += 0.75;
 
       const pressure = getBatterPressureProfile(batterStat);
@@ -2877,11 +2908,8 @@
         if (requiredRR !== null && requiredRR >= 13.0) minLevel = Math.max(minLevel, 9);
       }
 
-      // Level 10 is for true required-rate/death-over pressure, not any ordinary death over.
-      const deathNeedTen = phase === "Death" && (Number(desiredRpo || 0) >= 12.4 || (requiredRR !== null && requiredRR >= 12.8) || ballsLeft <= 12);
-      const firstInningsNeedTen = !inn.target && phase === "Death" && wickets <= 3 && ballsLeft <= 18 && Number(desiredRpo || 0) >= 12.2;
-      const setHitterNeedTen = pressure.settled > 0.82 && getBatterSloggerFactor(bat) > 0.65 && Number(desiredRpo || 0) >= 12.2;
-      const canUseTen = deathNeedTen || firstInningsNeedTen || setHitterNeedTen;
+      // Level 10 is for true death/required-rate pressure or a set hitter. No casual L10 in middle overs.
+      const canUseTen = phase === "Death" || ballsLeft <= 12 || (requiredRR !== null && requiredRR >= 13.2) || (pressure.settled > 0.82 && getBatterSloggerFactor(bat) > 0.65);
       if (!canUseTen) maxLevel = Math.min(maxLevel, 9);
 
       if (pressure.tired > 0.70 && phase !== "Death") maxLevel = Math.min(maxLevel, 8);
@@ -3310,10 +3338,6 @@
         bowlingStats,
         currentOverEvents: [],
         currentOverWickets: 0,
-        lastCompletedOverEvents: [],
-        lastCompletedOverRuns: 0,
-        lastCompletedOverWickets: 0,
-        lastCompletedOverNo: 0,
         overSummaries: [],
         fallOfWickets: [],
         partnerships: [],
@@ -3329,7 +3353,7 @@
       const bowlingXI = getSelectedXI(currentMatch, first.bowlingSide);
 
       const state = {
-        version: "t20-skill-v3-ai-weight-balance-both-places",
+        version: "t20-skill-v3-ai-meter-target-chase",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -3498,16 +3522,21 @@
     ========================================================= */
 
     function makeWeights() {
+      // Baseline T20 outcome budget.
+      // Byes/leg byes are included inside the same budget, not added on top of scoring.
+      // This keeps total RPO near the target while making extras more cricket-realistic.
       return {
         wicket: 4.45,
         dot: 29.4,
-        one: 38.2,
-        two: 15.0,
+        one: 37.4,
+        two: 14.4,
         three: 0.8,
         four: 9.8,
         six: 6.1,
-        wide: 1.45,
-        noBall: 0.38
+        wide: 1.25,
+        noBall: 0.34,
+        bye: 0.28,
+        legBye: 0.52
       };
     }
 
@@ -3656,21 +3685,21 @@
       // Ultra/death intent: trade safe rotation for explosive/wicket outcomes.
       if (agg >= 9) {
         const ultra = agg >= 10 ? 1 : 0.45;
-        multiply(weights, "one", 0.90 - ultra * 0.10);
-        multiply(weights, "two", 0.82 - ultra * 0.16);
-        multiply(weights, "three", 0.78 - ultra * 0.18);
-        multiply(weights, "four", 1.02 + ultra * 0.10);
-        multiply(weights, "six", 1.06 + ultra * 0.16);
-        multiply(weights, "wicket", 1.00 + ultra * 0.08);
+        multiply(weights, "one", 0.88 - ultra * 0.10);
+        multiply(weights, "two", 0.82 - ultra * 0.12);
+        multiply(weights, "three", 0.78 - ultra * 0.14);
+        multiply(weights, "four", 1.05 + ultra * 0.08);
+        multiply(weights, "six", 1.10 + ultra * 0.14);
+        multiply(weights, "wicket", 1.05 + ultra * 0.10);
       }
 
       if (phase === "Death" && agg >= 9) {
         const ultraDeath = agg >= 10 ? 1 : 0.5;
-        multiply(weights, "one", 0.94 - ultraDeath * 0.08);
-        multiply(weights, "two", 0.88 - ultraDeath * 0.12);
-        multiply(weights, "four", 1.02 + ultraDeath * 0.08);
-        multiply(weights, "six", 1.06 + ultraDeath * 0.12);
-        multiply(weights, "wicket", 1.03 + ultraDeath * 0.10);
+        multiply(weights, "one", 0.92 - ultraDeath * 0.08);
+        multiply(weights, "two", 0.86 - ultraDeath * 0.12);
+        multiply(weights, "four", 1.04 + ultraDeath * 0.08);
+        multiply(weights, "six", 1.08 + ultraDeath * 0.14);
+        multiply(weights, "wicket", 1.06 + ultraDeath * 0.11);
       }
 
       multiply(weights, "wicket", aggressionWicketRisk);
@@ -3703,10 +3732,10 @@
       // Wicket cap is aggression-aware. The old universal cap made level 10 too survivable.
       const wicketFloor = AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL[agg] ?? 1.5;
       const wicketCap = AGG_WICKET_WEIGHT_CAP_BY_LEVEL[agg] ?? 12.0;
-      const fourFloorByLevel = [0.35, 0.55, 0.75, 1.00, 1.35, 1.80, 2.15, 2.55, 3.00, 4.50, 5.80];
-      const sixFloorByLevel = [0.05, 0.08, 0.12, 0.20, 0.32, 0.50, 0.75, 0.95, 1.35, 2.70, 3.80];
-      const fourCapByLevel = [7.5, 8.2, 9.0, 10.0, 11.0, 12.0, 12.8, 13.6, 14.8, 18.0, 21.0];
-      const sixCapByLevel = [2.2, 2.8, 3.5, 4.5, 5.6, 6.8, 8.0, 9.2, 10.8, 16.0, 20.0];
+      const fourFloorByLevel = [0.35, 0.55, 0.75, 1.00, 1.40, 1.90, 2.30, 2.80, 3.30, 4.40, 5.80];
+      const sixFloorByLevel = [0.05, 0.08, 0.12, 0.20, 0.35, 0.55, 0.85, 1.10, 1.60, 2.70, 4.00];
+      const fourCapByLevel = [7.5, 8.2, 9.0, 10.0, 11.2, 12.4, 13.4, 14.8, 17.5, 21.5, 24.5];
+      const sixCapByLevel = [2.2, 2.8, 3.5, 4.5, 5.8, 7.2, 8.8, 10.8, 14.5, 19.5, 22.5];
       weights.wicket = clamp(weights.wicket, wicketFloor, wicketCap);
       weights.six = clamp(weights.six, sixFloorByLevel[agg] ?? 1.2, sixCapByLevel[agg] ?? 12.8);
       weights.four = clamp(weights.four, fourFloorByLevel[agg] ?? 2.8, fourCapByLevel[agg] ?? 14.8);
@@ -3734,8 +3763,10 @@
 
       matchState.lastBattle = battle;
 
-      if (outcome === "wide") return { type: "extra", extraType: "wide", runs: 1, legal: false, battle };
-      if (outcome === "noBall") return { type: "extra", extraType: "noBall", runs: 1, legal: false, battle };
+      if (outcome === "wide") return { type: "extra", extraType: "wide", runs: 1, legal: false, ballFaced: false, chargedToBowler: true, battle };
+      if (outcome === "noBall") return { type: "extra", extraType: "noBall", runs: 1, legal: false, ballFaced: false, chargedToBowler: true, battle };
+      if (outcome === "bye") return { type: "extra", extraType: "bye", runs: chooseFieldingExtraRuns("bye"), legal: true, ballFaced: true, chargedToBowler: false, battle };
+      if (outcome === "legBye") return { type: "extra", extraType: "legBye", runs: chooseFieldingExtraRuns("legBye"), legal: true, ballFaced: true, chargedToBowler: false, battle };
 
       if (outcome === "wicket") {
         return {
@@ -3755,6 +3786,16 @@
         boundary: runs === 4 || runs === 6,
         battle
       };
+    }
+
+    function chooseFieldingExtraRuns(extraType) {
+      // Legal extras should usually be 1, sometimes 2, rarely 4.
+      // Kept simple so extras remain part of baseline outcome shape, not a hidden scoring helper.
+      const weights = extraType === "bye"
+        ? { one: 82, two: 14, four: 4 }
+        : { one: 84, two: 14, four: 2 };
+      const pick = weightedRoll(weights);
+      return { one: 1, two: 2, four: 4 }[pick] || 1;
     }
 
     function weightedRoll(weights) {
@@ -3805,7 +3846,7 @@
       if (outcome.type === "wicket") change = -16;
       else if (outcome.type === "runs") {
         change = { 0: -1.0, 1: 0.5, 2: 1.1, 3: 1.6, 4: 3.3, 6: 4.4 }[outcome.runs] || 0;
-      } else if (outcome.type === "extra") change = 0.3;
+      } else if (outcome.type === "extra") change = outcome.legal ? 0.05 : 0.3;
 
       if (change > 0 && batterStat.balls < 6) change *= 0.72;
       if (change > 0 && batterStat.confidence > 75) change *= 0.55;
@@ -3845,15 +3886,31 @@
       let textLine = "";
 
       if (outcome.type === "extra") {
-        inn.runs += outcome.runs;
-        bowlerStat.runs += outcome.runs;
-        if (outcome.extraType === "wide") inn.extras.wides += outcome.runs;
-        if (outcome.extraType === "noBall") inn.extras.noBalls += outcome.runs;
-        chip = outcome.extraType === "wide" ? "Wd" : "Nb";
-        typeClass = "one";
-        textLine = outcome.extraType === "wide"
-          ? `${getPlayerName(bowler)} loses the line. Wide.`
-          : `${getPlayerName(bowler)} oversteps. No ball.`;
+        const r = Number(outcome.runs || 0);
+        inn.runs += r;
+
+        if (outcome.chargedToBowler) {
+          bowlerStat.runs += r;
+        }
+
+        if (outcome.extraType === "wide") inn.extras.wides += r;
+        if (outcome.extraType === "noBall") inn.extras.noBalls += r;
+        if (outcome.extraType === "bye") inn.extras.byes += r;
+        if (outcome.extraType === "legBye") inn.extras.legByes += r;
+
+        if (outcome.legal) {
+          batterStat.balls += 1;
+          bowlerStat.balls += 1;
+          inn.balls += 1;
+          inn.legalBallsThisOver += 1;
+          inn.partnershipRuns += r;
+          inn.partnershipBalls += 1;
+          if (r % 2 === 1) rotateStrike();
+        }
+
+        chip = outcome.extraType === "wide" ? "Wd" : outcome.extraType === "noBall" ? "Nb" : outcome.extraType === "bye" ? `B${r > 1 ? r : ""}` : `LB${r > 1 ? r : ""}`;
+        typeClass = outcome.extraType;
+        textLine = makeExtraText(outcome.extraType, r, batter, bowler);
       }
 
       if (outcome.type === "runs") {
@@ -3907,6 +3964,16 @@
       }
 
       checkInningsEnd();
+    }
+
+    function makeExtraText(extraType, runs, batter, bowler) {
+      const b = getPlayerName(batter);
+      const w = getPlayerName(bowler);
+      if (extraType === "wide") return `${w} loses the line. Wide.`;
+      if (extraType === "noBall") return `${w} oversteps. No ball.`;
+      if (extraType === "bye") return `${w} beats ${b}, but it sneaks past the keeper. ${runs} bye${runs > 1 ? "s" : ""}.`;
+      if (extraType === "legBye") return `${w} hits the pad and they steal ${runs} leg bye${runs > 1 ? "s" : ""}.`;
+      return `${runs} extra${runs > 1 ? "s" : ""}.`;
     }
 
     function makeRunsText(r, batter, bowler) {
@@ -3980,17 +4047,6 @@
       ensureScoreboardData(inn);
       const bowlerStat = ensureBowlerStat(inn.currentBowlerKey);
       recordOverSummary(inn);
-
-      // Keep the completed over visible in the top score strip until the next ball starts.
-      // Previously the display disappeared because currentOverEvents was cleared immediately.
-      inn.lastCompletedOverEvents = (inn.currentOverEvents || []).map(ev => ({
-        label: ev.label || "•",
-        type: ev.type || "dot"
-      }));
-      inn.lastCompletedOverRuns = Number(inn.currentOverRuns || 0);
-      inn.lastCompletedOverWickets = Number(inn.currentOverWickets || 0);
-      inn.lastCompletedOverNo = Math.ceil(Number(inn.balls || 0) / 6);
-
       if (inn.currentOverRuns === 0) bowlerStat.maidens += 1;
       bowlerStat.lastOverBowled = Math.floor((inn.balls - 1) / 6);
       inn.previousBowlerKey = inn.currentBowlerKey;
@@ -4551,13 +4607,13 @@
 
       const canRestore =
         saved &&
-        ["t20-skill-v3-ai-weight-balance-both-places", "t20-skill-v3-equal-skill-no-governor", "t20-skill-v3-equal-skill-aggression-test", "t20-skill-v3-ultra-aggression-risk", "t20-skill-v3-all-format-aggression-pill", "t20-skill-v3-scoreboard-hub-hotfix", "t20-skill-v3-scoreboard-hub", "t20-skill-v3-two-color-prediction-bar", "t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
+        ["t20-skill-v3-outcome-weight-probe", "t20-skill-v3-equal-skill-no-governor", "t20-skill-v3-equal-skill-aggression-test", "t20-skill-v3-ultra-aggression-risk", "t20-skill-v3-all-format-aggression-pill", "t20-skill-v3-scoreboard-hub-hotfix", "t20-skill-v3-scoreboard-hub", "t20-skill-v3-two-color-prediction-bar", "t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
         saved.matchIdentity === currentIdentity &&
         saved.phase !== "completed";
 
       matchState = canRestore ? saved : createInitialMatchState(currentMatchCache);
       hydrateScoreboardData(matchState);
-      matchState.version = "t20-skill-v3-ai-weight-balance-both-places";
+      matchState.version = "t20-skill-v3-outcome-weight-probe";
       persist();
       render();
       runAggressionDebugTests(false);
@@ -4707,7 +4763,7 @@
       const first = getStressFirstInningsInfo(currentMatch, teams);
 
       const state = {
-        version: "t20-skill-v3-ai-weight-balance-both-places",
+        version: "t20-skill-v3-equal-bell-curve-balance",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -5169,10 +5225,213 @@
     }
 
 
+
+
+    function numberStdDev(values) {
+      const nums = values.map(Number).filter(Number.isFinite);
+      if (!nums.length) return 0;
+      const mean = nums.reduce((a, b) => a + b, 0) / nums.length;
+      const variance = nums.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / nums.length;
+      return Math.sqrt(variance);
+    }
+
+    function medianValue(values) {
+      const nums = values.map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+      if (!nums.length) return 0;
+      const mid = Math.floor(nums.length / 2);
+      return nums.length % 2 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+    }
+
+    function scoreBandLabel(score) {
+      if (score < 100) return "<100";
+      if (score < 120) return "100-119";
+      if (score < 140) return "120-139";
+      if (score < 160) return "140-159";
+      if (score < 180) return "160-179";
+      if (score < 200) return "180-199";
+      if (score < 220) return "200-219";
+      return "220+";
+    }
+
+    function buildBellCurveRows(scores) {
+      const labels = ["<100", "100-119", "120-139", "140-159", "160-179", "180-199", "200-219", "220+"];
+      const counts = Object.fromEntries(labels.map(label => [label, 0]));
+      scores.forEach(score => { counts[scoreBandLabel(score)] += 1; });
+      const total = scores.length || 1;
+      const max = Math.max(1, ...Object.values(counts));
+      return labels.map(label => ({ label, count: counts[label], pct: counts[label] / total * 100, bar: Math.round(counts[label] / max * 100) }));
+    }
+
+    function scoreEqualBellHealth(summary) {
+      const notes = [];
+      if (summary.avgScore < 170 || summary.avgScore > 185) notes.push(`avg score ${summary.avgScore.toFixed(1)} outside 170-185`);
+      if (summary.avgWickets < 6 || summary.avgWickets > 8) notes.push(`avg wickets ${summary.avgWickets.toFixed(1)} outside 6-8`);
+      if (Math.abs(summary.teamAWinPct - 50) > 6) notes.push(`team A win ${summary.teamAWinPct.toFixed(1)}% not close to 50`);
+      if (Math.abs(summary.firstBatWinPct - 50) > 6) notes.push(`bat-first win ${summary.firstBatWinPct.toFixed(1)}% not close to 50`);
+      if (summary.centerScorePct < 45) notes.push("bell center 160-199 too low");
+      if (summary.lowScorePct > 18) notes.push("too many collapses under 120");
+      if (summary.bigScorePct > 22) notes.push("too many 200+ innings");
+      if (summary.comfortable170Pct > 18) notes.push("too many 170+ scores with 8+ wickets left");
+      if (summary.boundaryMatchFours < 20 || summary.boundaryMatchFours > 30) notes.push(`match 4s ${summary.boundaryMatchFours.toFixed(1)} outside rough 20-30`);
+      if (summary.boundaryMatchSixes < 14 || summary.boundaryMatchSixes > 22) notes.push(`match 6s ${summary.boundaryMatchSixes.toFixed(1)} outside rough 14-22`);
+      return notes.length ? `⚠️ ${notes.join("; ")}` : "OK";
+    }
+
+    function runEqualBellCurveBalanceTest(matchCount = 1000) {
+      const modal = document.getElementById("stressTestModal");
+      const output = document.getElementById("stressSummary");
+      if (modal) modal.classList.remove("hidden");
+      if (output) output.innerHTML = `<p class="stress-note">Running Equal Bell Curve Balance Test: ${matchCount} equal-skill AI matches with batting order split 50/50. This checks average score, wickets, win split, and score distribution.</p>`;
+
+      setTimeout(() => {
+        const savedState = matchState ? JSON.stringify(matchState) : null;
+        const savedCache = currentMatchCache;
+        const savedToss = localStorage.getItem(TOSS_KEY);
+        const baseMatch = currentMatchCache || loadCurrentMatch();
+        const equalBase = createEqualSkillCurrentMatch(baseMatch);
+        const results = [];
+        isStressTesting = true;
+
+        try {
+          localStorage.removeItem(TOSS_KEY);
+          for (let i = 0; i < matchCount; i += 1) {
+            const aBatsFirst = i % 2 === 0;
+            const testMatch = {
+              ...equalBase,
+              toss: {
+                winner: aBatsFirst ? equalBase.userTeam : equalBase.computerTeam,
+                decision: "Bat"
+              }
+            };
+            results.push(runOneStressMatch(testMatch));
+          }
+        } finally {
+          isStressTesting = false;
+          if (savedToss !== null) localStorage.setItem(TOSS_KEY, savedToss);
+          else localStorage.removeItem(TOSS_KEY);
+          matchState = savedState ? JSON.parse(savedState) : null;
+          currentMatchCache = savedCache;
+        }
+
+        latestStressResults = results;
+        renderEqualBellCurveResults(results, matchCount);
+        render();
+      }, 30);
+    }
+
+    function renderEqualBellCurveResults(results, matchCount) {
+      const output = document.getElementById("stressSummary");
+      if (!output) return;
+      const inningsRows = [];
+      results.forEach(row => {
+        inningsRows.push({ team: row.firstTeam, runs: row.firstRuns, wickets: row.firstWickets, balls: row.firstBalls, fours: row.firstFours, sixes: row.firstSixes, first: true });
+        if (Number(row.secondBalls || 0) > 0) inningsRows.push({ team: row.secondTeam, runs: row.secondRuns, wickets: row.secondWickets, balls: row.secondBalls, fours: row.secondFours, sixes: row.secondSixes, first: false });
+      });
+
+      const scores = inningsRows.map(row => Number(row.runs || 0));
+      const wickets = inningsRows.map(row => Number(row.wickets || 0));
+      const avgScore = avgValue(inningsRows, r => r.runs);
+      const avgWickets = avgValue(inningsRows, r => r.wickets);
+      const avgRpo = avgValue(inningsRows, r => r.balls ? Number(rowSafeRpo(r)) : 0);
+      const teamA = "Equal Skill A";
+      const teamAWins = results.filter(row => {
+        if (row.tie) return false;
+        const firstWon = !row.chaseWon;
+        return (row.firstTeam === teamA && firstWon) || (row.secondTeam === teamA && row.chaseWon);
+      }).length;
+      const firstBatWins = results.filter(row => !row.tie && !row.chaseWon).length;
+      const ties = results.filter(row => row.tie).length;
+      const bellRows = buildBellCurveRows(scores);
+      const matchFours = avgValue(results, r => Number(r.firstFours || 0) + Number(r.secondFours || 0));
+      const matchSixes = avgValue(results, r => Number(r.firstSixes || 0) + Number(r.secondSixes || 0));
+      const summary = {
+        avgScore,
+        avgWickets,
+        avgRpo,
+        medianScore: medianValue(scores),
+        scoreStdDev: numberStdDev(scores),
+        teamAWinPct: teamAWins / Math.max(1, results.length) * 100,
+        firstBatWinPct: firstBatWins / Math.max(1, results.length) * 100,
+        tiePct: ties / Math.max(1, results.length) * 100,
+        centerScorePct: scores.filter(v => v >= 160 && v < 200).length / Math.max(1, scores.length) * 100,
+        lowScorePct: scores.filter(v => v < 120).length / Math.max(1, scores.length) * 100,
+        bigScorePct: scores.filter(v => v >= 200).length / Math.max(1, scores.length) * 100,
+        comfortable170Pct: inningsRows.filter(r => r.runs >= 170 && r.wickets <= 2).length / Math.max(1, inningsRows.length) * 100,
+        boundaryMatchFours: matchFours,
+        boundaryMatchSixes: matchSixes
+      };
+      summary.health = scoreEqualBellHealth(summary);
+      const fmt = n => Number(n || 0).toFixed(1);
+      const pctFmt = n => `${Number(n || 0).toFixed(1)}%`;
+
+      output.innerHTML = `
+        <div class="stress-grid">
+          <div class="stress-card"><span>Test Mode</span><b>Equal Bell Curve</b></div>
+          <div class="stress-card"><span>Matches</span><b>${matchCount}</b></div>
+          <div class="stress-card"><span>Innings</span><b>${inningsRows.length}</b></div>
+          <div class="stress-card"><span>Avg Score</span><b>${fmt(summary.avgScore)}</b></div>
+          <div class="stress-card"><span>Avg Wickets</span><b>${fmt(summary.avgWickets)}</b></div>
+          <div class="stress-card"><span>Win Split</span><b>${pctFmt(summary.teamAWinPct)} / ${pctFmt(100 - summary.teamAWinPct - summary.tiePct)}</b></div>
+        </div>
+        <table class="stress-table">
+          <thead>
+            <tr><th>Metric</th><th>Target</th><th>Actual</th><th>Check</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Average innings score</td><td>170-185</td><td>${fmt(summary.avgScore)}</td><td>${summary.avgScore >= 170 && summary.avgScore <= 185 ? "OK" : "⚠️"}</td></tr>
+            <tr><td>Average wickets lost</td><td>6-8</td><td>${fmt(summary.avgWickets)}</td><td>${summary.avgWickets >= 6 && summary.avgWickets <= 8 ? "OK" : "⚠️"}</td></tr>
+            <tr><td>Team A win rate</td><td>44-56%</td><td>${pctFmt(summary.teamAWinPct)}</td><td>${Math.abs(summary.teamAWinPct - 50) <= 6 ? "OK" : "⚠️"}</td></tr>
+            <tr><td>Bat-first win rate</td><td>44-56%</td><td>${pctFmt(summary.firstBatWinPct)}</td><td>${Math.abs(summary.firstBatWinPct - 50) <= 6 ? "OK" : "⚠️"}</td></tr>
+            <tr><td>Center score band 160-199</td><td>45%+</td><td>${pctFmt(summary.centerScorePct)}</td><td>${summary.centerScorePct >= 45 ? "OK" : "⚠️"}</td></tr>
+            <tr><td>Comfortable 170+ with ≤2 wickets lost</td><td>≤18%</td><td>${pctFmt(summary.comfortable170Pct)}</td><td>${summary.comfortable170Pct <= 18 ? "OK" : "⚠️"}</td></tr>
+            <tr><td>Match total 4s</td><td>roughly 20-30</td><td>${fmt(summary.boundaryMatchFours)}</td><td>${summary.boundaryMatchFours >= 20 && summary.boundaryMatchFours <= 30 ? "OK" : "⚠️"}</td></tr>
+            <tr><td>Match total 6s</td><td>roughly 14-22</td><td>${fmt(summary.boundaryMatchSixes)}</td><td>${summary.boundaryMatchSixes >= 14 && summary.boundaryMatchSixes <= 22 ? "OK" : "⚠️"}</td></tr>
+          </tbody>
+        </table>
+        <table class="stress-table">
+          <thead><tr><th>Score Band</th><th>Innings</th><th>%</th><th>Bell Shape</th></tr></thead>
+          <tbody>
+            ${bellRows.map(row => `
+              <tr>
+                <td>${row.label}</td>
+                <td>${row.count}</td>
+                <td>${pctFmt(row.pct)}</td>
+                <td><div style="width:140px;height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden"><span style="display:block;height:100%;width:${row.bar}%;background:linear-gradient(90deg,#38bdf8,#f6c453)"></span></div></td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        <p class="stress-note"><strong>Overall:</strong> ${summary.health}</p>
+        <p class="stress-note"><strong>Mean / median / SD:</strong> ${fmt(summary.avgScore)} / ${fmt(summary.medianScore)} / ${fmt(summary.scoreStdDev)}. This test does not force collapses into 170. If a team is 60/5, the innings can stay broken; the bell curve checks the long-run average only.</p>
+        <p class="stress-note"><strong>Boundary target note:</strong> I am treating 24 fours and 18 sixes as a full-match target. Per innings that is roughly 12 fours and 9 sixes; 24 fours + 18 sixes in one innings would already be 204 boundary runs.</p>
+      `;
+    }
+
+    function getOverBallClass(ball) {
+      const label = String(ball || "");
+      if (label === "W") return "wicket";
+      if (label === "4") return "four";
+      if (label === "6") return "six";
+      if (label === "Wd") return "wide";
+      if (label === "Nb") return "noBall";
+      if (label.startsWith("B")) return "bye";
+      if (label.startsWith("LB")) return "legBye";
+      return "";
+    }
+
+    function rowSafeRpo(row) {
+      const balls = Number(row?.balls || 0);
+      return balls ? (Number(row.runs || 0) / (balls / 6)) : 0;
+    }
     function getOutcomeProbeKey(outcome) {
       if (!outcome) return "dot";
       if (outcome.type === "wicket") return "wicket";
-      if (outcome.type === "extra") return outcome.extraType === "noBall" ? "noBall" : "wide";
+      if (outcome.type === "extra") {
+        if (outcome.extraType === "noBall") return "noBall";
+        if (outcome.extraType === "bye") return "bye";
+        if (outcome.extraType === "legBye") return "legBye";
+        return "wide";
+      }
       const runs = Number(outcome.runs || 0);
       if (runs === 0) return "dot";
       if (runs === 1) return "one";
@@ -5223,8 +5482,8 @@
 
     function runOneOutcomeWeightProbeLevel(currentMatch, level, phaseName, trials) {
       createOutcomeProbeState(currentMatch, level, phaseName);
-      const counts = { dot: 0, one: 0, two: 0, three: 0, four: 0, six: 0, wicket: 0, wide: 0, noBall: 0, other: 0 };
-      const weightSums = { dot: 0, one: 0, two: 0, three: 0, four: 0, six: 0, wicket: 0, wide: 0, noBall: 0 };
+      const counts = { dot: 0, one: 0, two: 0, three: 0, four: 0, six: 0, wicket: 0, wide: 0, noBall: 0, bye: 0, legBye: 0, other: 0 };
+      const weightSums = { dot: 0, one: 0, two: 0, three: 0, four: 0, six: 0, wicket: 0, wide: 0, noBall: 0, bye: 0, legBye: 0 };
       let totalRuns = 0;
       let legalBalls = 0;
       let aggressionRpoTotal = 0;
@@ -5254,7 +5513,9 @@
       const boundaryPct = pctOf(counts.four + counts.six);
       const dotPct = pctOf(counts.dot);
       const wicketPct = pctOf(counts.wicket);
-      const extraPct = pctOf(counts.wide + counts.noBall);
+      const extraPct = pctOf(counts.wide + counts.noBall + counts.bye + counts.legBye);
+      const byePct = pctOf(counts.bye);
+      const legByePct = pctOf(counts.legBye);
       const avgAggressionRpo = battleCount ? aggressionRpoTotal / battleCount : 0;
       const avgAggressionRisk = battleCount ? aggressionRiskTotal / battleCount : 0;
 
@@ -5274,6 +5535,8 @@
         sixPct: pctOf(counts.six),
         wicketPct,
         extraPct,
+        byePct,
+        legByePct,
         safeRotationPct,
         boundaryPct,
         legalBalls,
@@ -5285,6 +5548,8 @@
         wtFour: avgWeight("four"),
         wtSix: avgWeight("six"),
         wtWicket: avgWeight("wicket"),
+        wtBye: avgWeight("bye"),
+        wtLegBye: avgWeight("legBye"),
         counts
       };
     }
@@ -5376,7 +5641,7 @@
         <table class="stress-table">
           <thead>
             <tr>
-              <th>Phase</th><th>Level</th><th>Zone</th><th>Target</th><th>Sim RPO</th><th>Dot</th><th>1</th><th>2</th><th>4</th><th>6</th><th>W</th><th>Ext</th><th>Safe 1/2/3</th><th>Boundary</th><th>Wt 1</th><th>Wt 2</th><th>Wt 4</th><th>Wt 6</th><th>Wt W</th><th>Check</th>
+              <th>Phase</th><th>Level</th><th>Zone</th><th>Target</th><th>Sim RPO</th><th>Dot</th><th>1</th><th>2</th><th>4</th><th>6</th><th>W</th><th>Ext</th><th>B</th><th>LB</th><th>Safe 1/2/3</th><th>Boundary</th><th>Wt 1</th><th>Wt 2</th><th>Wt 4</th><th>Wt 6</th><th>Wt W</th><th>Check</th>
             </tr>
           </thead>
           <tbody>
@@ -5394,6 +5659,8 @@
                 <td>${pctFmt(row.sixPct)}</td>
                 <td>${pctFmt(row.wicketPct)}</td>
                 <td>${pctFmt(row.extraPct)}</td>
+                <td>${pctFmt(row.byePct)}</td>
+                <td>${pctFmt(row.legByePct)}</td>
                 <td>${pctFmt(row.safeRotationPct)}</td>
                 <td>${pctFmt(row.boundaryPct)}</td>
                 <td>${fmt(row.wtOne)}</td>
@@ -5413,7 +5680,7 @@
 
     function buildOutcomeWeightProbeCSVRows(results = latestOutcomeWeightProbeResults) {
       if (!results?.rows?.length) return [];
-      const headers = ["mode", "trialsPerLevelPhase", "phase", "level", "zone", "targetRpo", "simRpo", "dotPct", "onePct", "twoPct", "threePct", "fourPct", "sixPct", "wicketPct", "extraPct", "safeRotationPct", "boundaryPct", "wtDot", "wtOne", "wtTwo", "wtFour", "wtSix", "wtWicket", "check"];
+      const headers = ["mode", "trialsPerLevelPhase", "phase", "level", "zone", "targetRpo", "simRpo", "dotPct", "onePct", "twoPct", "threePct", "fourPct", "sixPct", "wicketPct", "extraPct", "byePct", "legByePct", "safeRotationPct", "boundaryPct", "wtDot", "wtOne", "wtTwo", "wtFour", "wtSix", "wtWicket", "wtBye", "wtLegBye", "check"];
       return [
         headers,
         ...results.rows.map(row => [
@@ -5432,6 +5699,8 @@
           row.sixPct,
           row.wicketPct,
           row.extraPct,
+          row.byePct,
+          row.legByePct,
           row.safeRotationPct,
           row.boundaryPct,
           row.wtDot,
@@ -5440,6 +5709,8 @@
           row.wtFour,
           row.wtSix,
           row.wtWicket,
+          row.wtBye,
+          row.wtLegBye,
           row.check
         ])
       ];
@@ -5756,13 +6027,9 @@
       if (!Array.isArray(inn.fallOfWickets)) inn.fallOfWickets = [];
       if (!Array.isArray(inn.partnerships)) inn.partnerships = [];
       if (!Array.isArray(inn.currentOverEvents)) inn.currentOverEvents = [];
-      if (!Array.isArray(inn.lastCompletedOverEvents)) inn.lastCompletedOverEvents = [];
       if (!inn.extras) inn.extras = { wides: 0, noBalls: 0, byes: 0, legByes: 0 };
       inn.currentOverRuns = Number(inn.currentOverRuns || 0);
       inn.currentOverWickets = Number(inn.currentOverWickets || 0);
-      inn.lastCompletedOverRuns = Number(inn.lastCompletedOverRuns || 0);
-      inn.lastCompletedOverWickets = Number(inn.lastCompletedOverWickets || 0);
-      inn.lastCompletedOverNo = Number(inn.lastCompletedOverNo || 0);
       inn.partnershipRuns = Number(inn.partnershipRuns || 0);
       inn.partnershipBalls = Number(inn.partnershipBalls || 0);
       return inn;
@@ -5973,7 +6240,7 @@
           ${overs.map(item => `
             <div class="over-card">
               <div class="over-card-head"><span>Over ${item.over}</span><b>${item.runs} runs${item.wickets ? `, ${item.wickets} wicket${item.wickets > 1 ? "s" : ""}` : ""}</b></div>
-              <div class="over-ball-row">${(item.balls || []).map(ball => `<span class="over-ball-chip ${ball === "W" ? "wicket" : ""}">${escapeHTML(ball)}</span>`).join("")}</div>
+              <div class="over-ball-row">${(item.balls || []).map(ball => `<span class="over-ball-chip ${getOverBallClass(ball)}">${escapeHTML(ball)}</span>`).join("")}</div>
               <div class="over-card-meta">
                 <span>Score<b>${item.score}/${item.wicketsTotal}</b></span>
                 <span>Run rate<b>${Number(item.runRate || 0).toFixed(2)}</b></span>
@@ -6278,29 +6545,16 @@
       const wrap = document.getElementById("scoreCurrentOverWrap");
       const row = document.getElementById("scoreCurrentOverBalls");
       if (!wrap || !row) return;
-      ensureScoreboardData(inn);
 
-      const liveEvents = Array.isArray(inn?.currentOverEvents) ? inn.currentOverEvents : [];
-      const lastEvents = Array.isArray(inn?.lastCompletedOverEvents) ? inn.lastCompletedOverEvents : [];
-      const showingLive = liveEvents.length > 0;
-      const events = showingLive ? liveEvents : lastEvents;
-      const label = wrap.querySelector("em");
-
+      const events = Array.isArray(inn?.currentOverEvents) ? inn.currentOverEvents : [];
       row.innerHTML = "";
-      row.classList.toggle("completed-over", !showingLive && events.length > 0);
 
       if (!events.length) {
         wrap.style.display = "none";
-        if (label) label.textContent = "This over";
         return;
       }
 
       wrap.style.display = "inline-flex";
-      if (label) {
-        label.textContent = showingLive
-          ? "This over"
-          : `Over ${Number(inn?.lastCompletedOverNo || Math.floor((inn?.balls || 0) / 6))}`;
-      }
       events.forEach(ev => {
         const chip = document.createElement("span");
         chip.className = `ball-chip ${ev.type || "dot"}`;
@@ -6325,8 +6579,7 @@
       });
 
       timeline.innerHTML = "";
-      const timelineEvents = (inn?.currentOverEvents?.length ? inn.currentOverEvents : inn?.lastCompletedOverEvents) || [];
-      timelineEvents.forEach(ev => {
+      (inn?.currentOverEvents || []).forEach(ev => {
         const chip = document.createElement("div");
         chip.className = `ball-chip ${ev.type}`;
         chip.textContent = ev.label;
