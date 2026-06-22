@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#030712" />
-  <title>T20 Skill Match Center - Scorecard Summary</title>
+  <title>T20 Skill Match Center - Ultra Aggression Risk</title>
   <style>
     :root {
       --bg: #030712;
@@ -624,100 +624,130 @@
     .strike-star { color: var(--green); font-weight: 1000; }
     .small-action-btn { padding: 7px 10px; border-radius: 12px; font-size: 12px; }
 
-    .batter-intent-control { margin-top: 3px; display: grid; gap: 4px; }
-    .intent-head b { color: var(--gold); font-size: 10px; }
+    .batter-intent-control { margin-top: 5px; display: grid; gap: 5px; }
+    .intent-head b { color: var(--gold); font-size: 10px; white-space: nowrap; }
 
-    .compact-intents {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 2px;
+    .aggression-scale {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 3px;
+      margin-bottom: -1px;
+      font-size: 9px;
+      font-weight: 1000;
+      letter-spacing: 0.06em;
+      color: rgba(203,213,225,0.78);
+    }
+
+    .compact-intents.aggression-pill {
+      --agg-pct: 0%;
+      position: relative;
+      height: 31px;
+      width: 100%;
       overflow: hidden;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(2, 6, 23, 0.62);
-      padding: 2px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 10px 22px rgba(0,0,0,0.18);
-    }
-
-    .compact-intents button {
-      position: relative;
-      isolation: isolate;
-      overflow: hidden;
-      padding: 5px 2px;
-      min-height: 24px;
-      font-size: 7.8px;
-      font-weight: 1000;
-      letter-spacing: 0.01em;
-      border-radius: 999px;
-      color: rgba(226,232,240,0.56);
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(15,23,42,0.74);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-      transition: filter .12s ease, box-shadow .12s ease, transform .12s ease, color .12s ease, background .12s ease;
-    }
-
-    .compact-intents button:hover:not(:disabled) {
-      filter: brightness(1.10) saturate(1.08);
-      transform: translateY(-1px);
-    }
-
-    /* Fill-style aggression meter: selected level fills 1, 2, 3, or 4 segments. The unfilled side stays dark. */
-    .compact-intents[data-level="1"] button:nth-child(-n+1) {
-      color: #f8fafc;
-      border-color: rgba(125,211,252,0.54);
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 52%, #0f766e 100%);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 0 14px rgba(2,132,199,0.20);
-    }
-
-    .compact-intents[data-level="2"] button:nth-child(-n+2) {
-      color: #f8fafc;
-      border-color: rgba(134,239,172,0.54);
-      background: linear-gradient(135deg, #15803d 0%, #16a34a 55%, #65a30d 100%);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 0 14px rgba(22,163,74,0.20);
-    }
-
-    .compact-intents[data-level="3"] button:nth-child(-n+3) {
-      color: #fff7ed;
-      border-color: rgba(253,186,116,0.58);
-      background: linear-gradient(135deg, #ca8a04 0%, #f97316 62%, #dc2626 100%);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 0 14px rgba(249,115,22,0.20);
-    }
-
-    .compact-intents[data-level="4"] button:nth-child(-n+4) {
-      color: #fff7ed;
-      border-color: rgba(244,114,182,0.58);
-      background: linear-gradient(135deg, #dc2626 0%, #db2777 50%, #7c3aed 100%);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.24), 0 0 14px rgba(219,39,119,0.20);
-    }
-
-    .compact-intents button.active {
-      z-index: 2;
-      filter: brightness(1.18) saturate(1.14);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
+        rgba(2, 6, 23, 0.76);
       box-shadow:
-        inset 0 0 0 2px rgba(255,255,255,0.82),
-        inset 0 -16px 26px rgba(255,255,255,0.09),
-        0 0 0 2px rgba(246,196,83,0.24);
+        inset 0 1px 0 rgba(255,255,255,0.12),
+        inset 0 -11px 22px rgba(0,0,0,0.28),
+        0 10px 22px rgba(0,0,0,0.20);
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
-    .compact-intents button.active::after {
-      content: "";
+    .compact-intents.aggression-pill:focus-visible {
+      outline: 2px solid rgba(246,196,83,0.72);
+      outline-offset: 3px;
+    }
+
+    .aggression-pill-fill {
       position: absolute;
-      left: 18%;
-      right: 18%;
-      bottom: 4px;
-      height: 3px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.92);
-      box-shadow: 0 0 10px rgba(255,255,255,0.65);
+      inset: 0 auto 0 0;
+      width: var(--agg-pct);
+      border-radius: inherit;
+      transition: width .16s ease, background .16s ease, filter .16s ease;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.30),
+        inset 0 -12px 24px rgba(0,0,0,0.18),
+        0 0 18px rgba(59,130,246,0.13);
+    }
+
+    .compact-intents.aggression-pill[data-zone="none"] .aggression-pill-fill {
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .compact-intents.aggression-pill[data-zone="defensive"] .aggression-pill-fill {
+      background: linear-gradient(90deg, #075985 0%, #0284c7 50%, #38bdf8 100%);
+    }
+
+    .compact-intents.aggression-pill[data-zone="balanced"] .aggression-pill-fill {
+      background: linear-gradient(90deg, #166534 0%, #16a34a 55%, #84cc16 100%);
+    }
+
+    .compact-intents.aggression-pill[data-zone="aggressive"] .aggression-pill-fill {
+      background: linear-gradient(90deg, #ca8a04 0%, #f97316 58%, #ef4444 100%);
+    }
+
+    .compact-intents.aggression-pill[data-zone="ultra"] .aggression-pill-fill {
+      background: linear-gradient(90deg, #dc2626 0%, #db2777 52%, #7c3aed 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.30),
+        inset 0 -12px 24px rgba(0,0,0,0.20),
+        0 0 20px rgba(219,39,119,0.20);
+    }
+
+    .aggression-pill-grid {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .aggression-pill-grid i {
+      display: block;
+      border-left: 1px solid rgba(255,255,255,0.18);
+      box-shadow: inset 1px 0 0 rgba(0,0,0,0.16);
+    }
+
+    .aggression-pill-grid i:first-child { border-left: 0; }
+
+    .aggression-pill-gloss {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 45%;
+      border-radius: 999px 999px 40% 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.00));
+      z-index: 3;
       pointer-events: none;
     }
 
-    .compact-intents button:disabled,
-    .small-action-btn:disabled {
-      opacity: 0.42;
-      cursor: not-allowed;
-      filter: grayscale(0.42);
-      transform: none;
+    .aggression-pill-value {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4;
+      pointer-events: none;
+      font-size: 10px;
+      font-weight: 1000;
+      letter-spacing: 0.08em;
+      color: #f8fafc;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.72);
+    }
+
+    .compact-intents.aggression-pill[data-zone="none"] .aggression-pill-value {
+      color: rgba(203,213,225,0.72);
     }
 
     .batter-intent-control.locked {
@@ -1484,7 +1514,8 @@
       .batter-stat-grid b { font-size: 11px; }
       #currentBowlerFigures { font-size: 11.5px; }
       #currentBowlerStamina, #currentBowlerLimit { font-size: 10px; }
-      .compact-intents button { font-size: 7.4px; }
+      .compact-intents.aggression-pill { height: 29px; }
+      .aggression-pill-value { font-size: 9px; }
     }
   </style>
 </head>
@@ -1587,12 +1618,13 @@
         </div>
         <p id="strikerInfo" class="batter-stat-grid">R 0 • B 0 • 4s 0 • 6s 0 • SR 0.00</p>
         <div class="batter-intent-control" data-slot="striker">
-          <div class="intent-head"><span>Aggression</span><b id="strikerAggressionLabel">Aggressive 7</b></div>
-          <div class="intent-buttons compact-intents">
-            <button type="button" data-slot="striker" data-intent="2" onclick="setBatterAggression('striker', 2)">Defensive</button>
-            <button type="button" data-slot="striker" data-intent="5" onclick="setBatterAggression('striker', 5)">Balanced</button>
-            <button type="button" data-slot="striker" data-intent="7" onclick="setBatterAggression('striker', 7)">Aggressive</button>
-            <button type="button" data-slot="striker" data-intent="10" onclick="setBatterAggression('striker', 10)">Attack</button>
+          <div class="intent-head"><span>Aggression</span><b id="strikerAggressionLabel">T20 8 • RPO 8.5</b></div>
+          <div class="aggression-scale"><span>0</span><span>10+</span></div>
+          <div id="strikerAggressionMeter" class="compact-intents aggression-pill" data-slot="striker" data-value="8" data-zone="aggressive" role="slider" tabindex="0" aria-label="Striker aggression" aria-valuemin="0" aria-valuemax="10" aria-valuenow="8" onpointerdown="setBatterAggressionFromMeter(event, 'striker')" onkeydown="handleAggressionMeterKey(event, 'striker')">
+            <span class="aggression-pill-fill"></span>
+            <span class="aggression-pill-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="aggression-pill-gloss"></span>
+            <span class="aggression-pill-value">8</span>
           </div>
         </div>
       </article>
@@ -1611,12 +1643,13 @@
         </div>
         <p id="nonStrikerInfo" class="batter-stat-grid">R 0 • B 0 • 4s 0 • 6s 0 • SR 0.00</p>
         <div class="batter-intent-control" data-slot="nonStriker">
-          <div class="intent-head"><span>Aggression</span><b id="nonStrikerAggressionLabel">Aggressive 7</b></div>
-          <div class="intent-buttons compact-intents">
-            <button type="button" data-slot="nonStriker" data-intent="2" onclick="setBatterAggression('nonStriker', 2)">Defensive</button>
-            <button type="button" data-slot="nonStriker" data-intent="5" onclick="setBatterAggression('nonStriker', 5)">Balanced</button>
-            <button type="button" data-slot="nonStriker" data-intent="7" onclick="setBatterAggression('nonStriker', 7)">Aggressive</button>
-            <button type="button" data-slot="nonStriker" data-intent="10" onclick="setBatterAggression('nonStriker', 10)">Attack</button>
+          <div class="intent-head"><span>Aggression</span><b id="nonStrikerAggressionLabel">T20 8 • RPO 8.5</b></div>
+          <div class="aggression-scale"><span>0</span><span>10+</span></div>
+          <div id="nonStrikerAggressionMeter" class="compact-intents aggression-pill" data-slot="nonStriker" data-value="8" data-zone="aggressive" role="slider" tabindex="0" aria-label="Non-striker aggression" aria-valuemin="0" aria-valuemax="10" aria-valuenow="8" onpointerdown="setBatterAggressionFromMeter(event, 'nonStriker')" onkeydown="handleAggressionMeterKey(event, 'nonStriker')">
+            <span class="aggression-pill-fill"></span>
+            <span class="aggression-pill-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="aggression-pill-gloss"></span>
+            <span class="aggression-pill-value">8</span>
           </div>
         </div>
       </article>
@@ -1691,6 +1724,8 @@
           <details class="debug-box">
             <summary>Debug State</summary>
             <pre id="out">{}</pre>
+            <button class="secondary small-action-btn" type="button" onclick="runAggressionDebugTests(true)">Run Aggression Tests</button>
+            <pre id="aggressionDebugOut">Aggression tests not run yet.</pre>
           </details>
         </div>
       </article>
@@ -1814,7 +1849,7 @@
     const TOUR_STORAGE_KEY = "cricketTourSetupSave_v1";
     const TOUR_ID_KEY = "currentTourId_v1";
     const TOSS_KEY = "currentTossResult";
-    const STATE_PREFIX = "skillT20MatchState_v3_compact_no_autoplay_";
+    const STATE_PREFIX = "skillT20MatchState_v3_ultra_aggression_risk_";
 
     let matchState = null;
     let currentMatchCache = null;
@@ -1932,6 +1967,86 @@
         }
       });
       return weight ? total / weight : 0;
+    }
+
+
+    const BALANCED_RPO_BY_AGG = [1.6, 2.0, 2.5, 3.1, 3.8, 5.1, 6.2, 7.0, 8.5, 10.8, 12.8];
+    const SLOGGER_RPO_BY_AGG = BALANCED_RPO_BY_AGG.map(value => Number((value * (13.5 / 12.8)).toFixed(2)));
+
+    // 7 is the lowest-risk attacking gear, but it is still T20 intent.
+    // 10+ is not a 20-over mode. It is high reward and genuinely dangerous every ball.
+    // These are multipliers, not fixed percentages; bowler skill, batter control, fielding,
+    // confidence, fatigue, and phase still shape the final wicket chance.
+    const AGG_WICKET_RISK_BY_LEVEL = [
+      1.00, // 0 no color/no intent: blocks/low scoring, still not immune
+      0.95, // 1
+      0.90, // 2 Test default
+      0.88, // 3
+      0.86, // 4
+      0.84, // 5 ODI default
+      0.82, // 6
+      0.80, // 7 controlled T20 attack, lowest attacking risk but NOT safe
+      1.15, // 8 T20 default, more wicket risk than 7
+      1.75, // 9 heavy attack, real danger
+      2.75  // 10+ ultra/death: max danger, should not last 20 overs often
+    ];
+
+    const AGG_WICKET_FLOOR_BY_LEVEL = [0.96, 0.90, 0.85, 0.82, 0.80, 0.78, 0.76, 0.74, 1.03, 1.50, 2.25];
+
+    // Final wicket-weight guardrails. These keep Ultra from being softened too much by
+    // elite confidence/skill, while still allowing normal levels to play naturally.
+    const AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL = [1.50, 1.55, 1.65, 1.75, 1.90, 2.10, 2.35, 2.80, 4.25, 7.50, 12.00];
+    const AGG_WICKET_WEIGHT_CAP_BY_LEVEL = [10.8, 11.0, 11.2, 11.5, 12.0, 12.5, 13.2, 14.0, 16.5, 20.0, 24.0];
+
+    function getAggressionZone(value) {
+      const v = clamp(Math.round(value ?? 8), 0, 10);
+      if (v <= 0) return "none";
+      if (v <= 3) return "defensive";
+      if (v <= 6) return "balanced";
+      if (v <= 9) return "aggressive";
+      return "ultra";
+    }
+
+    function getBatterSloggerFactor(bat) {
+      const boundaryPower = weightedAverage([
+        [bat?.boundary ?? 50, 0.40],
+        [bat?.six ?? 50, 0.45],
+        [bat?.physical ?? 50, 0.15]
+      ]);
+      return clamp((boundaryPower - 58) / 32, 0, 1);
+    }
+
+    function getAggressionRpo(level, bat = null) {
+      const v = clamp(Math.round(level ?? 8), 0, 10);
+      const balancedRpo = BALANCED_RPO_BY_AGG[v];
+      const sloggerRpo = SLOGGER_RPO_BY_AGG[v];
+      const sloggerFactor = bat ? getBatterSloggerFactor(bat) : 0;
+      return balancedRpo + (sloggerRpo - balancedRpo) * sloggerFactor;
+    }
+
+    function getAttackFactorFromRpo(rpo) {
+      return clamp((Number(rpo) - 1.6) / (13.5 - 1.6), 0, 1);
+    }
+
+    function getAggressionWicketMultiplier(level, battingRow) {
+      const v = clamp(Math.round(level ?? 8), 0, 10);
+      let risk = AGG_WICKET_RISK_BY_LEVEL[v];
+
+      const balls = Number(battingRow?.balls || 0);
+      const confidence = Number(battingRow?.confidence ?? 50);
+      const fatigue = Number(battingRow?.fatigue || 0);
+
+      const setFactor = clamp((balls - 12) / 30, 0, 1);
+      const confidenceFactor = clamp((confidence - 55) / 35, 0, 1);
+      const settled = clamp(setFactor * 0.50 + confidenceFactor * 0.50, 0, 1);
+
+      const settledReliefByLevel = [0.02, 0.03, 0.04, 0.04, 0.05, 0.06, 0.07, 0.08, 0.10, 0.12, 0.15];
+      risk *= 1 - settled * settledReliefByLevel[v];
+
+      // Fatigue brings the wicket danger back, especially for long innings.
+      risk *= 1 + clamp(fatigue - 35, 0, 65) * 0.007;
+
+      return clamp(risk, AGG_WICKET_FLOOR_BY_LEVEL[v], 1.90);
     }
 
     function getPlayerKey(player, fallback = "player") {
@@ -2528,9 +2643,11 @@
     }
 
     function applyFirstInningsRunSettingGovernor(inn, aggression) {
-      if (!inn || inn.target !== null || inn.target !== undefined) return aggression;
+      // First-innings only. A chase has a target, so do not use this governor there.
+      if (!inn || inn.target !== null) return aggression;
       if (inn.balls < 18) return aggression;
 
+      const phase = getPhase(inn.balls);
       const over = inn.balls / 6;
       const projected = inn.balls ? (inn.runs * 120) / inn.balls : 0;
       const range = getFirstInningsTargetRangeForAI(inn);
@@ -2615,7 +2732,7 @@
 
       aggression = applyFirstInningsRunSettingGovernor(inn, aggression);
 
-      return clamp(Math.round(aggression), 1, 10);
+      return clamp(Math.round(aggression), 0, 10);
     }
 
     function getAIPlanSummary(inn) {
@@ -3024,7 +3141,7 @@
       const bowlingXI = getSelectedXI(currentMatch, first.bowlingSide);
 
       const state = {
-        version: "t20-skill-v3-scoreboard-hub-hotfix",
+        version: "t20-skill-v3-ultra-aggression-risk",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -3054,8 +3171,8 @@
       };
 
       const inn = state.innings[0];
-      state.aggressionByKey[inn.strikerKey] = 7;
-      state.aggressionByKey[inn.nonStrikerKey] = 7;
+      state.aggressionByKey[inn.strikerKey] = 8;
+      state.aggressionByKey[inn.nonStrikerKey] = 8;
       addCommentary(state, "0.0", "T20 skill engine ready. This version uses raw attributes only: batter skill vs bowler skill.", "note", "No country boost. No real-world stat shortcut. No hidden team help.");
       addInningsAIIntro(state, inn);
       return state;
@@ -3097,7 +3214,7 @@
     }
 
     function getAggression(key) {
-      return clamp(matchState.aggressionByKey[key] ?? 7, 1, 10);
+      return clamp(matchState.aggressionByKey[key] ?? 8, 0, 10);
     }
 
     function setBatterAggression(slot, value) {
@@ -3107,25 +3224,85 @@
       if (inn.battingSide === "computer") return;
 
       const key = slot === "nonStriker" ? inn.nonStrikerKey : inn.strikerKey;
-      matchState.aggressionByKey[key] = clamp(value, 1, 10);
+      matchState.aggressionByKey[key] = clamp(Math.round(value), 0, 10);
       persist();
       render();
     }
 
-    function aggressionLabel(value) {
-      const v = clamp(value, 1, 10);
-      if (v <= 3) return `Defensive ${v}`;
-      if (v <= 6) return `Balanced ${v}`;
-      if (v <= 8) return `Aggressive ${v}`;
-      return `Attack ${v}`;
+    function getAggressionValueFromMeterPoint(event, meter) {
+      if (!meter?.getBoundingClientRect) return 8;
+      const rect = meter.getBoundingClientRect();
+      const x = clamp((event.clientX - rect.left) / Math.max(1, rect.width), 0, 1);
+
+      // 11 choices on one 10-level bar:
+      // 0 = no fill/no color, 1-10 = filled levels.
+      // floor(x * 11) gives level 0 a real selectable zone instead of only the far-left pixel.
+      return clamp(Math.floor(x * 11), 0, 10);
     }
 
-    function aggressionMeterLevel(value) {
-      const v = clamp(value, 1, 10);
-      if (v <= 3) return 1;
-      if (v <= 6) return 2;
-      if (v <= 8) return 3;
-      return 4;
+    function setBatterAggressionFromMeter(event, slot) {
+      if (event?.cancelable) event.preventDefault();
+      const meter = event?.currentTarget;
+      if (!meter?.getBoundingClientRect) return;
+      const rect = meter.getBoundingClientRect();
+      const x = clamp((event.clientX - rect.left) / Math.max(1, rect.width), 0, 1);
+      const value = getAggressionValueFromMeterPoint(event, meter);
+      setBatterAggression(slot, value);
+
+      const drag = moveEvent => {
+        if (moveEvent?.cancelable) moveEvent.preventDefault();
+        setBatterAggression(slot, getAggressionValueFromMeterPoint(moveEvent, meter));
+      };
+      const stop = () => {
+        window.removeEventListener("pointermove", drag);
+        window.removeEventListener("pointerup", stop);
+        window.removeEventListener("pointercancel", stop);
+      };
+      window.addEventListener("pointermove", drag, { passive: false });
+      window.addEventListener("pointerup", stop, { once: true });
+      window.addEventListener("pointercancel", stop, { once: true });
+    }
+
+    function handleAggressionMeterKey(event, slot) {
+      const inn = currentInnings();
+      if (!inn || inn.battingSide === "computer") return;
+      const key = slot === "nonStriker" ? inn.nonStrikerKey : inn.strikerKey;
+      const current = getAggression(key);
+      let next = current;
+      if (event.key === "ArrowLeft" || event.key === "ArrowDown") next = current - 1;
+      else if (event.key === "ArrowRight" || event.key === "ArrowUp") next = current + 1;
+      else if (event.key === "Home") next = 0;
+      else if (event.key === "End") next = 10;
+      else return;
+      event.preventDefault();
+      setBatterAggression(slot, clamp(next, 0, 10));
+    }
+
+    function aggressionLabel(value, bat = null) {
+      const v = clamp(Math.round(value ?? 8), 0, 10);
+      const rpo = getAggressionRpo(v, bat);
+      if (v === 0) return `No Intent 0 • RPO ${rpo.toFixed(1)}`;
+      if (v <= 3) return `Defensive Test ${v} • RPO ${rpo.toFixed(1)}`;
+      if (v <= 6) return `Balanced ODI ${v} • RPO ${rpo.toFixed(1)}`;
+      if (v <= 9) return `Aggressive T20 ${v} • RPO ${rpo.toFixed(1)}`;
+      return `Ultra Death 10+ • RPO ${rpo.toFixed(1)}`;
+    }
+
+    function getAggressionFillPct(value) {
+      const v = clamp(Math.round(value ?? 8), 0, 10);
+      return v * 10;
+    }
+
+    function renderAggressionMeter(meter, value) {
+      if (!meter) return;
+      const v = clamp(Math.round(value ?? 8), 0, 10);
+      meter.dataset.value = String(v);
+      meter.dataset.zone = getAggressionZone(v);
+      meter.style.setProperty("--agg-pct", `${getAggressionFillPct(v)}%`);
+      meter.setAttribute("aria-valuenow", String(v));
+      meter.setAttribute("aria-valuetext", aggressionLabel(v));
+      const valueEl = meter.querySelector(".aggression-pill-value");
+      if (valueEl) valueEl.textContent = v === 10 ? "10+" : String(v);
     }
 
     /* =========================================================
@@ -3173,10 +3350,14 @@
       const bowlerStat = ensureBowlerStat(inn.currentBowlerKey);
       const agg = inn.battingAI ? getComputerAggression(inn, inn.strikerKey) : getAggression(inn.strikerKey);
       matchState.aggressionByKey[inn.strikerKey] = agg;
-      const attack = (agg - 1) / 9;
       const phase = getPhase(inn.balls);
 
       const bat = battingSkill(batter);
+      const aggressionRpo = getAggressionRpo(agg, bat);
+      const attack = getAttackFactorFromRpo(aggressionRpo);
+      const aggressionWicketRisk = getAggressionWicketMultiplier(agg, batterStat);
+      const highIntentControlCost = Math.max(0, aggressionRpo - 8.5) * 1.6;
+      const highIntentRotateCost = Math.max(0, aggressionRpo - 10.0) * 0.75;
       const bowl = bowlingSkill(bowler);
       const field = teamFieldingAverage(inn.bowlingXI);
       const bowlerIsSpin = isSpinBowler(bowler);
@@ -3192,7 +3373,7 @@
         [vsType, 0.9],
         [bat.mental, 0.65],
         [bat.overall, 0.7]
-      ]) + (10 - agg) * 1.2 + confidenceAdj - batterFatiguePenalty;
+      ]) + (10 - agg) * 1.2 + confidenceAdj - batterFatiguePenalty - highIntentControlCost;
 
       const batAttack = weightedAverage([
         [bat.boundary, 1.2],
@@ -3207,7 +3388,7 @@
         [bat.mental, 0.55],
         [bat.physical, 0.35],
         [vsType, 0.45]
-      ]) + (agg <= 5 ? 2.5 : 0) + confidenceAdj * 0.35 - batterFatiguePenalty * 0.4;
+      ]) + (agg <= 5 ? 2.5 : 0) + confidenceAdj * 0.35 - batterFatiguePenalty * 0.4 - highIntentRotateCost;
 
       const batPower = weightedAverage([
         [bat.six, 1.25],
@@ -3259,13 +3440,13 @@
         multiply(weights, "wicket", 1.18);
       }
 
-      // Aggression shape.
-      multiply(weights, "dot", 1.16 - attack * 0.24);
-      multiply(weights, "one", 1.14 - attack * 0.12);
-      multiply(weights, "two", 1.02 + attack * 0.10);
-      multiply(weights, "four", 0.68 + attack * 0.44);
-      multiply(weights, "six", 0.56 + attack * 0.72);
-      multiply(weights, "wicket", 0.72 + attack * 0.70);
+      // Aggression shape. RPO controls scoring intent; wicket risk is a separate curve.
+      multiply(weights, "dot", 1.18 - attack * 0.28);
+      multiply(weights, "one", 1.12 - attack * 0.10);
+      multiply(weights, "two", 1.00 + attack * 0.12);
+      multiply(weights, "four", 0.64 + attack * 0.52);
+      multiply(weights, "six", 0.50 + attack * 0.82);
+      multiply(weights, "wicket", aggressionWicketRisk);
 
       // Raw skill vs raw skill.
       multiply(weights, "four", 1 + clamp(skillEdge, -30, 30) * 0.0070);
@@ -3292,10 +3473,10 @@
       // - Sixes should be closer to fours.
       // - Fours are not allowed to dominate every strong batting innings.
       // - High aggression keeps real wicket risk even against weak bowling.
-      if (agg >= 9) multiply(weights, "wicket", 1.06);
-      if (agg >= 10) multiply(weights, "wicket", 1.10);
-
-      weights.wicket = clamp(weights.wicket, 1.5, 10.8);
+      // Wicket cap is aggression-aware. The old universal cap made level 10 too survivable.
+      const wicketFloor = AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL[agg] ?? 1.5;
+      const wicketCap = AGG_WICKET_WEIGHT_CAP_BY_LEVEL[agg] ?? 12.0;
+      weights.wicket = clamp(weights.wicket, wicketFloor, wicketCap);
       weights.six = clamp(weights.six, 1.2, 12.8);
       weights.four = clamp(weights.four, 2.8, 14.8);
       weights.dot = clamp(weights.dot, 8.5, 45.0);
@@ -3306,6 +3487,9 @@
         batter: getPlayerName(batter),
         bowler: getPlayerName(bowler),
         aggression: agg,
+        aggressionRpo: Math.round(aggressionRpo * 10) / 10,
+        aggressionWicketRisk: Math.round(aggressionWicketRisk * 100) / 100,
+        highIntentControlCost: Math.round(highIntentControlCost * 10) / 10,
         batControl: Math.round(batControl),
         batAttack: Math.round(batAttack),
         batPower: Math.round(batPower),
@@ -3553,7 +3737,7 @@
       const nextKey = getPlayerKey(next);
       inn.strikerKey = nextKey;
       ensureBatterStat(nextKey);
-      matchState.aggressionByKey[nextKey] = 7;
+      matchState.aggressionByKey[nextKey] = 8;
       inn.nextBatterIndex += 1;
       inn.partnershipRuns = 0;
       inn.partnershipBalls = 0;
@@ -3623,10 +3807,6 @@
 
       if (!allOut && !oversDone && !targetReached) return;
 
-      if (inn.legalBallsThisOver > 0 && inn.currentOverEvents?.length) {
-        recordOverSummary(inn);
-      }
-
       if (matchState.inningsNo === 1) {
         matchState.phase = "break";
         addCommentary(matchState, ballsToOvers(inn.balls), `${inn.battingTeam} finish on ${inn.runs}/${inn.wickets}. Target will be ${inn.runs + 1}.`, "note", "Click Next Innings to begin the chase.");
@@ -3658,8 +3838,8 @@
       matchState.phase = "innings2";
       scorecardInningsNo = 2;
       const inn = currentInnings();
-      matchState.aggressionByKey[inn.strikerKey] = 7;
-      matchState.aggressionByKey[inn.nonStrikerKey] = 7;
+      matchState.aggressionByKey[inn.strikerKey] = 8;
+      matchState.aggressionByKey[inn.nonStrikerKey] = 8;
       addCommentary(matchState, "0.0", `${battingTeam} begin the chase. Target: ${first.runs + 1}.`, "note", "Second innings started.");
       addInningsAIIntro(matchState, inn);
       persist();
@@ -4049,6 +4229,66 @@
       writeJSON(getMatchStateKey(currentMatchCache), matchState);
     }
 
+
+    function runAggressionDebugTests(showPanel = false) {
+      const checks = [];
+      const add = (name, pass, detail = "") => checks.push({ name, pass: Boolean(pass), detail });
+      const approx = (a, b, tolerance = 0.01) => Math.abs(Number(a) - Number(b)) <= tolerance;
+
+      try {
+        add("Phase 0.0 is Powerplay", getPhase(0) === "Powerplay", getPhase(0));
+        add("Phase 5.5 is Powerplay", getPhase(35) === "Powerplay", getPhase(35));
+        add("Phase 6.0 is Middle", getPhase(36) === "Middle", getPhase(36));
+        add("Phase 15.5 is Middle", getPhase(95) === "Middle", getPhase(95));
+        add("Phase 16.0 is Death", getPhase(96) === "Death", getPhase(96));
+
+        add("Aggression level 0 maps to no fill", getAggressionFillPct(0) === 0, `${getAggressionFillPct(0)}%`);
+        add("Aggression level 10 maps to full fill", getAggressionFillPct(10) === 100, `${getAggressionFillPct(10)}%`);
+        add("Defensive zone is 1-3", getAggressionZone(1) === "defensive" && getAggressionZone(3) === "defensive", `${getAggressionZone(1)} / ${getAggressionZone(3)}`);
+        add("Balanced zone is 4-6", getAggressionZone(4) === "balanced" && getAggressionZone(6) === "balanced", `${getAggressionZone(4)} / ${getAggressionZone(6)}`);
+        add("Aggressive zone is 7-9", getAggressionZone(7) === "aggressive" && getAggressionZone(9) === "aggressive", `${getAggressionZone(7)} / ${getAggressionZone(9)}`);
+        add("Ultra zone is 10", getAggressionZone(10) === "ultra", getAggressionZone(10));
+
+        add("Balanced RPO level 2 default is 2.5", approx(BALANCED_RPO_BY_AGG[2], 2.5), BALANCED_RPO_BY_AGG[2]);
+        add("Balanced RPO level 5 default is 5.1", approx(BALANCED_RPO_BY_AGG[5], 5.1), BALANCED_RPO_BY_AGG[5]);
+        add("Balanced RPO level 8 default is 8.5", approx(BALANCED_RPO_BY_AGG[8], 8.5), BALANCED_RPO_BY_AGG[8]);
+        add("Slogger RPO level 10 is 13.5", approx(SLOGGER_RPO_BY_AGG[10], 13.5), SLOGGER_RPO_BY_AGG[10]);
+
+        const newBatter = { balls: 0, confidence: 50, fatigue: 0 };
+        const setBatter = { balls: 30, confidence: 82, fatigue: 0 };
+        const tiredSetBatter = { balls: 30, confidence: 82, fatigue: 65 };
+        const risk7 = getAggressionWicketMultiplier(7, newBatter);
+        const risk8 = getAggressionWicketMultiplier(8, newBatter);
+        const risk9 = getAggressionWicketMultiplier(9, newBatter);
+        const risk10 = getAggressionWicketMultiplier(10, newBatter);
+        const setRisk10 = getAggressionWicketMultiplier(10, setBatter);
+        const tiredRisk10 = getAggressionWicketMultiplier(10, tiredSetBatter);
+
+        add("Level 7 is lowest attacking risk, not zero risk", risk7 >= 0.74 && risk7 < risk8, `L7 ${risk7.toFixed(2)} / L8 ${risk8.toFixed(2)}`);
+        add("Wicket risk rises sharply 8 < 9 < 10", risk8 < risk9 && risk9 < risk10 && risk10 >= 2.25, `L8 ${risk8.toFixed(2)} / L9 ${risk9.toFixed(2)} / L10 ${risk10.toFixed(2)}`);
+        add("Set batter reduces level 10 but not immune", setRisk10 < risk10 && setRisk10 >= 2.25, `new ${risk10.toFixed(2)} / set ${setRisk10.toFixed(2)}`);
+        add("Fatigue pushes level 10 risk back up", tiredRisk10 > setRisk10, `set ${setRisk10.toFixed(2)} / tired ${tiredRisk10.toFixed(2)}`);
+        add("Level 10 has true wicket-weight floor", AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL[10] >= 12, AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL[10]);
+        add("Level 9/10 wicket cap allows collapse", AGG_WICKET_WEIGHT_CAP_BY_LEVEL[9] >= 20 && AGG_WICKET_WEIGHT_CAP_BY_LEVEL[10] >= 24, `${AGG_WICKET_WEIGHT_CAP_BY_LEVEL[9]} / ${AGG_WICKET_WEIGHT_CAP_BY_LEVEL[10]}`);
+      } catch (error) {
+        add("Aggression debug test runner crashed", false, error?.message || String(error));
+      }
+
+      const passed = checks.filter(check => check.pass).length;
+      const failed = checks.length - passed;
+      const lines = [
+        `Aggression debug: ${passed}/${checks.length} passed${failed ? `, ${failed} failed` : ""}`,
+        ...checks.map(check => `${check.pass ? "✅" : "❌"} ${check.name}${check.detail !== "" ? ` — ${check.detail}` : ""}`)
+      ];
+      const output = lines.join("\n");
+      if (showPanel) {
+        const panel = document.getElementById("aggressionDebugOut");
+        if (panel) panel.textContent = output;
+      }
+      console.log(output);
+      return { passed, failed, checks };
+    }
+
     function init() {
       loadCommentaryPreference();
       const activeTourId = getActiveTourId();
@@ -4059,15 +4299,16 @@
 
       const canRestore =
         saved &&
-        ["t20-skill-v3-scoreboard-hub-hotfix", "t20-skill-v3-scoreboard-hub", "t20-skill-v3-two-color-prediction-bar", "t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
+        ["t20-skill-v3-all-format-aggression-pill", "t20-skill-v3-scoreboard-hub-hotfix", "t20-skill-v3-scoreboard-hub", "t20-skill-v3-two-color-prediction-bar", "t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
         saved.matchIdentity === currentIdentity &&
         saved.phase !== "completed";
 
       matchState = canRestore ? saved : createInitialMatchState(currentMatchCache);
       hydrateScoreboardData(matchState);
-      matchState.version = "t20-skill-v3-scoreboard-hub-hotfix";
+      matchState.version = "t20-skill-v3-all-format-aggression-pill";
       persist();
       render();
+      runAggressionDebugTests(false);
     }
 
 
@@ -4110,7 +4351,7 @@
       const first = getStressFirstInningsInfo(currentMatch, teams);
 
       const state = {
-        version: "t20-skill-v3-scoreboard-hub-hotfix",
+        version: "t20-skill-v3-ultra-aggression-risk",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -4140,8 +4381,8 @@
       };
 
       forceAIForInnings(state.innings[0]);
-      state.aggressionByKey[state.innings[0].strikerKey] = 7;
-      state.aggressionByKey[state.innings[0].nonStrikerKey] = 7;
+      state.aggressionByKey[state.innings[0].strikerKey] = 8;
+      state.aggressionByKey[state.innings[0].nonStrikerKey] = 8;
       return state;
     }
 
@@ -4183,8 +4424,8 @@
       matchState.phase = "innings2";
       const inn = currentInnings();
       forceAIForInnings(inn);
-      matchState.aggressionByKey[inn.strikerKey] = 7;
-      matchState.aggressionByKey[inn.nonStrikerKey] = 7;
+      matchState.aggressionByKey[inn.strikerKey] = 8;
+      matchState.aggressionByKey[inn.nonStrikerKey] = 8;
     }
 
     function playNextBallSilent() {
@@ -4610,7 +4851,7 @@
       const inningsNo = (matchState?.innings || []).indexOf(inn) + 1 || matchState?.inningsNo || 1;
       const wicketNo = Number(inn.wickets || 0);
       const partner = getPlayerByKey(inn.battingXI, partnerKeyBeforeWicket);
-      const overText = ballsToOvers(inn.balls);
+      const overText = ballsToOvers(inn.balls + 1);
       const outName = getPlayerName(batter);
       const partnerName = partner ? getPlayerName(partner) : "Partner";
       const partnership = {
@@ -4619,7 +4860,7 @@
         batterA: outName,
         batterB: partnerName,
         runs: Number(inn.partnershipRuns || 0),
-        balls: Number(inn.partnershipBalls || 0),
+        balls: Number(inn.partnershipBalls || 0) + 1,
         endedAt: `${inn.runs}/${wicketNo}`,
         over: overText
       };
@@ -5053,21 +5294,18 @@
       }
       const inn = currentInnings();
       const locked = inn?.battingSide === "computer";
-      text(`${slot}AggressionLabel`, locked ? "" : aggressionLabel(agg));
+      text(`${slot}AggressionLabel`, locked ? "" : aggressionLabel(agg, skill));
 
       const control = document.querySelector(`.batter-intent-control[data-slot="${slot}"]`);
       if (control) {
         control.classList.toggle("locked", locked);
         control.setAttribute("aria-hidden", locked ? "true" : "false");
         const meter = control.querySelector(".compact-intents");
-        if (meter) meter.dataset.level = locked ? "0" : String(aggressionMeterLevel(agg));
+        if (meter) {
+          renderAggressionMeter(meter, locked ? 0 : agg);
+          meter.title = locked ? "Computer batting: aggression is controlled by AI." : "Tap or drag across the pill to choose 0-10+ aggression.";
+        }
       }
-
-      document.querySelectorAll(`button[data-slot="${slot}"]`).forEach(btn => {
-        btn.classList.toggle("active", Number(btn.dataset.intent) === Number(agg));
-        btn.disabled = locked;
-        btn.title = locked ? "Computer batting: aggression is controlled by AI." : "";
-      });
     }
 
     function renderBowlerCard() {
