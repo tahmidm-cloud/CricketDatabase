@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#030712" />
-  <title>T20 Skill Match Center - Aggression Correlated Test</title>
+  <title>T20 Skill Match Center - Ultra RPO + Current Over</title>
   <style>
     :root {
       --bg: #030712;
@@ -243,6 +243,68 @@
     }
 
     .score-micro-row b, .score-metrics-inline b, .score-bowling-team b { color: var(--text); }
+
+    .score-current-over {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-left: 10px;
+      padding-left: 12px;
+      border-left: 1px solid rgba(148, 163, 184, 0.22);
+      white-space: nowrap;
+    }
+
+    .score-current-over em {
+      font-style: normal;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .score-over-chip-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      min-height: 22px;
+    }
+
+    .score-over-chip-row .ball-chip {
+      width: 22px;
+      height: 22px;
+      font-size: 10px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.20);
+    }
+
+    .score-over-chip-row .ball-chip.four {
+      background: linear-gradient(180deg, rgba(125, 211, 252, 0.30), rgba(56, 189, 248, 0.13));
+      color: #bae6fd;
+      border-color: rgba(125, 211, 252, 0.52);
+    }
+
+    .score-over-chip-row .ball-chip.six {
+      background: linear-gradient(180deg, rgba(216, 180, 254, 0.33), rgba(126, 34, 206, 0.20));
+      color: #f3e8ff;
+      border-color: rgba(216, 180, 254, 0.56);
+    }
+
+    .score-over-chip-row .ball-chip.wicket {
+      background: linear-gradient(180deg, rgba(248, 113, 113, 0.36), rgba(127, 29, 29, 0.24));
+      color: #fff1f2;
+      border-color: rgba(248, 113, 113, 0.65);
+    }
+
+    @media (max-width: 640px) {
+      .score-current-over {
+        margin-left: 0;
+        padding-left: 0;
+        border-left: 0;
+        flex-basis: 100%;
+        justify-content: flex-start;
+      }
+    }
+
     #rrrWrap { color: var(--gold2); font-weight: 1000; }
     #rrrWrap b { color: #fff7ed; }
     .score-bowling-team { justify-content: flex-end; }
@@ -1577,6 +1639,10 @@
           <span><b id="formatBox">T20</b></span>
           <span id="phaseBox">Powerplay</span>
           <span>Partnership <b id="partnershipBox">0 off 0</b></span>
+          <span class="score-current-over" id="scoreCurrentOverWrap" aria-label="Current over outcome">
+            <em>This over</em>
+            <span class="score-over-chip-row" id="scoreCurrentOverBalls"></span>
+          </span>
         </div>
       </div>
 
@@ -1804,11 +1870,15 @@
         <button onclick="runAggressionMatrixTest(50)">Real Squad 50 / Level</button>
         <button class="secondary" onclick="runAggressionMatrixTest(100)">Real Squad 100 / Level</button>
         <button class="secondary" onclick="runAggressionMatrixTest(100, { equalSkill: true })">Equal Skill 100 / Level</button>
+        <button class="secondary" onclick="runOutcomeWeightProbe(5000)">Weight Probe 5k Balls/Phase</button>
+        <button class="secondary" onclick="runOutcomeWeightProbe(5000, { equalSkill: true })">Equal Weight Probe 5k</button>
+        <button class="secondary" onclick="runAIAggressionPlanTest()">AI Plan Test</button>
+        <button class="secondary" onclick="downloadOutcomeWeightProbeCSV()">Download Weight CSV</button>
         <button class="secondary" onclick="downloadStressSummaryCSV()">Download Summary CSV</button>
         <button class="secondary" onclick="downloadStressCSVChunks()">Download Detail CSV Chunks</button>
       </div>
       <div id="stressSummary" class="stress-output">
-        <p class="stress-note">Run a normal stress test, a real-squad aggression matrix, or an equal-skill aggression matrix. Equal Skill removes team-strength gaps so you can judge the aggression curve itself. First-innings governor is removed in this version.</p>
+        <p class="stress-note">Run a normal stress test, an aggression matrix, a weight probe, or the AI Plan Test. The weight probe isolates ball-outcome weights. The AI Plan Test checks whether the computer is choosing sensible 0-10 aggression levels while setting and chasing targets. First-innings governor is removed in this version.</p>
       </div>
     </div>
   </div>
@@ -1852,12 +1922,13 @@
     const TOUR_STORAGE_KEY = "cricketTourSetupSave_v1";
     const TOUR_ID_KEY = "currentTourId_v1";
     const TOSS_KEY = "currentTossResult";
-    const STATE_PREFIX = "skillT20MatchState_v3_equal_skill_no_governor_";
+    const STATE_PREFIX = "skillT20MatchState_v3_outcome_weight_probe_";
 
     let matchState = null;
     let currentMatchCache = null;
     let autoPlayTimer = null;
     let latestStressResults = null;
+    let latestOutcomeWeightProbeResults = null;
     let isStressTesting = false;
     let commentaryHidden = false;
     let scorecardInningsNo = 1;
@@ -1988,24 +2059,26 @@
       0.93, // 5 ODI default
       1.12, // 6
       1.35, // 7 controlled T20 aggression, riskier than 6
-      1.68, // 8 T20 default
-      2.20, // 9 heavy attack
-      3.05  // 10+ ultra/death: max danger
+      1.72, // 8 T20 default
+      2.45, // 9 heavy attack
+      3.85  // 10+ ultra/death: max danger
     ];
 
-    const AGG_WICKET_FLOOR_BY_LEVEL = [0.34, 0.40, 0.47, 0.56, 0.68, 0.84, 1.02, 1.22, 1.55, 2.05, 2.75];
+    const AGG_WICKET_FLOOR_BY_LEVEL = [0.34, 0.40, 0.47, 0.56, 0.68, 0.84, 1.02, 1.22, 1.58, 2.25, 3.35];
 
-    // Final wicket-weight guardrails are also monotonic. This creates the visible avg-wicket pattern
-    // in the aggression matrix without adding a separate timer penalty.
-    const AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL = [0.55, 0.70, 0.90, 1.15, 1.45, 1.85, 2.40, 3.15, 4.50, 7.80, 12.50];
-    const AGG_WICKET_WEIGHT_CAP_BY_LEVEL = [6.0, 6.8, 7.6, 8.6, 9.8, 11.2, 12.8, 14.5, 17.0, 21.5, 27.0];
+    // Final wicket-weight guardrails are monotonic. Level 10 must stay dangerous even when a batter is set.
+    const AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL = [0.55, 0.70, 0.90, 1.15, 1.45, 1.85, 2.40, 3.15, 4.70, 9.40, 16.50];
+    const AGG_WICKET_WEIGHT_CAP_BY_LEVEL = [6.0, 6.8, 7.6, 8.6, 9.8, 11.2, 13.0, 15.0, 18.8, 25.5, 34.0];
 
     // Tempo alignment: this is the scoring side of the aggression bar.
-    // Low levels become actual defensive gears; high levels unlock boundary volume.
-    const AGG_RUN_TEMPO_BY_LEVEL = [0.36, 0.42, 0.50, 0.60, 0.70, 0.78, 0.88, 0.98, 1.06, 1.20, 1.34];
-    const AGG_BOUNDARY_TEMPO_BY_LEVEL = [0.12, 0.18, 0.26, 0.38, 0.52, 0.70, 0.86, 1.00, 1.12, 1.40, 1.70];
-    const AGG_DOT_TEMPO_BY_LEVEL = [2.70, 2.35, 2.05, 1.75, 1.50, 1.30, 1.14, 1.00, 0.94, 0.88, 0.82];
-    const AGG_DOT_CAP_BY_LEVEL = [78, 72, 66, 60, 54, 49, 46, 44, 42, 40, 38];
+    // Important: at high intent, runs must come from 4/6/W pressure, not safe 1/2/3 rotation.
+    const AGG_RUN_TEMPO_BY_LEVEL = [0.36, 0.42, 0.50, 0.60, 0.70, 0.78, 0.88, 0.98, 1.08, 1.32, 1.55];
+    const AGG_SAFE_ROTATION_TEMPO_BY_LEVEL = [0.36, 0.42, 0.50, 0.58, 0.66, 0.72, 0.78, 0.82, 0.78, 0.62, 0.48];
+    const AGG_TWO_TEMPO_BY_LEVEL = [0.34, 0.40, 0.47, 0.55, 0.62, 0.68, 0.72, 0.74, 0.70, 0.52, 0.36];
+    const AGG_THREE_TEMPO_BY_LEVEL = [0.25, 0.30, 0.36, 0.42, 0.50, 0.56, 0.60, 0.60, 0.56, 0.42, 0.28];
+    const AGG_BOUNDARY_TEMPO_BY_LEVEL = [0.12, 0.18, 0.26, 0.36, 0.50, 0.68, 0.86, 1.03, 1.28, 2.25, 3.85];
+    const AGG_DOT_TEMPO_BY_LEVEL = [2.70, 2.35, 2.05, 1.78, 1.52, 1.30, 1.12, 0.98, 0.88, 0.62, 0.44];
+    const AGG_DOT_CAP_BY_LEVEL = [78, 72, 66, 61, 55, 50, 46, 43, 38, 31, 24];
 
     function getAggressionZone(value) {
       const v = clamp(Math.round(value ?? 8), 0, 10);
@@ -2640,70 +2713,184 @@
     // The innings now stays fully ball-by-ball: aggression, skill, phase, confidence,
     // fatigue, and weighted outcome rolls decide the score without target-range correction.
 
-    function getComputerAggression(inn, batterKey) {
-      const ai = inn?.battingAI;
-      const over = inn.balls / 6;
-      const phase = getPhase(inn.balls);
-      const wickets = inn.wickets;
-      const batter = getPlayerByKey(inn.battingXI, batterKey) || getCurrentBatter();
-      const bat = battingSkill(batter);
-      const confidence = ensureBatterStat(batterKey).confidence;
-      const currentRR = inn.balls ? inn.runs / (inn.balls / 6) : 0;
-      const requiredRR = getRequiredRate(inn);
+    function getInningsRatingsForAI(inn) {
+      const batting = getTeamRatings(inn?.battingXI || []);
+      const bowling = getTeamRatings(inn?.bowlingXI || []);
+      return { batting, bowling };
+    }
 
-      let aggression = 7;
+    function getAIParScore(inn) {
+      const { batting, bowling } = getInningsRatingsForAI(inn);
+      const batEdge = Number(batting.bat || 0) - Number(bowling.bowl || 0);
+      const fieldEdge = Number(bowling.field || 0) - 58;
+      const power = averageSkill(inn?.battingXI || [], p => battingSkill(p).boundary + battingSkill(p).six);
+      const powerEdge = (power / 2) - 64;
+      return clamp(Math.round(164 + batEdge * 0.52 - fieldEdge * 0.16 + powerEdge * 0.18), 130, 205);
+    }
+
+    function getAIProjectedScore(inn) {
+      const { batting, bowling } = getInningsRatingsForAI(inn);
+      return estimateProjectedScore(inn, batting, bowling, matchState?.maxBalls || 120);
+    }
+
+    function getAggressionLevelForDesiredRpo(desiredRpo, bat, minLevel = 0, maxLevel = 10) {
+      const wanted = Number(desiredRpo);
+      let bestLevel = clamp(Math.round(minLevel), 0, 10);
+      let bestDiff = Infinity;
+      for (let level = clamp(Math.round(minLevel), 0, 10); level <= clamp(Math.round(maxLevel), 0, 10); level += 1) {
+        const rpo = getAggressionRpo(level, bat);
+        const diff = Math.abs(rpo - wanted);
+        if (diff < bestDiff) {
+          bestDiff = diff;
+          bestLevel = level;
+        }
+      }
+      return bestLevel;
+    }
+
+    function getBatterPressureProfile(batterStat) {
+      const balls = Number(batterStat?.balls || 0);
+      const confidence = Number(batterStat?.confidence ?? 50);
+      const fatigue = Number(batterStat?.fatigue || 0);
+      const settled = clamp((balls - 10) / 24, 0, 1) * 0.55 + clamp((confidence - 58) / 32, 0, 1) * 0.45;
+      return {
+        balls,
+        confidence,
+        fatigue,
+        settled: clamp(settled, 0, 1),
+        tired: clamp((fatigue - 42) / 40, 0, 1)
+      };
+    }
+
+    function getFirstInningsBaseIntent(aiKey, phase, wickets) {
+      const model = aiKey || "PAR_BUILDER";
+      let desired = 7.0;
+      if (model === "WICKET_BANK") desired = phase === "Powerplay" ? 4.8 : phase === "Middle" ? 5.8 : 9.2;
+      else if (model === "FRONT_LOAD") desired = phase === "Powerplay" ? 8.5 : phase === "Middle" ? 6.4 : 9.0;
+      else if (model === "MAX_PRESSURE") desired = phase === "Powerplay" ? 8.6 : phase === "Middle" ? 7.5 : 11.1;
+      else desired = phase === "Powerplay" ? 6.5 : phase === "Middle" ? 6.8 : 9.5;
+
+      if (wickets >= 7 && phase !== "Death") desired -= 1.4;
+      else if (wickets >= 5 && phase === "Middle") desired -= 0.8;
+      return desired;
+    }
+
+    function getFirstInningsDesiredRpo(inn, ai, batterStat, bat) {
+      const phase = getPhase(inn.balls);
+      const balls = Number(inn.balls || 0);
+      const ballsLeft = Math.max(1, (matchState?.maxBalls || 120) - balls);
+      const wickets = Number(inn.wickets || 0);
+      const par = getAIParScore(inn);
+      const projected = getAIProjectedScore(inn);
+      const currentRR = balls > 0 ? (Number(inn.runs || 0) / balls) * 6 : null;
+      let desired = getFirstInningsBaseIntent(ai?.modelKey, phase, wickets);
+
+      const parGap = par - projected;
+      if (balls >= 18) desired += clamp(parGap / 18, -1.2, 1.35);
+      if (currentRR !== null && balls >= 30) {
+        const liveParRR = ((par - Number(inn.runs || 0)) / ballsLeft) * 6;
+        desired = desired * 0.68 + clamp(liveParRR, 3.2, 13.4) * 0.32;
+      }
+
+      if (phase === "Death") {
+        if (wickets <= 3) desired += 0.8;
+        if (wickets >= 6) desired -= 0.9;
+      }
+
+      const pressure = getBatterPressureProfile(batterStat);
+      const power = getBatterSloggerFactor(bat);
+      desired += power * 0.55;
+      desired += pressure.settled * 0.45;
+      desired -= pressure.tired * 0.55;
+
+      return clamp(desired, 1.6, 13.2);
+    }
+
+    function getChaseDesiredRpo(inn, ai, batterStat, bat) {
+      const phase = getPhase(inn.balls);
+      const ballsLeft = Math.max(1, (matchState?.maxBalls || 120) - Number(inn.balls || 0));
+      const wickets = Number(inn.wickets || 0);
+      const wicketsLeft = Math.max(0, 10 - wickets);
+      const requiredRR = getRequiredRate(inn) ?? 7.6;
+      const need = Math.max(0, Number(inn.target || 0) - Number(inn.runs || 0));
+      let desired = requiredRR;
+
+      // New meter chase logic: required rate is the anchor, phase controls urgency.
+      if (phase === "Powerplay") desired = requiredRR <= 7.2 ? requiredRR - 0.5 : requiredRR + 0.1;
+      if (phase === "Middle") desired = requiredRR <= 7.2 ? requiredRR - 0.2 : requiredRR + 0.35;
+      if (phase === "Death") desired = requiredRR + 0.9;
+      if (ballsLeft <= 24) desired = Math.max(desired, requiredRR + 1.2);
+      if (ballsLeft <= 12) desired = Math.max(desired, requiredRR + 1.8);
 
       switch (ai?.modelKey) {
-        case "PAR_BUILDER":
-          aggression = phase === "Powerplay" ? 6 : phase === "Middle" ? 6 : 9;
-          break;
-        case "FRONT_LOAD":
-          aggression = phase === "Powerplay" ? 9 : phase === "Middle" ? 6 : 8;
-          break;
-        case "WICKET_BANK":
-          aggression = phase === "Powerplay" ? 5 : phase === "Middle" ? 5 : 9;
-          break;
-        case "MAX_PRESSURE":
-          aggression = phase === "Powerplay" ? 8 : phase === "Middle" ? 7 : 10;
-          break;
         case "WICKET_CHASE":
-          aggression = phase === "Powerplay" ? 5 : phase === "Middle" ? 6 : 8;
-          if (requiredRR !== null && requiredRR > 9.2) aggression += 1;
-          if (requiredRR !== null && requiredRR > 11.0) aggression += 1;
+          desired -= ballsLeft > 36 ? 0.8 : 0.25;
           break;
         case "POWER_CHASE":
-          aggression = phase === "Powerplay" ? 8 : phase === "Middle" ? 8 : 10;
+          desired += phase === "Powerplay" ? 0.65 : 0.25;
           break;
         case "DEATH_CHARGE":
-          aggression = phase === "Powerplay" ? 7 : phase === "Middle" ? 7 : 10;
-          if (requiredRR !== null && requiredRR > 10.5) aggression += 1;
+          desired += phase === "Death" ? 0.65 : 0.20;
           break;
         case "RATE_CHASE":
         default:
-          aggression = phase === "Powerplay" ? 6 : phase === "Middle" ? 7 : 9;
-          if (requiredRR !== null) {
-            if (requiredRR < 6.5) aggression -= 2;
-            else if (requiredRR < 7.5) aggression -= 1;
-            else if (requiredRR > 11.0) aggression += 2;
-            else if (requiredRR > 9.5) aggression += 1;
-          } else {
-            if (currentRR < 6.8 && over >= 6) aggression += 1;
-            if (currentRR > 9.0 && wickets <= 3) aggression -= 1;
-          }
+          desired += requiredRR > 10.5 ? 0.45 : 0;
+          break;
       }
 
-      // Player-specific correction: powerful batters are allowed more, weak/tired batters hold back.
-      if (bat.boundary + bat.six > 130) aggression += 1;
-      if (bat.defense + bat.rotation < 88) aggression -= 1;
-      if (confidence > 78) aggression += 1;
-      if (confidence < 30) aggression -= 1;
+      // Protect wickets only while there is time. In the last 18 balls the required rate wins.
+      if (wicketsLeft <= 3 && ballsLeft > 18) desired -= 1.0;
+      else if (wicketsLeft <= 5 && ballsLeft > 30) desired -= 0.45;
+      if (need <= 18 && ballsLeft >= 18) desired -= 0.9;
+      if (requiredRR >= 12.0) desired += 0.7;
+      if (requiredRR >= 14.0) desired += 1.0;
 
-      // Wicket pressure.
-      if (wickets >= 7 && phase !== "Death") aggression -= 2;
-      else if (wickets >= 5 && phase === "Middle") aggression -= 1;
-      if (inn.target && matchState.maxBalls - inn.balls <= 18 && wickets <= 7) aggression += 2;
+      const pressure = getBatterPressureProfile(batterStat);
+      desired += getBatterSloggerFactor(bat) * 0.55;
+      desired += pressure.settled * 0.55;
+      desired -= pressure.tired * 0.55;
 
-      return clamp(Math.round(aggression), 0, 10);
+      return clamp(desired, 1.6, 13.5);
+    }
+
+    function clampAILevelForSituation(level, inn, desiredRpo, batterStat, bat) {
+      const phase = getPhase(inn.balls);
+      const ballsLeft = Math.max(0, (matchState?.maxBalls || 120) - Number(inn.balls || 0));
+      const wickets = Number(inn.wickets || 0);
+      const requiredRR = getRequiredRate(inn);
+      const pressure = getBatterPressureProfile(batterStat);
+      let minLevel = 0;
+      let maxLevel = 10;
+
+      if (!inn.target) {
+        if (phase !== "Death" && wickets >= 5) maxLevel = Math.min(maxLevel, 8);
+        if (phase === "Powerplay" && wickets >= 3) maxLevel = Math.min(maxLevel, 8);
+      } else {
+        if (requiredRR !== null && requiredRR < 5.0 && ballsLeft > 36) maxLevel = Math.min(maxLevel, 6);
+        if (requiredRR !== null && requiredRR < 6.4 && ballsLeft > 48) maxLevel = Math.min(maxLevel, 7);
+        if (requiredRR !== null && requiredRR >= 11.0) minLevel = Math.max(minLevel, 8);
+        if (requiredRR !== null && requiredRR >= 13.0) minLevel = Math.max(minLevel, 9);
+      }
+
+      // Level 10 is for true death/required-rate pressure or a set hitter. No casual L10 in middle overs.
+      const canUseTen = phase === "Death" || ballsLeft <= 18 || (requiredRR !== null && requiredRR >= 12.5) || (pressure.settled > 0.75 && getBatterSloggerFactor(bat) > 0.55);
+      if (!canUseTen) maxLevel = Math.min(maxLevel, 9);
+
+      if (pressure.tired > 0.70 && phase !== "Death") maxLevel = Math.min(maxLevel, 8);
+      const clamped = clamp(Math.round(level), minLevel, maxLevel);
+      return clamp(clamped, 0, 10);
+    }
+
+    function getComputerAggression(inn, batterKey) {
+      const ai = inn?.battingAI;
+      const batter = getPlayerByKey(inn?.battingXI, batterKey) || getCurrentBatter();
+      const bat = battingSkill(batter);
+      const batterStat = ensureBatterStat(batterKey);
+      const desiredRpo = inn?.target
+        ? getChaseDesiredRpo(inn, ai, batterStat, bat)
+        : getFirstInningsDesiredRpo(inn, ai, batterStat, bat);
+      const rawLevel = getAggressionLevelForDesiredRpo(desiredRpo, bat, 0, 10);
+      return clampAILevelForSituation(rawLevel, inn, desiredRpo, batterStat, bat);
     }
 
     function getForcedAggressionLevel() {
@@ -3130,7 +3317,7 @@
       const bowlingXI = getSelectedXI(currentMatch, first.bowlingSide);
 
       const state = {
-        version: "t20-skill-v3-equal-skill-no-governor",
+        version: "t20-skill-v3-ai-meter-target-chase",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -3437,16 +3624,42 @@
       multiply(weights, "six", 0.50 + attack * 0.82);
 
       // Tempo alignment: makes the 0-10 bar actually drive scoring speed.
-      // Low gears become dot-heavy and boundary-light; high gears unlock boundary volume.
+      // Low gears become dot-heavy and boundary-light. High gears become boundary/wicket heavy,
+      // not safe 1/2/3 heavy. This is what fixes the smooth 205/4 problem.
       const runTempo = AGG_RUN_TEMPO_BY_LEVEL[agg] ?? 1;
+      const safeTempo = AGG_SAFE_ROTATION_TEMPO_BY_LEVEL[agg] ?? runTempo;
+      const twoTempo = AGG_TWO_TEMPO_BY_LEVEL[agg] ?? safeTempo;
+      const threeTempo = AGG_THREE_TEMPO_BY_LEVEL[agg] ?? twoTempo;
       const boundaryTempo = AGG_BOUNDARY_TEMPO_BY_LEVEL[agg] ?? 1;
       const dotTempo = AGG_DOT_TEMPO_BY_LEVEL[agg] ?? 1;
+
+      const highIntent = clamp((agg - 8) / 2, 0, 1);
       multiply(weights, "dot", dotTempo);
-      multiply(weights, "one", runTempo);
-      multiply(weights, "two", runTempo * (0.88 + attack * 0.22));
-      multiply(weights, "three", runTempo * (0.82 + attack * 0.18));
-      multiply(weights, "four", boundaryTempo * (0.90 + attack * 0.24));
-      multiply(weights, "six", boundaryTempo * (0.78 + attack * 0.42));
+      multiply(weights, "one", safeTempo * (1.04 - attack * 0.18));
+      multiply(weights, "two", twoTempo * (0.95 - highIntent * 0.24));
+      multiply(weights, "three", threeTempo * (0.86 - highIntent * 0.20));
+      multiply(weights, "four", boundaryTempo * (0.92 + attack * 0.34));
+      multiply(weights, "six", boundaryTempo * (0.82 + attack * 0.62));
+
+      // Ultra/death intent: trade safe rotation for explosive/wicket outcomes.
+      if (agg >= 9) {
+        const ultra = agg >= 10 ? 1 : 0.45;
+        multiply(weights, "one", 0.82 - ultra * 0.14);
+        multiply(weights, "two", 0.76 - ultra * 0.18);
+        multiply(weights, "three", 0.72 - ultra * 0.20);
+        multiply(weights, "four", 1.12 + ultra * 0.16);
+        multiply(weights, "six", 1.22 + ultra * 0.28);
+        multiply(weights, "wicket", 1.08 + ultra * 0.16);
+      }
+
+      if (phase === "Death" && agg >= 9) {
+        const ultraDeath = agg >= 10 ? 1 : 0.5;
+        multiply(weights, "one", 0.88 - ultraDeath * 0.10);
+        multiply(weights, "two", 0.82 - ultraDeath * 0.16);
+        multiply(weights, "four", 1.08 + ultraDeath * 0.14);
+        multiply(weights, "six", 1.16 + ultraDeath * 0.24);
+        multiply(weights, "wicket", 1.10 + ultraDeath * 0.18);
+      }
 
       multiply(weights, "wicket", aggressionWicketRisk);
 
@@ -3478,12 +3691,14 @@
       // Wicket cap is aggression-aware. The old universal cap made level 10 too survivable.
       const wicketFloor = AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL[agg] ?? 1.5;
       const wicketCap = AGG_WICKET_WEIGHT_CAP_BY_LEVEL[agg] ?? 12.0;
-      const fourFloorByLevel = [0.35, 0.55, 0.75, 1.00, 1.40, 1.90, 2.30, 2.80, 2.80, 2.80, 2.80];
-      const sixFloorByLevel = [0.05, 0.08, 0.12, 0.20, 0.35, 0.55, 0.85, 1.10, 1.20, 1.20, 1.20];
+      const fourFloorByLevel = [0.35, 0.55, 0.75, 1.00, 1.40, 1.90, 2.30, 2.80, 3.30, 5.20, 7.20];
+      const sixFloorByLevel = [0.05, 0.08, 0.12, 0.20, 0.35, 0.55, 0.85, 1.10, 1.60, 3.60, 5.80];
+      const fourCapByLevel = [7.5, 8.2, 9.0, 10.0, 11.2, 12.4, 13.4, 14.8, 17.5, 23.5, 30.0];
+      const sixCapByLevel = [2.2, 2.8, 3.5, 4.5, 5.8, 7.2, 8.8, 10.8, 14.5, 23.5, 32.0];
       weights.wicket = clamp(weights.wicket, wicketFloor, wicketCap);
-      weights.six = clamp(weights.six, sixFloorByLevel[agg] ?? 1.2, 12.8);
-      weights.four = clamp(weights.four, fourFloorByLevel[agg] ?? 2.8, 14.8);
-      weights.dot = clamp(weights.dot, 8.5, AGG_DOT_CAP_BY_LEVEL[agg] ?? 45.0);
+      weights.six = clamp(weights.six, sixFloorByLevel[agg] ?? 1.2, sixCapByLevel[agg] ?? 12.8);
+      weights.four = clamp(weights.four, fourFloorByLevel[agg] ?? 2.8, fourCapByLevel[agg] ?? 14.8);
+      weights.dot = clamp(weights.dot, 5.2, AGG_DOT_CAP_BY_LEVEL[agg] ?? 45.0);
 
       const outcome = weightedRoll(weights);
       const battle = {
@@ -4313,18 +4528,122 @@
 
       const canRestore =
         saved &&
-        ["t20-skill-v3-equal-skill-no-governor", "t20-skill-v3-equal-skill-aggression-test", "t20-skill-v3-ultra-aggression-risk", "t20-skill-v3-all-format-aggression-pill", "t20-skill-v3-scoreboard-hub-hotfix", "t20-skill-v3-scoreboard-hub", "t20-skill-v3-two-color-prediction-bar", "t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
+        ["t20-skill-v3-outcome-weight-probe", "t20-skill-v3-equal-skill-no-governor", "t20-skill-v3-equal-skill-aggression-test", "t20-skill-v3-ultra-aggression-risk", "t20-skill-v3-all-format-aggression-pill", "t20-skill-v3-scoreboard-hub-hotfix", "t20-skill-v3-scoreboard-hub", "t20-skill-v3-two-color-prediction-bar", "t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
         saved.matchIdentity === currentIdentity &&
         saved.phase !== "completed";
 
       matchState = canRestore ? saved : createInitialMatchState(currentMatchCache);
       hydrateScoreboardData(matchState);
-      matchState.version = "t20-skill-v3-equal-skill-no-governor";
+      matchState.version = "t20-skill-v3-outcome-weight-probe";
       persist();
       render();
       runAggressionDebugTests(false);
     }
 
+
+
+    function runAIAggressionPlanTest() {
+      const output = document.getElementById("stressSummary");
+      if (!output) return;
+      const savedState = matchState;
+      const savedCache = currentMatchCache;
+      const savedStress = isStressTesting;
+      isStressTesting = true;
+      try {
+        const baseMatch = currentMatchCache || loadCurrentMatch();
+        const testMatch = createEqualSkillCurrentMatch(baseMatch || {});
+        matchState = createStressInitialMatchState(testMatch);
+        forceAIForInnings(matchState.innings[0]);
+        const firstInn = matchState.innings[0];
+        const firstScenarios = [
+          { name: "1st PP normal", balls: 12, runs: 18, wickets: 0 },
+          { name: "1st PP trouble", balls: 24, runs: 28, wickets: 3 },
+          { name: "1st middle below par", balls: 60, runs: 64, wickets: 2 },
+          { name: "1st middle ahead", balls: 72, runs: 92, wickets: 1 },
+          { name: "1st death wickets in hand", balls: 96, runs: 142, wickets: 3 },
+          { name: "1st death collapse", balls: 96, runs: 112, wickets: 7 }
+        ];
+
+        function cloneInnWith(row, target = null) {
+          const clone = JSON.parse(JSON.stringify(firstInn));
+          clone.runs = row.runs;
+          clone.balls = row.balls;
+          clone.wickets = row.wickets;
+          clone.target = target;
+          clone.battingAI = buildComputerBattingAI({ battingXI: clone.battingXI, bowlingXI: clone.bowlingXI, target });
+          return clone;
+        }
+
+        const rows = [];
+        firstScenarios.forEach(row => {
+          const inn = cloneInnWith(row, null);
+          const key = inn.strikerKey;
+          const bat = battingSkill(getPlayerByKey(inn.battingXI, key));
+          const stat = ensureBatterStat(key);
+          stat.balls = Math.min(18, row.balls);
+          stat.confidence = 58;
+          stat.fatigue = 12;
+          const desired = getFirstInningsDesiredRpo(inn, inn.battingAI, stat, bat);
+          const level = getComputerAggression(inn, key);
+          rows.push({ mode: "Set target", scenario: row.name, phase: getPhase(row.balls), need: "—", desired, level, label: aggressionLabel(level, bat), targetRpo: getAggressionRpo(level, bat) });
+        });
+
+        const chaseScenarios = [
+          { name: "Chase easy", target: 151, balls: 60, runs: 86, wickets: 2 },
+          { name: "Chase controlled", target: 171, balls: 72, runs: 95, wickets: 3 },
+          { name: "Chase behind", target: 191, balls: 72, runs: 88, wickets: 3 },
+          { name: "Chase death gettable", target: 181, balls: 102, runs: 148, wickets: 4 },
+          { name: "Chase death hard", target: 206, balls: 102, runs: 146, wickets: 5 },
+          { name: "Chase collapse", target: 171, balls: 78, runs: 93, wickets: 7 }
+        ];
+        chaseScenarios.forEach(row => {
+          const inn = cloneInnWith(row, row.target);
+          const key = inn.strikerKey;
+          const bat = battingSkill(getPlayerByKey(inn.battingXI, key));
+          const stat = ensureBatterStat(key);
+          stat.balls = Math.min(26, row.balls);
+          stat.confidence = row.wickets <= 4 ? 68 : 46;
+          stat.fatigue = row.balls >= 90 ? 36 : 18;
+          const desired = getChaseDesiredRpo(inn, inn.battingAI, stat, bat);
+          const level = getComputerAggression(inn, key);
+          rows.push({ mode: "Chase", scenario: row.name, phase: getPhase(row.balls), need: getRequiredRate(inn)?.toFixed(2), desired, level, label: aggressionLabel(level, bat), targetRpo: getAggressionRpo(level, bat) });
+        });
+
+        output.innerHTML = `
+          <div class="stress-grid">
+            <div class="stress-card"><span>AI test</span><b>New 0-10 meter</b></div>
+            <div class="stress-card"><span>Rows</span><b>${rows.length}</b></div>
+            <div class="stress-card"><span>First innings</span><b>Par-aware</b></div>
+            <div class="stress-card"><span>Chase</span><b>RRR-aware</b></div>
+          </div>
+          <table class="stress-table">
+            <thead>
+              <tr><th>Mode</th><th>Scenario</th><th>Phase</th><th>RRR</th><th>Desired RPO</th><th>Level</th><th>Meter RPO</th><th>Label</th></tr>
+            </thead>
+            <tbody>
+              ${rows.map(row => `
+                <tr>
+                  <td>${row.mode}</td>
+                  <td>${row.scenario}</td>
+                  <td>${row.phase}</td>
+                  <td>${row.need}</td>
+                  <td>${row.desired.toFixed(2)}</td>
+                  <td>${row.level}</td>
+                  <td>${row.targetRpo.toFixed(2)}</td>
+                  <td>${row.label}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+          <p class="stress-note">AI Plan Test does not roll balls. It checks whether AI chooses sensible aggression levels from the new 0-10 meter for setting targets and chasing required rates.</p>
+        `;
+      } finally {
+        matchState = savedState;
+        currentMatchCache = savedCache;
+        isStressTesting = savedStress;
+        render();
+      }
+    }
 
     /* =========================================================
        STRESS TEST RUNNER
@@ -4365,7 +4684,7 @@
       const first = getStressFirstInningsInfo(currentMatch, teams);
 
       const state = {
-        version: "t20-skill-v3-equal-skill-no-governor",
+        version: "t20-skill-v3-outcome-weight-probe",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -4824,6 +5143,292 @@
         <p class="stress-note"><strong>How to read this:</strong> Target RPO is the aggression intent curve, not a guaranteed score. Level 10 should show high wickets/all-outs and may have lower actual RPO if collapses happen. Level 7 should be the lowest-risk attacking gear, but not a free survival mode.</p>
         <p class="stress-note"><strong>Trend:</strong> ${trend}</p>
       `;
+    }
+
+
+    function getOutcomeProbeKey(outcome) {
+      if (!outcome) return "dot";
+      if (outcome.type === "wicket") return "wicket";
+      if (outcome.type === "extra") return outcome.extraType === "noBall" ? "noBall" : "wide";
+      const runs = Number(outcome.runs || 0);
+      if (runs === 0) return "dot";
+      if (runs === 1) return "one";
+      if (runs === 2) return "two";
+      if (runs === 3) return "three";
+      if (runs === 4) return "four";
+      if (runs === 6) return "six";
+      return "other";
+    }
+
+    function createOutcomeProbeState(currentMatch, level, phaseName) {
+      matchState = createStressInitialMatchState(currentMatch);
+      matchState.forcedAggressionLevel = clamp(Math.round(level), 0, 10);
+      const inn = currentInnings();
+      forceAIForInnings(inn);
+      setOpeningAggressionForInnings(inn, matchState.forcedAggressionLevel);
+
+      const phaseStartBalls = {
+        Powerplay: 0,
+        Middle: 36,
+        Death: 96
+      }[phaseName] ?? 0;
+
+      inn.balls = phaseStartBalls;
+      inn.legalBallsThisOver = 0;
+      inn.currentOverRuns = 0;
+      inn.currentOverWickets = 0;
+      inn.currentOverEvents = [];
+      inn.runs = 0;
+      inn.wickets = 0;
+
+      const striker = ensureBatterStat(inn.strikerKey);
+      striker.runs = 0;
+      striker.balls = 0;
+      striker.fours = 0;
+      striker.sixes = 0;
+      striker.confidence = 50;
+      striker.fatigue = 0;
+
+      const bowler = ensureBowlerStat(inn.currentBowlerKey);
+      bowler.balls = 0;
+      bowler.runs = 0;
+      bowler.wickets = 0;
+      bowler.fatigue = 0;
+      bowler.spellBalls = 0;
+      return inn;
+    }
+
+    function runOneOutcomeWeightProbeLevel(currentMatch, level, phaseName, trials) {
+      createOutcomeProbeState(currentMatch, level, phaseName);
+      const counts = { dot: 0, one: 0, two: 0, three: 0, four: 0, six: 0, wicket: 0, wide: 0, noBall: 0, other: 0 };
+      const weightSums = { dot: 0, one: 0, two: 0, three: 0, four: 0, six: 0, wicket: 0, wide: 0, noBall: 0 };
+      let totalRuns = 0;
+      let legalBalls = 0;
+      let aggressionRpoTotal = 0;
+      let aggressionRiskTotal = 0;
+      let battleCount = 0;
+
+      for (let i = 0; i < trials; i += 1) {
+        const outcome = simulateSkillBall();
+        const key = getOutcomeProbeKey(outcome);
+        counts[key] = (counts[key] || 0) + 1;
+        totalRuns += Number(outcome?.runs || 0);
+        if (outcome?.legal) legalBalls += 1;
+
+        const weights = outcome?.battle?.weights || matchState?.lastBattle?.weights || {};
+        Object.keys(weightSums).forEach(weightKey => {
+          weightSums[weightKey] += Number(weights[weightKey] || 0);
+        });
+        aggressionRpoTotal += Number(outcome?.battle?.aggressionRpo || 0);
+        aggressionRiskTotal += Number(outcome?.battle?.aggressionWicketRisk || 0);
+        battleCount += 1;
+      }
+
+      const pctOf = value => trials ? value / trials * 100 : 0;
+      const avgWeight = key => trials ? weightSums[key] / trials : 0;
+      const simRpo = legalBalls ? totalRuns / legalBalls * 6 : 0;
+      const safeRotationPct = pctOf(counts.one + counts.two + counts.three);
+      const boundaryPct = pctOf(counts.four + counts.six);
+      const dotPct = pctOf(counts.dot);
+      const wicketPct = pctOf(counts.wicket);
+      const extraPct = pctOf(counts.wide + counts.noBall);
+      const avgAggressionRpo = battleCount ? aggressionRpoTotal / battleCount : 0;
+      const avgAggressionRisk = battleCount ? aggressionRiskTotal / battleCount : 0;
+
+      return {
+        phase: phaseName,
+        level,
+        zone: getAggressionZone(level),
+        trials,
+        targetRpo: BALANCED_RPO_BY_AGG[level],
+        avgAggressionRpo,
+        simRpo,
+        dotPct,
+        onePct: pctOf(counts.one),
+        twoPct: pctOf(counts.two),
+        threePct: pctOf(counts.three),
+        fourPct: pctOf(counts.four),
+        sixPct: pctOf(counts.six),
+        wicketPct,
+        extraPct,
+        safeRotationPct,
+        boundaryPct,
+        legalBalls,
+        totalRuns,
+        avgAggressionRisk,
+        wtDot: avgWeight("dot"),
+        wtOne: avgWeight("one"),
+        wtTwo: avgWeight("two"),
+        wtFour: avgWeight("four"),
+        wtSix: avgWeight("six"),
+        wtWicket: avgWeight("wicket"),
+        counts
+      };
+    }
+
+    function scoreOutcomeWeightProbeRow(row, previousSamePhase = null) {
+      const notes = [];
+      if (previousSamePhase && row.level > 0 && row.wicketPct + 0.15 < previousSamePhase.wicketPct) {
+        notes.push(`wicket % fell vs L${previousSamePhase.level}`);
+      }
+      if (row.level >= 9 && row.safeRotationPct > 42) {
+        notes.push("too many safe 1/2/3 at high intent");
+      }
+      if (row.level >= 9 && row.boundaryPct <= row.safeRotationPct * 0.55) {
+        notes.push("high intent still not boundary-heavy enough");
+      }
+      if (row.level === 10 && row.phase === "Death" && row.simRpo < 11.5) {
+        notes.push("death L10 RPO reward too low");
+      }
+      if (row.level === 10 && row.phase === "Death" && row.wicketPct < 13) {
+        notes.push("death L10 wicket danger too low");
+      }
+      if (row.level <= 3 && row.simRpo > row.targetRpo + 0.8) {
+        notes.push("defensive tempo too fast");
+      }
+      if (row.level >= 8 && row.boundaryPct < 13) {
+        notes.push("attack boundary % low");
+      }
+      return notes.length ? `⚠️ ${notes.join("; ")}` : "OK";
+    }
+
+    function runOutcomeWeightProbe(trialsPerLevelPhase = 5000, options = {}) {
+      const equalSkill = !!options.equalSkill;
+      const modal = document.getElementById("stressTestModal");
+      const output = document.getElementById("stressSummary");
+      const modeLabel = equalSkill ? "equal-skill weight probe" : "real-squad weight probe";
+      if (modal) modal.classList.remove("hidden");
+      if (output) output.innerHTML = `<p class="stress-note">Running ${modeLabel}: 11 levels × 3 phases × ${trialsPerLevelPhase} ball trials. This isolates outcome weights and may take a few seconds...</p>`;
+
+      setTimeout(() => {
+        const savedState = matchState ? JSON.stringify(matchState) : null;
+        const savedCache = currentMatchCache;
+        const baseMatch = currentMatchCache || loadCurrentMatch();
+        const currentMatch = equalSkill ? createEqualSkillCurrentMatch(baseMatch) : baseMatch;
+        const phases = ["Powerplay", "Middle", "Death"];
+        const rows = [];
+
+        isStressTesting = true;
+        try {
+          phases.forEach(phaseName => {
+            let previous = null;
+            for (let level = 0; level <= 10; level += 1) {
+              const row = runOneOutcomeWeightProbeLevel(currentMatch, level, phaseName, trialsPerLevelPhase);
+              row.check = scoreOutcomeWeightProbeRow(row, previous);
+              rows.push(row);
+              previous = row;
+            }
+          });
+        } finally {
+          isStressTesting = false;
+          matchState = savedState ? JSON.parse(savedState) : null;
+          currentMatchCache = savedCache;
+          latestOutcomeWeightProbeResults = { rows, trialsPerLevelPhase, equalSkill };
+          renderOutcomeWeightProbeResults(rows, trialsPerLevelPhase, { equalSkill });
+          render();
+        }
+      }, 30);
+    }
+
+    function renderOutcomeWeightProbeResults(rows, trialsPerLevelPhase, options = {}) {
+      const output = document.getElementById("stressSummary");
+      if (!output) return;
+      const fmt = n => Number(n || 0).toFixed(1);
+      const pctFmt = n => `${Number(n || 0).toFixed(1)}%`;
+      const modeLabel = options.equalSkill ? "Equal Skill Weight Probe" : "Real Squad Weight Probe";
+      const deathL10 = rows.find(row => row.phase === "Death" && row.level === 10);
+      const highIntentTrend = rows
+        .filter(row => row.phase === "Death" && row.level >= 8)
+        .map(row => `L${row.level}: ${fmt(row.simRpo)} RPO / W ${pctFmt(row.wicketPct)} / safe ${pctFmt(row.safeRotationPct)}`)
+        .join(" • ");
+
+      output.innerHTML = `
+        <div class="stress-grid">
+          <div class="stress-card"><span>Test Mode</span><b>${modeLabel}</b></div>
+          <div class="stress-card"><span>Trials / Level / Phase</span><b>${trialsPerLevelPhase}</b></div>
+          <div class="stress-card"><span>Total Ball Trials</span><b>${trialsPerLevelPhase * 11 * 3}</b></div>
+          <div class="stress-card"><span>Death L10 RPO</span><b>${deathL10 ? fmt(deathL10.simRpo) : "—"}</b></div>
+          <div class="stress-card"><span>Death L10 Wicket</span><b>${deathL10 ? pctFmt(deathL10.wicketPct) : "—"}</b></div>
+        </div>
+        <table class="stress-table">
+          <thead>
+            <tr>
+              <th>Phase</th><th>Level</th><th>Zone</th><th>Target</th><th>Sim RPO</th><th>Dot</th><th>1</th><th>2</th><th>4</th><th>6</th><th>W</th><th>Ext</th><th>Safe 1/2/3</th><th>Boundary</th><th>Wt 1</th><th>Wt 2</th><th>Wt 4</th><th>Wt 6</th><th>Wt W</th><th>Check</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(row => `
+              <tr>
+                <td>${row.phase}</td>
+                <td><strong>${row.level}</strong></td>
+                <td>${row.zone}</td>
+                <td>${fmt(row.targetRpo)}</td>
+                <td>${fmt(row.simRpo)}</td>
+                <td>${pctFmt(row.dotPct)}</td>
+                <td>${pctFmt(row.onePct)}</td>
+                <td>${pctFmt(row.twoPct)}</td>
+                <td>${pctFmt(row.fourPct)}</td>
+                <td>${pctFmt(row.sixPct)}</td>
+                <td>${pctFmt(row.wicketPct)}</td>
+                <td>${pctFmt(row.extraPct)}</td>
+                <td>${pctFmt(row.safeRotationPct)}</td>
+                <td>${pctFmt(row.boundaryPct)}</td>
+                <td>${fmt(row.wtOne)}</td>
+                <td>${fmt(row.wtTwo)}</td>
+                <td>${fmt(row.wtFour)}</td>
+                <td>${fmt(row.wtSix)}</td>
+                <td>${fmt(row.wtWicket)}</td>
+                <td style="text-align:left;white-space:normal;min-width:170px">${row.check}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        <p class="stress-note"><strong>How to read this:</strong> This is not a full innings. It freezes a batter/bowler matchup and rolls the same ball situation thousands of times. Use it to debug outcome weights directly. If level 10 still has high Safe 1/2/3, then the weights are creating smooth scoring. If Wicket % is high but Sim RPO is low, reward needs more 4/6 weight instead of less wicket risk.</p>
+        <p class="stress-note"><strong>Death high-intent trend:</strong> ${highIntentTrend || "—"}</p>
+      `;
+    }
+
+    function buildOutcomeWeightProbeCSVRows(results = latestOutcomeWeightProbeResults) {
+      if (!results?.rows?.length) return [];
+      const headers = ["mode", "trialsPerLevelPhase", "phase", "level", "zone", "targetRpo", "simRpo", "dotPct", "onePct", "twoPct", "threePct", "fourPct", "sixPct", "wicketPct", "extraPct", "safeRotationPct", "boundaryPct", "wtDot", "wtOne", "wtTwo", "wtFour", "wtSix", "wtWicket", "check"];
+      return [
+        headers,
+        ...results.rows.map(row => [
+          results.equalSkill ? "equalSkill" : "realSquad",
+          results.trialsPerLevelPhase,
+          row.phase,
+          row.level,
+          row.zone,
+          row.targetRpo,
+          row.simRpo,
+          row.dotPct,
+          row.onePct,
+          row.twoPct,
+          row.threePct,
+          row.fourPct,
+          row.sixPct,
+          row.wicketPct,
+          row.extraPct,
+          row.safeRotationPct,
+          row.boundaryPct,
+          row.wtDot,
+          row.wtOne,
+          row.wtTwo,
+          row.wtFour,
+          row.wtSix,
+          row.wtWicket,
+          row.check
+        ])
+      ];
+    }
+
+    function downloadOutcomeWeightProbeCSV() {
+      if (!latestOutcomeWeightProbeResults?.rows?.length) {
+        alert("Run a Weight Probe first.");
+        return;
+      }
+      const mode = latestOutcomeWeightProbeResults.equalSkill ? "equal_skill" : "real_squad";
+      downloadCSVFile(`t20_outcome_weight_probe_${mode}_${latestOutcomeWeightProbeResults.trialsPerLevelPhase}_trials.csv`, buildOutcomeWeightProbeCSVRows(latestOutcomeWeightProbeResults));
     }
 
     function runStressTest(count = 200) {
@@ -5510,6 +6115,7 @@
       text("formatBox", "T20");
       text("phaseBox", getPhase(inn.balls));
       text("partnershipBox", `${inn.partnershipRuns} off ${inn.partnershipBalls}`);
+      renderScorebarCurrentOver(inn);
 
       const prediction = calculateLivePrediction(matchState, userRatings, compRatings);
       text("predictionLeader", prediction.leader);
@@ -5639,6 +6245,28 @@
 
       const fill = document.getElementById("currentBowlerStaminaFill");
       if (fill) fill.style.width = `${clamp(stat.stamina, 0, 100)}%`;
+    }
+
+    function renderScorebarCurrentOver(inn) {
+      const wrap = document.getElementById("scoreCurrentOverWrap");
+      const row = document.getElementById("scoreCurrentOverBalls");
+      if (!wrap || !row) return;
+
+      const events = Array.isArray(inn?.currentOverEvents) ? inn.currentOverEvents : [];
+      row.innerHTML = "";
+
+      if (!events.length) {
+        wrap.style.display = "none";
+        return;
+      }
+
+      wrap.style.display = "inline-flex";
+      events.forEach(ev => {
+        const chip = document.createElement("span");
+        chip.className = `ball-chip ${ev.type || "dot"}`;
+        chip.textContent = ev.label || "•";
+        row.appendChild(chip);
+      });
     }
 
     function renderCommentary() {
