@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#030712" />
-  <title>T20 Skill Match Center - Ultra Aggression Risk</title>
+  <title>T20 Skill Match Center - Aggression Correlated Test</title>
   <style>
     :root {
       --bg: #030712;
@@ -1801,13 +1801,14 @@
         <button onclick="runStressTest(50)">Run 50</button>
         <button onclick="runStressTest(200)">Run 200</button>
         <button onclick="runStressTest(1000)">Run 1000</button>
-        <button onclick="runAggressionMatrixTest(50)">Aggression 50 / Level</button>
-        <button class="secondary" onclick="runAggressionMatrixTest(100)">Aggression 100 / Level</button>
+        <button onclick="runAggressionMatrixTest(50)">Real Squad 50 / Level</button>
+        <button class="secondary" onclick="runAggressionMatrixTest(100)">Real Squad 100 / Level</button>
+        <button class="secondary" onclick="runAggressionMatrixTest(100, { equalSkill: true })">Equal Skill 100 / Level</button>
         <button class="secondary" onclick="downloadStressSummaryCSV()">Download Summary CSV</button>
         <button class="secondary" onclick="downloadStressCSVChunks()">Download Detail CSV Chunks</button>
       </div>
       <div id="stressSummary" class="stress-output">
-        <p class="stress-note">Run a normal match stress test, or run Aggression 50 / Level to force every level from 0 to 10 and check RPO, wickets, all-out rate, and collapse danger.</p>
+        <p class="stress-note">Run a normal stress test, a real-squad aggression matrix, or an equal-skill aggression matrix. Equal Skill removes team-strength gaps so you can judge the aggression curve itself. First-innings governor is removed in this version.</p>
       </div>
     </div>
   </div>
@@ -1851,7 +1852,7 @@
     const TOUR_STORAGE_KEY = "cricketTourSetupSave_v1";
     const TOUR_ID_KEY = "currentTourId_v1";
     const TOSS_KEY = "currentTossResult";
-    const STATE_PREFIX = "skillT20MatchState_v3_ultra_aggression_risk_";
+    const STATE_PREFIX = "skillT20MatchState_v3_equal_skill_no_governor_";
 
     let matchState = null;
     let currentMatchCache = null;
@@ -1975,30 +1976,36 @@
     const BALANCED_RPO_BY_AGG = [1.6, 2.0, 2.5, 3.1, 3.8, 5.1, 6.2, 7.0, 8.5, 10.8, 12.8];
     const SLOGGER_RPO_BY_AGG = BALANCED_RPO_BY_AGG.map(value => Number((value * (13.5 / 12.8)).toFixed(2)));
 
-    // 7 is the lowest-risk attacking gear, but it is still T20 intent.
-    // 10+ is not a 20-over mode. It is high reward and genuinely dangerous every ball.
-    // These are multipliers, not fixed percentages; bowler skill, batter control, fielding,
-    // confidence, fatigue, and phase still shape the final wicket chance.
+    // Aggression must show a readable trend: higher level = higher wicket danger on average.
+    // These are not direct wicket percentages. They multiply the existing skill-vs-skill wicket weight.
+    // Skill, confidence, fatigue, phase, fielding, and bowling quality still matter after this curve.
     const AGG_WICKET_RISK_BY_LEVEL = [
-      1.00, // 0 no color/no intent: blocks/low scoring, still not immune
-      0.95, // 1
-      0.90, // 2 Test default
-      0.88, // 3
-      0.86, // 4
-      0.84, // 5 ODI default
-      0.82, // 6
-      0.80, // 7 controlled T20 attack, lowest attacking risk but NOT safe
-      1.15, // 8 T20 default, more wicket risk than 7
-      1.75, // 9 heavy attack, real danger
-      2.75  // 10+ ultra/death: max danger, should not last 20 overs often
+      0.38, // 0 no intent: low scoring, lowest wicket pressure
+      0.45, // 1
+      0.53, // 2 Test default
+      0.63, // 3
+      0.76, // 4
+      0.93, // 5 ODI default
+      1.12, // 6
+      1.35, // 7 controlled T20 aggression, riskier than 6
+      1.68, // 8 T20 default
+      2.20, // 9 heavy attack
+      3.05  // 10+ ultra/death: max danger
     ];
 
-    const AGG_WICKET_FLOOR_BY_LEVEL = [0.96, 0.90, 0.85, 0.82, 0.80, 0.78, 0.76, 0.74, 1.03, 1.50, 2.25];
+    const AGG_WICKET_FLOOR_BY_LEVEL = [0.34, 0.40, 0.47, 0.56, 0.68, 0.84, 1.02, 1.22, 1.55, 2.05, 2.75];
 
-    // Final wicket-weight guardrails. These keep Ultra from being softened too much by
-    // elite confidence/skill, while still allowing normal levels to play naturally.
-    const AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL = [1.50, 1.55, 1.65, 1.75, 1.90, 2.10, 2.35, 2.80, 4.25, 7.50, 12.00];
-    const AGG_WICKET_WEIGHT_CAP_BY_LEVEL = [10.8, 11.0, 11.2, 11.5, 12.0, 12.5, 13.2, 14.0, 16.5, 20.0, 24.0];
+    // Final wicket-weight guardrails are also monotonic. This creates the visible avg-wicket pattern
+    // in the aggression matrix without adding a separate timer penalty.
+    const AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL = [0.55, 0.70, 0.90, 1.15, 1.45, 1.85, 2.40, 3.15, 4.50, 7.80, 12.50];
+    const AGG_WICKET_WEIGHT_CAP_BY_LEVEL = [6.0, 6.8, 7.6, 8.6, 9.8, 11.2, 12.8, 14.5, 17.0, 21.5, 27.0];
+
+    // Tempo alignment: this is the scoring side of the aggression bar.
+    // Low levels become actual defensive gears; high levels unlock boundary volume.
+    const AGG_RUN_TEMPO_BY_LEVEL = [0.36, 0.42, 0.50, 0.60, 0.70, 0.78, 0.88, 0.98, 1.06, 1.20, 1.34];
+    const AGG_BOUNDARY_TEMPO_BY_LEVEL = [0.12, 0.18, 0.26, 0.38, 0.52, 0.70, 0.86, 1.00, 1.12, 1.40, 1.70];
+    const AGG_DOT_TEMPO_BY_LEVEL = [2.70, 2.35, 2.05, 1.75, 1.50, 1.30, 1.14, 1.00, 0.94, 0.88, 0.82];
+    const AGG_DOT_CAP_BY_LEVEL = [78, 72, 66, 60, 54, 49, 46, 44, 42, 40, 38];
 
     function getAggressionZone(value) {
       const v = clamp(Math.round(value ?? 8), 0, 10);
@@ -2040,15 +2047,17 @@
 
       const setFactor = clamp((balls - 12) / 30, 0, 1);
       const confidenceFactor = clamp((confidence - 55) / 35, 0, 1);
-      const settled = clamp(setFactor * 0.50 + confidenceFactor * 0.50, 0, 1);
+      const settled = clamp(setFactor * 0.45 + confidenceFactor * 0.55, 0, 1);
 
-      const settledReliefByLevel = [0.02, 0.03, 0.04, 0.04, 0.05, 0.06, 0.07, 0.08, 0.10, 0.12, 0.15];
+      // Being set helps shot execution, but it must not break the monotonic wicket pattern.
+      // Relief is intentionally small and never reverses the level order.
+      const settledReliefByLevel = [0.00, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.055, 0.07, 0.085];
       risk *= 1 - settled * settledReliefByLevel[v];
 
-      // Fatigue brings the wicket danger back, especially for long innings.
+      // Fatigue brings the wicket danger back, especially for long innings at high intent.
       risk *= 1 + clamp(fatigue - 35, 0, 65) * 0.007;
 
-      return clamp(risk, AGG_WICKET_FLOOR_BY_LEVEL[v], 1.90);
+      return clamp(risk, AGG_WICKET_FLOOR_BY_LEVEL[v], 3.50);
     }
 
     function getPlayerKey(player, fallback = "player") {
@@ -2627,47 +2636,9 @@
     }
 
 
-    function getFirstInningsTargetRangeForAI(inn) {
-      const battingXI = inn?.battingXI || [];
-      const bowlingXI = inn?.bowlingXI || [];
-      const batRating = getTeamRatings(battingXI);
-      const bowlRating = getTeamRatings(bowlingXI);
-      const battingGap = batRating.bat - bowlRating.bowl;
-      const totalGap = (batRating.bat * 0.45 + batRating.bowl * 0.35 + batRating.field * 0.20) -
-                       (bowlRating.bat * 0.45 + bowlRating.bowl * 0.35 + bowlRating.field * 0.20);
-
-      if (Math.abs(totalGap) <= 8 && Math.abs(battingGap) <= 8) return { low: 160, high: 175, label: "equal" };
-      if (battingGap >= 28 || totalGap >= 24) return { low: 175, high: 185, label: "big batting side" };
-      if (battingGap <= -28 || totalGap <= -24) return { low: 125, high: 145, label: "small batting side" };
-      if (battingGap >= 12 || totalGap >= 10) return { low: 160, high: 170, label: "controlled stronger side" };
-      if (battingGap <= -12 || totalGap <= -10) return { low: 140, high: 150, label: "weaker side under pressure" };
-      return { low: 150, high: 165, label: "moderate advantage" };
-    }
-
-    function applyFirstInningsRunSettingGovernor(inn, aggression) {
-      // First-innings only. A chase has a target, so do not use this governor there.
-      if (!inn || inn.target !== null) return aggression;
-      if (inn.balls < 18) return aggression;
-
-      const phase = getPhase(inn.balls);
-      const over = inn.balls / 6;
-      const projected = inn.balls ? (inn.runs * 120) / inn.balls : 0;
-      const range = getFirstInningsTargetRangeForAI(inn);
-
-      // Do not let dominant teams auto-race to 220+ unless the ball-by-ball luck is extreme.
-      if (over >= 6 && projected > range.high + 28) aggression -= 2;
-      else if (over >= 6 && projected > range.high + 12) aggression -= 1;
-
-      // If the batting side is behind its matchup par, encourage controlled acceleration.
-      if (over >= 8 && projected < range.low - 18 && inn.wickets <= 5) aggression += 1;
-      if (over >= 14 && projected < range.low - 8 && inn.wickets <= 6) aggression += 1;
-
-      // Wicket bank matters. Teams with many wickets can attack late; teams collapsing must rotate.
-      if (inn.wickets >= 7 && phase !== "Death") aggression -= 2;
-      else if (inn.wickets >= 5 && phase === "Middle") aggression -= 1;
-
-      return aggression;
-    }
+    // First-innings run-setting governor removed by design.
+    // The innings now stays fully ball-by-ball: aggression, skill, phase, confidence,
+    // fatigue, and weighted outcome rolls decide the score without target-range correction.
 
     function getComputerAggression(inn, batterKey) {
       const ai = inn?.battingAI;
@@ -2731,8 +2702,6 @@
       if (wickets >= 7 && phase !== "Death") aggression -= 2;
       else if (wickets >= 5 && phase === "Middle") aggression -= 1;
       if (inn.target && matchState.maxBalls - inn.balls <= 18 && wickets <= 7) aggression += 2;
-
-      aggression = applyFirstInningsRunSettingGovernor(inn, aggression);
 
       return clamp(Math.round(aggression), 0, 10);
     }
@@ -3161,7 +3130,7 @@
       const bowlingXI = getSelectedXI(currentMatch, first.bowlingSide);
 
       const state = {
-        version: "t20-skill-v3-aggression-matrix-test",
+        version: "t20-skill-v3-equal-skill-no-governor",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -3460,12 +3429,25 @@
         multiply(weights, "wicket", 1.18);
       }
 
-      // Aggression shape. RPO controls scoring intent; wicket risk is a separate curve.
+      // Aggression shape. RPO controls scoring intent; wicket risk is a separate monotonic curve.
       multiply(weights, "dot", 1.18 - attack * 0.28);
       multiply(weights, "one", 1.12 - attack * 0.10);
       multiply(weights, "two", 1.00 + attack * 0.12);
       multiply(weights, "four", 0.64 + attack * 0.52);
       multiply(weights, "six", 0.50 + attack * 0.82);
+
+      // Tempo alignment: makes the 0-10 bar actually drive scoring speed.
+      // Low gears become dot-heavy and boundary-light; high gears unlock boundary volume.
+      const runTempo = AGG_RUN_TEMPO_BY_LEVEL[agg] ?? 1;
+      const boundaryTempo = AGG_BOUNDARY_TEMPO_BY_LEVEL[agg] ?? 1;
+      const dotTempo = AGG_DOT_TEMPO_BY_LEVEL[agg] ?? 1;
+      multiply(weights, "dot", dotTempo);
+      multiply(weights, "one", runTempo);
+      multiply(weights, "two", runTempo * (0.88 + attack * 0.22));
+      multiply(weights, "three", runTempo * (0.82 + attack * 0.18));
+      multiply(weights, "four", boundaryTempo * (0.90 + attack * 0.24));
+      multiply(weights, "six", boundaryTempo * (0.78 + attack * 0.42));
+
       multiply(weights, "wicket", aggressionWicketRisk);
 
       // Raw skill vs raw skill.
@@ -3496,10 +3478,12 @@
       // Wicket cap is aggression-aware. The old universal cap made level 10 too survivable.
       const wicketFloor = AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL[agg] ?? 1.5;
       const wicketCap = AGG_WICKET_WEIGHT_CAP_BY_LEVEL[agg] ?? 12.0;
+      const fourFloorByLevel = [0.35, 0.55, 0.75, 1.00, 1.40, 1.90, 2.30, 2.80, 2.80, 2.80, 2.80];
+      const sixFloorByLevel = [0.05, 0.08, 0.12, 0.20, 0.35, 0.55, 0.85, 1.10, 1.20, 1.20, 1.20];
       weights.wicket = clamp(weights.wicket, wicketFloor, wicketCap);
-      weights.six = clamp(weights.six, 1.2, 12.8);
-      weights.four = clamp(weights.four, 2.8, 14.8);
-      weights.dot = clamp(weights.dot, 8.5, 45.0);
+      weights.six = clamp(weights.six, sixFloorByLevel[agg] ?? 1.2, 12.8);
+      weights.four = clamp(weights.four, fourFloorByLevel[agg] ?? 2.8, 14.8);
+      weights.dot = clamp(weights.dot, 8.5, AGG_DOT_CAP_BY_LEVEL[agg] ?? 45.0);
 
       const outcome = weightedRoll(weights);
       const battle = {
@@ -4284,12 +4268,22 @@
         const setRisk10 = getAggressionWicketMultiplier(10, setBatter);
         const tiredRisk10 = getAggressionWicketMultiplier(10, tiredSetBatter);
 
-        add("Level 7 is lowest attacking risk, not zero risk", risk7 >= 0.74 && risk7 < risk8, `L7 ${risk7.toFixed(2)} / L8 ${risk8.toFixed(2)}`);
-        add("Wicket risk rises sharply 8 < 9 < 10", risk8 < risk9 && risk9 < risk10 && risk10 >= 2.25, `L8 ${risk8.toFixed(2)} / L9 ${risk9.toFixed(2)} / L10 ${risk10.toFixed(2)}`);
-        add("Set batter reduces level 10 but not immune", setRisk10 < risk10 && setRisk10 >= 2.25, `new ${risk10.toFixed(2)} / set ${setRisk10.toFixed(2)}`);
+        const risk0 = getAggressionWicketMultiplier(0, newBatter);
+        const risk1 = getAggressionWicketMultiplier(1, newBatter);
+        const risk2 = getAggressionWicketMultiplier(2, newBatter);
+        const risk3 = getAggressionWicketMultiplier(3, newBatter);
+        const risk4 = getAggressionWicketMultiplier(4, newBatter);
+        const risk5 = getAggressionWicketMultiplier(5, newBatter);
+        const risk6 = getAggressionWicketMultiplier(6, newBatter);
+        const risks = [risk0, risk1, risk2, risk3, risk4, risk5, risk6, risk7, risk8, risk9, risk10];
+        add("Wicket risk is monotonic 0-10", risks.every((risk, i) => i === 0 || risk > risks[i - 1]), risks.map(r => r.toFixed(2)).join(" / "));
+        add("Attack risk rises sharply 8 < 9 < 10", risk8 < risk9 && risk9 < risk10 && risk10 >= 2.75, `L8 ${risk8.toFixed(2)} / L9 ${risk9.toFixed(2)} / L10 ${risk10.toFixed(2)}`);
+        add("Set batter reduces level 10 but not immune", setRisk10 < risk10 && setRisk10 >= AGG_WICKET_FLOOR_BY_LEVEL[10], `new ${risk10.toFixed(2)} / set ${setRisk10.toFixed(2)}`);
         add("Fatigue pushes level 10 risk back up", tiredRisk10 > setRisk10, `set ${setRisk10.toFixed(2)} / tired ${tiredRisk10.toFixed(2)}`);
         add("Level 10 has true wicket-weight floor", AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL[10] >= 12, AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL[10]);
-        add("Level 9/10 wicket cap allows collapse", AGG_WICKET_WEIGHT_CAP_BY_LEVEL[9] >= 20 && AGG_WICKET_WEIGHT_CAP_BY_LEVEL[10] >= 24, `${AGG_WICKET_WEIGHT_CAP_BY_LEVEL[9]} / ${AGG_WICKET_WEIGHT_CAP_BY_LEVEL[10]}`);
+        add("Level 9/10 wicket cap allows collapse", AGG_WICKET_WEIGHT_CAP_BY_LEVEL[9] >= 21 && AGG_WICKET_WEIGHT_CAP_BY_LEVEL[10] >= 27, `${AGG_WICKET_WEIGHT_CAP_BY_LEVEL[9]} / ${AGG_WICKET_WEIGHT_CAP_BY_LEVEL[10]}`);
+        add("Tempo is slower at 0 than 5 than 8", AGG_RUN_TEMPO_BY_LEVEL[0] < AGG_RUN_TEMPO_BY_LEVEL[5] && AGG_RUN_TEMPO_BY_LEVEL[5] < AGG_RUN_TEMPO_BY_LEVEL[8], `${AGG_RUN_TEMPO_BY_LEVEL[0]} / ${AGG_RUN_TEMPO_BY_LEVEL[5]} / ${AGG_RUN_TEMPO_BY_LEVEL[8]}`);
+        add("Dot tempo falls as aggression rises", AGG_DOT_TEMPO_BY_LEVEL[0] > AGG_DOT_TEMPO_BY_LEVEL[5] && AGG_DOT_TEMPO_BY_LEVEL[5] > AGG_DOT_TEMPO_BY_LEVEL[8], `${AGG_DOT_TEMPO_BY_LEVEL[0]} / ${AGG_DOT_TEMPO_BY_LEVEL[5]} / ${AGG_DOT_TEMPO_BY_LEVEL[8]}`);
       } catch (error) {
         add("Aggression debug test runner crashed", false, error?.message || String(error));
       }
@@ -4319,13 +4313,13 @@
 
       const canRestore =
         saved &&
-        ["t20-skill-v3-aggression-matrix-test", "t20-skill-v3-ultra-aggression-risk", "t20-skill-v3-all-format-aggression-pill", "t20-skill-v3-scoreboard-hub-hotfix", "t20-skill-v3-scoreboard-hub", "t20-skill-v3-two-color-prediction-bar", "t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
+        ["t20-skill-v3-equal-skill-no-governor", "t20-skill-v3-equal-skill-aggression-test", "t20-skill-v3-ultra-aggression-risk", "t20-skill-v3-all-format-aggression-pill", "t20-skill-v3-scoreboard-hub-hotfix", "t20-skill-v3-scoreboard-hub", "t20-skill-v3-two-color-prediction-bar", "t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
         saved.matchIdentity === currentIdentity &&
         saved.phase !== "completed";
 
       matchState = canRestore ? saved : createInitialMatchState(currentMatchCache);
       hydrateScoreboardData(matchState);
-      matchState.version = "t20-skill-v3-aggression-matrix-test";
+      matchState.version = "t20-skill-v3-equal-skill-no-governor";
       persist();
       render();
       runAggressionDebugTests(false);
@@ -4371,7 +4365,7 @@
       const first = getStressFirstInningsInfo(currentMatch, teams);
 
       const state = {
-        version: "t20-skill-v3-aggression-matrix-test",
+        version: "t20-skill-v3-equal-skill-no-governor",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -4553,6 +4547,94 @@
       return { runs: Number(inn?.runs || 0), wickets: Number(inn?.wickets || 0) };
     }
 
+    function buildEqualSkillAttributes() {
+      const bat = 68;
+      const bowl = 68;
+      const field = 66;
+      return {
+        batting: {
+          technique: bat,
+          timing: bat,
+          footwork: bat,
+          placement: bat,
+          range360: bat,
+          defensiveShots: bat,
+          neutralShots: bat,
+          attackingShots: bat,
+          vsPace: bat,
+          vsSpin: bat,
+          creativity: bat
+        },
+        bowling: {
+          accuracy: bowl,
+          swing: bowl,
+          seam: bowl,
+          pace: bowl,
+          spin: bowl,
+          turn: bowl,
+          variations: bowl,
+          yorker: bowl,
+          bouncer: bowl
+        },
+        fielding: {
+          catching: field,
+          reflexes: field,
+          groundFielding: field,
+          throwPower: field,
+          throwAccuracy: field
+        },
+        physical: {
+          stamina: 68,
+          fitness: 68
+        },
+        mental: {
+          temperament: 68,
+          judgement: 68,
+          leadership: 60
+        },
+        overall: {
+          batting_overall: bat,
+          bowling_overall: bowl,
+          fielding_overall: field
+        }
+      };
+    }
+
+    function createEqualSkillPlayer(index, teamCode) {
+      const isSpin = index % 3 === 0;
+      return {
+        id: `${teamCode}_eq_${index}`,
+        name: `${teamCode} Equal ${index}`,
+        fullName: `${teamCode} Equal Player ${index}`,
+        role: index <= 5 ? "batting all-rounder" : "bowling all-rounder",
+        battingHand: index % 2 === 0 ? "left hand bat" : "right hand bat",
+        bowlingHand: index % 2 === 0 ? "left arm" : "right arm",
+        bowlingType: isSpin ? "spin" : "pace",
+        bowlingStyle: isSpin ? "right arm off spin" : "right arm fast medium",
+        attributes: buildEqualSkillAttributes()
+      };
+    }
+
+    function createEqualSkillCurrentMatch(baseMatch = {}) {
+      const userSquad = Array.from({ length: 11 }, (_, i) => createEqualSkillPlayer(i + 1, "EQ-A"));
+      const computerSquad = Array.from({ length: 11 }, (_, i) => createEqualSkillPlayer(i + 1, "EQ-B"));
+      return {
+        ...baseMatch,
+        title: "Equal Skill A vs Equal Skill B",
+        userTeam: "Equal Skill A",
+        computerTeam: "Equal Skill B",
+        teamA: "Equal Skill A",
+        teamB: "Equal Skill B",
+        selectedUserXI: userSquad,
+        selectedComputerXI: computerSquad,
+        userPlayingXI: userSquad,
+        computerPlayingXI: computerSquad,
+        userSquad,
+        computerSquad,
+        toss: null
+      };
+    }
+
     function runOneAggressionLevelMatch(currentMatch, level) {
       isStressTesting = true;
       try {
@@ -4607,13 +4689,21 @@
 
     function scoreAggressionLevelHealth(row, previousRow = null) {
       const notes = [];
-      if (row.level === 7 && previousRow && row.avgWickets > previousRow.avgWickets + 0.9) notes.push("L7 too dangerous vs L6");
-      if (row.level === 8 && previousRow && row.avgWickets <= previousRow.avgWickets) notes.push("L8 should be riskier than L7");
-      if (row.level === 9 && row.avgWickets < 5.5) notes.push("L9 may be too safe");
-      if (row.level === 10 && row.avgWickets < 6.8) notes.push("L10 too safe");
-      if (row.level === 10 && row.allOutPct < 25) notes.push("L10 all-out rate low");
-      if (row.level <= 3 && row.avgRpo > 6.2) notes.push("defensive levels scoring too fast");
-      if (row.level >= 8 && row.avgRpo < 6.0 && row.avgWickets < 7) notes.push("attack not rewarding enough");
+      const rpoGap = Number(row.avgRpo || 0) - Number(row.targetRpo || 0);
+      const tolerance = row.level <= 3 ? 0.7 : row.level <= 8 ? 0.8 : 1.2;
+
+      if (previousRow && row.avgWickets + 0.15 < previousRow.avgWickets) {
+        notes.push(`wkts broke pattern vs L${previousRow.level}`);
+      }
+      if (previousRow && row.avgWickets < previousRow.avgWickets + 0.15 && row.level >= 4) {
+        notes.push(`wkts too flat vs L${previousRow.level}`);
+      }
+      if (Math.abs(rpoGap) > tolerance) {
+        notes.push(`RPO off target by ${rpoGap.toFixed(1)}`);
+      }
+      if (row.level <= 3 && row.avgRpo > 4.2) notes.push("defensive levels scoring too fast");
+      if (row.level >= 8 && row.avgWickets < 5.0) notes.push("attack levels too safe");
+      if (row.level === 10 && row.allOutPct < 35) notes.push("L10 all-out rate low");
       return notes.length ? `⚠️ ${notes.join("; ")}` : "OK";
     }
 
@@ -4649,16 +4739,19 @@
       return row;
     }
 
-    function runAggressionMatrixTest(matchesPerLevel = 50) {
+    function runAggressionMatrixTest(matchesPerLevel = 50, options = {}) {
+      const equalSkill = !!options.equalSkill;
       const modal = document.getElementById("stressTestModal");
       const output = document.getElementById("stressSummary");
+      const modeLabel = equalSkill ? "equal-skill aggression matrix" : "real-squad aggression matrix";
       if (modal) modal.classList.remove("hidden");
-      if (output) output.innerHTML = `<p class="stress-note">Running aggression matrix: 11 levels × ${matchesPerLevel} silent matches. This may take a few seconds...</p>`;
+      if (output) output.innerHTML = `<p class="stress-note">Running ${modeLabel}: 11 levels × ${matchesPerLevel} silent matches. This may take a few seconds...</p>`;
 
       setTimeout(() => {
         const savedState = matchState ? JSON.stringify(matchState) : null;
         const savedCache = currentMatchCache;
-        const currentMatch = currentMatchCache || loadCurrentMatch();
+        const baseMatch = currentMatchCache || loadCurrentMatch();
+        const currentMatch = equalSkill ? createEqualSkillCurrentMatch(baseMatch) : baseMatch;
         const matrixRows = [];
         const detailRows = [];
 
@@ -4666,29 +4759,35 @@
           const results = [];
           for (let i = 0; i < matchesPerLevel; i += 1) {
             const result = runOneAggressionLevelMatch(currentMatch, level);
+            result.testMode = equalSkill ? "equalSkill" : "realSquad";
             results.push(result);
             detailRows.push(result);
           }
           matrixRows.push(summarizeAggressionLevel(level, results, matrixRows[matrixRows.length - 1] || null));
         }
 
-        latestAggressionMatrixResults = { summary: matrixRows, details: detailRows, matchesPerLevel };
+        latestAggressionMatrixResults = { summary: matrixRows, details: detailRows, matchesPerLevel, equalSkill };
         isStressTesting = false;
         matchState = savedState ? JSON.parse(savedState) : null;
         currentMatchCache = savedCache;
-        renderAggressionMatrixResults(matrixRows, matchesPerLevel);
+        renderAggressionMatrixResults(matrixRows, matchesPerLevel, { equalSkill });
         render();
       }, 30);
     }
 
-    function renderAggressionMatrixResults(rows, matchesPerLevel) {
+    function renderAggressionMatrixResults(rows, matchesPerLevel, options = {}) {
       const output = document.getElementById("stressSummary");
       if (!output) return;
       const format = n => Number(n || 0).toFixed(1);
       const pctText = n => `${Number(n || 0).toFixed(1)}%`;
+      const modeLabel = options.equalSkill ? "Equal Skill" : "Real Squad";
+      const modeNote = options.equalSkill
+        ? "Equal Skill uses two neutral cloned XIs with the same batting, bowling, fielding, mental, and physical ratings. Use this to judge the aggression curve without team-strength noise."
+        : "Real Squad uses your selected teams and real attributes. Use this to judge actual gameplay behavior.";
       const trend = rows.map(r => `L${r.level}: ${format(r.avgRpo)} RPO / ${format(r.avgWickets)} wkts`).join(" • ");
       output.innerHTML = `
         <div class="stress-grid">
+          <div class="stress-card"><span>Test Mode</span><b>${modeLabel}</b></div>
           <div class="stress-card"><span>Levels Tested</span><b>0-10</b></div>
           <div class="stress-card"><span>Matches / Level</span><b>${matchesPerLevel}</b></div>
           <div class="stress-card"><span>Total Matches</span><b>${matchesPerLevel * 11}</b></div>
@@ -4721,6 +4820,7 @@
             `).join("")}
           </tbody>
         </table>
+        <p class="stress-note"><strong>Mode:</strong> ${modeNote}</p>
         <p class="stress-note"><strong>How to read this:</strong> Target RPO is the aggression intent curve, not a guaranteed score. Level 10 should show high wickets/all-outs and may have lower actual RPO if collapses happen. Level 7 should be the lowest-risk attacking gear, but not a free survival mode.</p>
         <p class="stress-note"><strong>Trend:</strong> ${trend}</p>
       `;
