@@ -1655,6 +1655,7 @@
         <div class="score-micro-row">
           <span>CRR: <b id="runRate">0.00</b></span>
           <span id="rrrWrap" style="display: none;">RRR: <b id="requiredRate">—</b></span>
+          <span id="chasePressureWrap" class="chase-pressure-pill calm" style="display: none;">Pressure: <b id="chasePressureBox">—</b></span>
           <span id="targetPill">Live prediction</span>
         </div>
       </div>
@@ -1997,26 +1998,21 @@
   <div id="stressTestModal" class="player-option-modal hidden">
     <div class="player-option-box" style="width:min(880px,94vw)">
       <button class="player-option-close" onclick="closeStressTestModal()">×</button>
-      <h2>T20 Engine Stress Test + Aggression Matrix</h2>
-      <p>Runs silent AI-vs-AI simulations using the same attribute-vs-attribute ball engine. Your live match is restored after testing.</p>
-      <div class="stress-actions">
+      <h2>T20 Balance Test Center</h2>
+      <p>Only the useful balancing tests are shown here. Your live match is restored after every test.</p>
+      <div class="stress-actions compact-stress-actions">
         <button onclick="runStressTest(50)">Run 50</button>
         <button onclick="runStressTest(200)">Run 200</button>
         <button onclick="runStressTest(1000)">Run 1000</button>
-        <button onclick="runAggressionMatrixTest(50)">Real Squad 50 / Level</button>
-        <button class="secondary" onclick="runAggressionMatrixTest(100)">Real Squad 100 / Level</button>
-        <button class="secondary" onclick="runAggressionMatrixTest(100, { equalSkill: true })">Equal Skill 100 / Level</button>
-        <button class="secondary" onclick="runOutcomeWeightProbe(5000)">Weight Probe 5k Balls/Phase</button>
-        <button class="secondary" onclick="runOutcomeWeightProbe(5000, { equalSkill: true })">Equal Weight Probe 5k</button>
         <button class="secondary" onclick="runEqualBellCurveBalanceTest(1000)">Equal Bell Curve 1000</button>
         <button class="secondary" onclick="runEqualBellCurveBalanceTest(300)">Quick Bell 300</button>
-        <button class="secondary" onclick="runAIAggressionPlanTest()">AI Plan Test</button>
+        <button class="secondary" onclick="runAggressionMatrixTest(100)">Real Squad 100 / Level</button>
+        <button class="secondary" onclick="runOutcomeWeightProbe(5000)">Weight Probe 5k</button>
+        <button class="secondary" onclick="runAIChaseModeCoverageTest(360)">AI Chase Mode Test</button>
         <button class="secondary" onclick="downloadOutcomeWeightProbeCSV()">Download Weight CSV</button>
-        <button class="secondary" onclick="downloadStressSummaryCSV()">Download Summary CSV</button>
-        <button class="secondary" onclick="downloadStressCSVChunks()">Download Detail CSV Chunks</button>
       </div>
       <div id="stressSummary" class="stress-output">
-        <p class="stress-note">Run a normal stress test, aggression matrix, weight probe, AI Plan Test, or Equal Bell Curve test. The Equal Bell Curve test checks whether equal teams average 170-185, lose 6-8 wickets, split wins around 50/50, and produce a bell-shaped score distribution without forcing collapses into par scores.</p>
+        <p class="stress-note">Use Run 50/200/1000 for your original quick stress checks. Use Equal Bell Curve as the main balance test, Real Squad 100 / Level for actual teams, Weight Probe for outcome-shape debugging, and AI Chase Mode Test to confirm the chase AI is not just defaulting to RRR.</p>
       </div>
     </div>
   </div>
@@ -2705,15 +2701,31 @@
       },
       RATE_CHASE: {
         name: "Rate-Control Chase",
-        description: "Tracks required rate and adjusts aggression every ball."
+        description: "Keeps the chase near the asking rate without overusing level 10."
+      },
+      POWER_PUNCH_CHASE: {
+        name: "Power Punch Chase",
+        description: "Uses the Powerplay to cut down a big chase, then settles if wickets fall."
+      },
+      SAVE_FOR_DEATH_CHASE: {
+        name: "Save for Death Chase",
+        description: "Keeps wickets and accepts a slightly higher RRR so the final 5 overs can launch."
+      },
+      SAVE_WICKETS_CHASE: {
+        name: "Save Wickets Chase",
+        description: "Protects wickets in low/moderate chases and avoids unnecessary risk."
+      },
+      EARLY_ATTACK_CHASE: {
+        name: "Early Attack Chase",
+        description: "Attacks the first 6-8 overs when the target is high but not impossible."
       },
       WICKET_CHASE: {
-        name: "Wicket-Preserve Chase",
-        description: "Protects wickets until the asking rate demands attack."
+        name: "Save Wickets Chase",
+        description: "Legacy alias for wicket-preserve chase."
       },
       POWER_CHASE: {
-        name: "Power Chase",
-        description: "Attacks early when the target is high."
+        name: "Power Punch Chase",
+        description: "Legacy alias for power chase."
       },
       DEATH_CHARGE: {
         name: "Death Charge Chase",
@@ -2787,11 +2799,16 @@
       const battingPower = averageSkill(battingXI || [], p => battingSkill(p).boundary + battingSkill(p).six);
       const battingControl = averageSkill(battingXI || [], p => battingSkill(p).defense + battingSkill(p).rotation);
       const bowlingThreat = averageSkill(rankBowlers(bowlingXI || []).slice(0, 5), p => bowlingSkill(p).threat);
+      const topOrderPower = averageSkill((battingXI || []).slice(0, 3), p => battingSkill(p).boundary + battingSkill(p).six);
+      const middleDepth = averageSkill((battingXI || []).slice(3, 7), p => battingSkill(p).defense + battingSkill(p).rotation + battingSkill(p).boundary * 0.35);
 
       if (target !== null && target !== undefined) {
         const requiredRate = target / 20;
-        if (requiredRate >= 9.8 && battingPower >= 112) return "POWER_CHASE";
-        if (requiredRate <= 7.4 && battingControl >= 112) return "WICKET_CHASE";
+
+        if (requiredRate <= 7.2 && battingControl >= 106) return "SAVE_WICKETS_CHASE";
+        if (requiredRate <= 8.4 && middleDepth >= 105) return "SAVE_FOR_DEATH_CHASE";
+        if (requiredRate >= 10.3 && topOrderPower >= 112) return "POWER_PUNCH_CHASE";
+        if (requiredRate >= 9.1 && topOrderPower >= 104) return "EARLY_ATTACK_CHASE";
         if (requiredRate >= 8.8) return "DEATH_CHARGE";
         return "RATE_CHASE";
       }
@@ -2845,6 +2862,88 @@
       const ballsLeft = Math.max(1, matchState.maxBalls - inn.balls);
       const runsNeeded = Math.max(0, inn.target - inn.runs);
       return runsNeeded / (ballsLeft / 6);
+    }
+
+
+    function getChasePressureInfo(inn) {
+      if (!inn || !inn.target) {
+        return { score: 0, label: "—", className: "calm", requiredRR: null, note: "No chase" };
+      }
+
+      const ballsLeft = Math.max(1, (matchState?.maxBalls || 120) - Number(inn.balls || 0));
+      const ballsBowled = Number(inn.balls || 0);
+      const runsNeeded = Math.max(0, Number(inn.target || 0) - Number(inn.runs || 0));
+      const wicketsLeft = Math.max(0, 10 - Number(inn.wickets || 0));
+      const requiredRR = getRequiredRate(inn) ?? 0;
+      const currentRR = ballsBowled > 0 ? (Number(inn.runs || 0) / ballsBowled) * 6 : 0;
+
+      const ratePressure = clamp((requiredRR - 7.2) * 7.5, 0, 42);
+      const timePressure = ballsLeft <= 6 ? 28 : ballsLeft <= 12 ? 20 : ballsLeft <= 24 ? 12 : ballsLeft <= 36 ? 6 : 0;
+      const wicketPressure = wicketsLeft <= 2 ? 24 : wicketsLeft <= 4 ? 15 : wicketsLeft <= 6 ? 8 : 0;
+      const fallingBehind = ballsBowled >= 24 ? clamp((requiredRR - currentRR) * 3.25, -8, 18) : 0;
+      const finishingCalm = runsNeeded <= 24 && ballsLeft >= 24 ? -12 : runsNeeded <= 18 && ballsLeft >= 18 ? -10 : 0;
+
+      const score = clamp(Math.round(10 + ratePressure + timePressure + wicketPressure + fallingBehind + finishingCalm), 0, 100);
+      let label = "Calm";
+      let className = "calm";
+      if (score >= 82) { label = "Panic"; className = "panic"; }
+      else if (score >= 66) { label = "High"; className = "high"; }
+      else if (score >= 48) { label = "Pressure"; className = "pressure"; }
+      else if (score >= 28) { label = "Building"; className = "building"; }
+
+      return {
+        score,
+        label,
+        className,
+        requiredRR,
+        currentRR,
+        ballsLeft,
+        runsNeeded,
+        wicketsLeft,
+        note: `${label} ${score}/100`
+      };
+    }
+
+    function getChaseModeAdjustment(aiKey, context) {
+      const phase = context.phase;
+      const pressure = Number(context.pressure || 0);
+      const wicketsLeft = Number(context.wicketsLeft || 10);
+      const requiredRR = Number(context.requiredRR || 0);
+      const ballsLeft = Number(context.ballsLeft || 120);
+      const key = aiKey || "RATE_CHASE";
+      let adjustment = 0;
+
+      switch (key) {
+        case "POWER_PUNCH_CHASE":
+        case "POWER_CHASE":
+          adjustment += phase === "Powerplay" ? 0.85 : phase === "Middle" ? 0.10 : 0.25;
+          if (wicketsLeft <= 5 && ballsLeft > 30) adjustment -= 0.55;
+          break;
+        case "SAVE_FOR_DEATH_CHASE":
+          adjustment += phase === "Powerplay" ? -0.85 : phase === "Middle" ? -0.50 : 0.85;
+          if (pressure >= 70 && phase !== "Death") adjustment += 0.35;
+          if (wicketsLeft <= 4) adjustment -= 0.45;
+          break;
+        case "SAVE_WICKETS_CHASE":
+        case "WICKET_CHASE":
+          adjustment += phase === "Powerplay" ? -1.05 : phase === "Middle" ? -0.70 : 0.20;
+          if (pressure >= 75) adjustment += 0.45;
+          if (wicketsLeft <= 4 && ballsLeft > 18) adjustment -= 0.65;
+          break;
+        case "EARLY_ATTACK_CHASE":
+          adjustment += phase === "Powerplay" ? 1.05 : phase === "Middle" ? -0.15 : 0.30;
+          if (wicketsLeft <= 5 && ballsLeft > 36) adjustment -= 0.60;
+          break;
+        case "DEATH_CHARGE":
+          adjustment += phase === "Powerplay" ? -0.35 : phase === "Middle" ? -0.25 : 1.10;
+          if (requiredRR >= 11.5 && phase === "Middle") adjustment += 0.25;
+          break;
+        case "RATE_CHASE":
+        default:
+          adjustment += pressure >= 70 ? 0.20 : pressure <= 25 ? -0.20 : 0;
+          break;
+      }
+      return adjustment;
     }
 
 
@@ -2953,46 +3052,53 @@
     function getChaseDesiredRpo(inn, ai, batterStat, bat) {
       const phase = getPhase(inn.balls);
       const ballsLeft = Math.max(1, (matchState?.maxBalls || 120) - Number(inn.balls || 0));
+      const ballsBowled = Number(inn.balls || 0);
       const wickets = Number(inn.wickets || 0);
       const wicketsLeft = Math.max(0, 10 - wickets);
       const requiredRR = getRequiredRate(inn) ?? 7.6;
       const need = Math.max(0, Number(inn.target || 0) - Number(inn.runs || 0));
+      const chasePressure = getChasePressureInfo(inn);
       let desired = requiredRR;
 
-      // New meter chase logic: required rate is the anchor, phase controls urgency.
-      if (phase === "Powerplay") desired = requiredRR <= 7.2 ? requiredRR - 0.5 : requiredRR + 0.1;
-      if (phase === "Middle") desired = requiredRR <= 7.2 ? requiredRR - 0.2 : requiredRR + 0.35;
-      if (phase === "Death") desired = requiredRR + 0.55;
-      if (ballsLeft <= 24) desired = Math.max(desired, requiredRR + 0.85);
-      if (ballsLeft <= 12) desired = Math.max(desired, requiredRR + 1.35);
-
-      switch (ai?.modelKey) {
-        case "WICKET_CHASE":
-          desired -= ballsLeft > 36 ? 0.8 : 0.25;
-          break;
-        case "POWER_CHASE":
-          desired += phase === "Powerplay" ? 0.65 : 0.25;
-          break;
-        case "DEATH_CHARGE":
-          desired += phase === "Death" ? 0.65 : 0.20;
-          break;
-        case "RATE_CHASE":
-        default:
-          desired += requiredRR > 10.5 ? 0.45 : 0;
-          break;
+      // Base chase behavior: chase AI should feel the RRR, but not solve the chase perfectly.
+      if (phase === "Powerplay") {
+        desired = requiredRR - 0.90 + chasePressure.score * 0.004;
+        if (requiredRR >= 10.2) desired = requiredRR - 0.20 + chasePressure.score * 0.003;
+      } else if (phase === "Middle") {
+        desired = requiredRR - 0.50 + chasePressure.score * 0.005;
+        if (requiredRR >= 10.4) desired = requiredRR - 0.10 + chasePressure.score * 0.004;
+      } else {
+        desired = requiredRR + 0.15 + chasePressure.score * 0.007;
       }
 
-      // Protect wickets only while there is time. In the last 18 balls the required rate wins.
-      if (wicketsLeft <= 3 && ballsLeft > 18) desired -= 1.0;
-      else if (wicketsLeft <= 5 && ballsLeft > 30) desired -= 0.45;
-      if (need <= 18 && ballsLeft >= 18) desired -= 0.9;
-      if (requiredRR >= 12.0) desired += 0.45;
-      if (requiredRR >= 14.0) desired += 0.75;
+      desired += getChaseModeAdjustment(ai?.modelKey, {
+        phase,
+        pressure: chasePressure.score,
+        wicketsLeft,
+        requiredRR,
+        ballsLeft,
+        need
+      });
+
+      // Chasing pressure raises urgency, but low wickets still reduce freedom.
+      desired += clamp((chasePressure.score - 45) / 55, -0.35, 1.20);
+
+      if (ballsLeft <= 24) desired = Math.max(desired, requiredRR + 0.35);
+      if (ballsLeft <= 12) desired = Math.max(desired, requiredRR + 0.85);
+      if (ballsLeft <= 6) desired = Math.max(desired, requiredRR + 1.15);
+
+      if (wicketsLeft <= 3 && ballsLeft > 18) desired -= 1.35;
+      else if (wicketsLeft <= 5 && ballsLeft > 30) desired -= 0.80;
+      else if (wicketsLeft <= 7 && ballsLeft > 60 && ballsBowled < 48) desired -= 0.30;
+
+      // If target is almost done with time in hand, do not keep attacking.
+      if (need <= 18 && ballsLeft >= 18) desired -= 1.20;
+      if (need <= 30 && ballsLeft >= 30) desired -= 0.60;
 
       const pressure = getBatterPressureProfile(batterStat);
-      desired += getBatterSloggerFactor(bat) * 0.55;
-      desired += pressure.settled * 0.55;
-      desired -= pressure.tired * 0.55;
+      desired += getBatterSloggerFactor(bat) * 0.35;
+      desired += pressure.settled * 0.30;
+      desired -= pressure.tired * 0.65;
 
       return clamp(desired, 1.6, 13.5);
     }
@@ -3010,14 +3116,24 @@
         if (phase !== "Death" && wickets >= 5) maxLevel = Math.min(maxLevel, 8);
         if (phase === "Powerplay" && wickets >= 3) maxLevel = Math.min(maxLevel, 8);
       } else {
+        const chasePressure = getChasePressureInfo(inn);
         if (requiredRR !== null && requiredRR < 5.0 && ballsLeft > 36) maxLevel = Math.min(maxLevel, 6);
         if (requiredRR !== null && requiredRR < 6.4 && ballsLeft > 48) maxLevel = Math.min(maxLevel, 7);
-        if (requiredRR !== null && requiredRR >= 11.0) minLevel = Math.max(minLevel, 8);
-        if (requiredRR !== null && requiredRR >= 13.0) minLevel = Math.max(minLevel, 9);
+        if (requiredRR !== null && requiredRR < 8.8 && ballsLeft > 72) maxLevel = Math.min(maxLevel, 7);
+        if (requiredRR !== null && requiredRR < 9.5 && ballsLeft > 54 && chasePressure.score < 55) maxLevel = Math.min(maxLevel, 8);
+        if (chasePressure.score >= 70) minLevel = Math.max(minLevel, 7);
+        if (chasePressure.score >= 84) minLevel = Math.max(minLevel, 8);
+        if (requiredRR !== null && requiredRR >= 12.5) minLevel = Math.max(minLevel, 8);
+        if (requiredRR !== null && requiredRR >= 14.5) minLevel = Math.max(minLevel, 9);
       }
 
-      // Level 10 is for true death/required-rate pressure or a set hitter. No casual L10 in middle overs.
-      const canUseTen = phase === "Death" || ballsLeft <= 12 || (requiredRR !== null && requiredRR >= 13.2) || (pressure.settled > 0.82 && getBatterSloggerFactor(bat) > 0.65);
+      // Level 10 is for true death/required-rate pressure. A set hitter alone should
+      // not casually choose L10 in the middle overs during an even chase.
+      const chasePressureForTen = inn.target ? getChasePressureInfo(inn).score : 0;
+      const canUseTen =
+        (phase === "Death" && (requiredRR === null || requiredRR >= 11.4 || ballsLeft <= 12 || chasePressureForTen >= 84)) ||
+        ballsLeft <= 6 ||
+        (requiredRR !== null && requiredRR >= 14.2);
       if (!canUseTen) maxLevel = Math.min(maxLevel, 9);
 
       if (pressure.tired > 0.70 && phase !== "Death") maxLevel = Math.min(maxLevel, 8);
@@ -3461,7 +3577,7 @@
       const bowlingXI = getSelectedXI(currentMatch, first.bowlingSide);
 
       const state = {
-        version: "t20-skill-v3-ai-meter-target-chase",
+        version: "t20-skill-v3-chase-modes-pressure",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -4721,13 +4837,178 @@
 
       matchState = canRestore ? saved : createInitialMatchState(currentMatchCache);
       hydrateScoreboardData(matchState);
-      matchState.version = "t20-skill-v3-outcome-weight-probe";
+      matchState.version = "t20-skill-v3-chase-modes-pressure";
       persist();
       render();
       runAggressionDebugTests(false);
     }
 
 
+
+
+    function runAIChaseModeCoverageTest(sampleCount = 360) {
+      const output = document.getElementById("stressSummary");
+      if (!output) return;
+      const savedState = matchState;
+      const savedCache = currentMatchCache;
+      const savedStress = isStressTesting;
+      isStressTesting = true;
+
+      try {
+        const baseMatch = currentMatchCache || loadCurrentMatch();
+        const testMatch = createEqualSkillCurrentMatch(baseMatch || {});
+        matchState = createStressInitialMatchState(testMatch);
+        forceAIForInnings(matchState.innings[0]);
+        const firstInn = matchState.innings[0];
+        const targetList = [142, 152, 162, 172, 182, 192, 204, 216, 228];
+        const ballMarks = [0, 12, 24, 36, 48, 60, 72, 84, 96, 108];
+        const wicketsList = [0, 1, 2, 3, 4, 5, 6, 7];
+
+        const modeStats = {};
+        const rows = [];
+        let rrrOnlyMatches = 0;
+        let earlyTen = 0;
+        let total = 0;
+        let levelTotal = 0;
+        let pressureTotal = 0;
+
+        function buildChaseInnings(target, balls, wickets, scenarioSeed) {
+          const clone = JSON.parse(JSON.stringify(firstInn));
+          const ballsLeft = Math.max(1, (matchState?.maxBalls || 120) - balls);
+          const parProgress = (target - 1) * (balls / (matchState?.maxBalls || 120));
+          const pressureSwing = ((scenarioSeed % 7) - 3) * 7;
+          const wicketDrag = wickets * 4.2;
+          clone.balls = balls;
+          clone.wickets = wickets;
+          clone.runs = clamp(Math.round(parProgress + pressureSwing - wicketDrag), 0, Math.max(0, target - 1));
+          clone.target = target;
+          clone.battingAI = buildComputerBattingAI({ battingXI: clone.battingXI, bowlingXI: clone.bowlingXI, target });
+          return clone;
+        }
+
+        for (let i = 0; i < sampleCount; i += 1) {
+          const target = targetList[i % targetList.length];
+          const balls = ballMarks[Math.floor(i / targetList.length) % ballMarks.length];
+          const wickets = wicketsList[Math.floor(i / (targetList.length * ballMarks.length)) % wicketsList.length];
+          const inn = buildChaseInnings(target, balls, wickets, i);
+          const key = inn.strikerKey;
+          const batter = getPlayerByKey(inn.battingXI, key) || inn.battingXI?.[0];
+          const bat = battingSkill(batter);
+          const stat = ensureBatterStat(key);
+          stat.balls = Math.min(36, Math.max(0, Math.round(balls / 2)));
+          stat.confidence = clamp(62 + ((i % 9) - 4) * 4 - wickets * 2, 28, 92);
+          stat.fatigue = clamp(balls * 0.34 + wickets * 2, 0, 70);
+
+          const pressure = getChasePressureInfo(inn);
+          const desired = getChaseDesiredRpo(inn, inn.battingAI, stat, bat);
+          const aiLevel = getComputerAggression(inn, key);
+          const rrr = getRequiredRate(inn) || 0;
+          const rrrOnlyLevel = getAggressionLevelForDesiredRpo(rrr, bat, 0, 10);
+          const modeName = inn.battingAI?.modelName || "Unknown";
+          const modeKey = inn.battingAI?.modelKey || "UNKNOWN";
+          const ballsLeft = Math.max(0, (matchState?.maxBalls || 120) - balls);
+          const sameAsRrr = aiLevel === rrrOnlyLevel;
+
+          modeStats[modeKey] ||= { key: modeKey, name: modeName, count: 0, levelTotal: 0, pressureTotal: 0, rrrSame: 0, earlyTen: 0 };
+          modeStats[modeKey].count += 1;
+          modeStats[modeKey].levelTotal += aiLevel;
+          modeStats[modeKey].pressureTotal += pressure.score;
+          if (sameAsRrr) modeStats[modeKey].rrrSame += 1;
+          if (aiLevel === 10 && ballsLeft > 36) modeStats[modeKey].earlyTen += 1;
+
+          if (sameAsRrr) rrrOnlyMatches += 1;
+          if (aiLevel === 10 && ballsLeft > 36) earlyTen += 1;
+          levelTotal += aiLevel;
+          pressureTotal += pressure.score;
+          total += 1;
+
+          if (rows.length < 24) {
+            rows.push({
+              mode: modeName,
+              target,
+              score: `${inn.runs}/${inn.wickets}`,
+              phase: getPhase(balls),
+              ballsLeft,
+              rrr,
+              pressure: pressure.score,
+              desired,
+              aiLevel,
+              rrrOnlyLevel,
+              sameAsRrr
+            });
+          }
+        }
+
+        const modeRows = Object.values(modeStats).sort((a, b) => b.count - a.count);
+        const modeCount = modeRows.length;
+        const rateControlCount = modeRows.find(row => row.key === "RATE_CHASE")?.count || 0;
+        const rateControlPct = total ? (rateControlCount / total) * 100 : 0;
+        const rrrSamePct = total ? (rrrOnlyMatches / total) * 100 : 0;
+        const earlyTenPct = total ? (earlyTen / total) * 100 : 0;
+        const health = [];
+        if (modeCount < 4) health.push("⚠️ fewer than 4 chase modes appeared");
+        if (rateControlPct > 55) health.push("⚠️ Rate-Control is dominating too much");
+        if (rrrSamePct > 70) health.push("⚠️ AI level matches plain RRR too often");
+        if (earlyTenPct > 8) health.push("⚠️ Level 10 appears too early too often");
+        if (!health.length) health.push("OK: chase modes are active and not just RRR default");
+
+        output.innerHTML = `
+          <div class="stress-grid">
+            <div class="stress-card"><span>Test Mode</span><b>AI Chase Mode Coverage</b></div>
+            <div class="stress-card"><span>Scenarios</span><b>${total}</b></div>
+            <div class="stress-card"><span>Modes used</span><b>${modeCount}</b></div>
+            <div class="stress-card"><span>RRR-only match</span><b>${rrrSamePct.toFixed(1)}%</b></div>
+            <div class="stress-card"><span>Avg AI level</span><b>${(levelTotal / Math.max(1, total)).toFixed(1)}</b></div>
+            <div class="stress-card"><span>Avg pressure</span><b>${(pressureTotal / Math.max(1, total)).toFixed(0)}/100</b></div>
+          </div>
+          <table class="stress-table">
+            <thead><tr><th>Mode</th><th>Count</th><th>%</th><th>Avg Level</th><th>Avg Pressure</th><th>Same as RRR</th><th>Early L10</th></tr></thead>
+            <tbody>
+              ${modeRows.map(row => `
+                <tr>
+                  <td>${row.name}</td>
+                  <td>${row.count}</td>
+                  <td>${((row.count / Math.max(1, total)) * 100).toFixed(1)}%</td>
+                  <td>${(row.levelTotal / Math.max(1, row.count)).toFixed(1)}</td>
+                  <td>${(row.pressureTotal / Math.max(1, row.count)).toFixed(0)}</td>
+                  <td>${((row.rrrSame / Math.max(1, row.count)) * 100).toFixed(1)}%</td>
+                  <td>${row.earlyTen}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+          <h3>Sample decisions</h3>
+          <table class="stress-table">
+            <thead><tr><th>Mode</th><th>Target</th><th>Score</th><th>Phase</th><th>Balls Left</th><th>RRR</th><th>Pressure</th><th>Desired</th><th>AI Level</th><th>RRR Level</th></tr></thead>
+            <tbody>
+              ${rows.map(row => `
+                <tr>
+                  <td>${row.mode}</td>
+                  <td>${row.target}</td>
+                  <td>${row.score}</td>
+                  <td>${row.phase}</td>
+                  <td>${row.ballsLeft}</td>
+                  <td>${row.rrr.toFixed(2)}</td>
+                  <td>${row.pressure}/100</td>
+                  <td>${row.desired.toFixed(2)}</td>
+                  <td>${row.aiLevel}</td>
+                  <td>${row.rrrOnlyLevel}${row.sameAsRrr ? " =" : ""}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+          <p class="stress-note"><b>Check:</b> ${health.join(" • ")}</p>
+        `;
+      } catch (error) {
+        output.innerHTML = `<p class="stress-note">AI Chase Mode Test failed: ${error?.message || String(error)}</p>`;
+        console.error(error);
+      } finally {
+        matchState = savedState;
+        currentMatchCache = savedCache;
+        isStressTesting = savedStress;
+        render();
+      }
+    }
 
     function runAIAggressionPlanTest() {
       const output = document.getElementById("stressSummary");
@@ -4772,7 +5053,7 @@
           stat.fatigue = 12;
           const desired = getFirstInningsDesiredRpo(inn, inn.battingAI, stat, bat);
           const level = getComputerAggression(inn, key);
-          rows.push({ mode: "Set target", scenario: row.name, phase: getPhase(row.balls), need: "—", desired, level, label: aggressionLabel(level, bat), targetRpo: getAggressionRpo(level, bat) });
+          rows.push({ mode: "Set target", scenario: row.name, phase: getPhase(row.balls), pressure: "—", need: "—", desired, level, label: aggressionLabel(level, bat), targetRpo: getAggressionRpo(level, bat) });
         });
 
         const chaseScenarios = [
@@ -4793,7 +5074,7 @@
           stat.fatigue = row.balls >= 90 ? 36 : 18;
           const desired = getChaseDesiredRpo(inn, inn.battingAI, stat, bat);
           const level = getComputerAggression(inn, key);
-          rows.push({ mode: "Chase", scenario: row.name, phase: getPhase(row.balls), need: getRequiredRate(inn)?.toFixed(2), desired, level, label: aggressionLabel(level, bat), targetRpo: getAggressionRpo(level, bat) });
+          rows.push({ mode: `Chase: ${inn.battingAI?.modelName || "AI"}`, scenario: row.name, phase: getPhase(row.balls), pressure: getChasePressureInfo(inn).note, need: getRequiredRate(inn)?.toFixed(2), desired, level, label: aggressionLabel(level, bat), targetRpo: getAggressionRpo(level, bat) });
         });
 
         output.innerHTML = `
@@ -4801,11 +5082,11 @@
             <div class="stress-card"><span>AI test</span><b>New 0-10 meter</b></div>
             <div class="stress-card"><span>Rows</span><b>${rows.length}</b></div>
             <div class="stress-card"><span>First innings</span><b>Par-aware</b></div>
-            <div class="stress-card"><span>Chase</span><b>RRR-aware</b></div>
+            <div class="stress-card"><span>Chase</span><b>Modes + Pressure</b></div>
           </div>
           <table class="stress-table">
             <thead>
-              <tr><th>Mode</th><th>Scenario</th><th>Phase</th><th>RRR</th><th>Desired RPO</th><th>Level</th><th>Meter RPO</th><th>Label</th></tr>
+              <tr><th>Mode</th><th>Scenario</th><th>Phase</th><th>Pressure</th><th>RRR</th><th>Desired RPO</th><th>Level</th><th>Meter RPO</th><th>Label</th></tr>
             </thead>
             <tbody>
               ${rows.map(row => `
@@ -4813,6 +5094,7 @@
                   <td>${row.mode}</td>
                   <td>${row.scenario}</td>
                   <td>${row.phase}</td>
+                  <td>${row.pressure}</td>
                   <td>${row.need}</td>
                   <td>${row.desired.toFixed(2)}</td>
                   <td>${row.level}</td>
@@ -5523,6 +5805,10 @@
         avgScore,
         avgWickets,
         avgRpo,
+        avgFirstScore: avgValue(results, r => r.firstRuns),
+        avgSecondScore: avgValue(results, r => r.secondRuns),
+        avgFirstWickets: avgValue(results, r => r.firstWickets),
+        avgSecondWickets: avgValue(results, r => r.secondWickets),
         medianScore: medianValue(scores),
         scoreStdDev: numberStdDev(scores),
         teamAWinPct: teamAWins / Math.max(1, results.length) * 100,
@@ -5557,6 +5843,8 @@
             <tr><td>Average wickets lost</td><td>6-8</td><td>${fmt(summary.avgWickets)}</td><td>${summary.avgWickets >= 6 && summary.avgWickets <= 8 ? "OK" : "⚠️"}</td></tr>
             <tr><td>Team A win rate</td><td>44-56%</td><td>${pctFmt(summary.teamAWinPct)}</td><td>${Math.abs(summary.teamAWinPct - 50) <= 6 ? "OK" : "⚠️"}</td></tr>
             <tr><td>Bat-first win rate</td><td>44-56%</td><td>${pctFmt(summary.firstBatWinPct)}</td><td>${Math.abs(summary.firstBatWinPct - 50) <= 6 ? "OK" : "⚠️"}</td></tr>
+            <tr><td>Avg first innings score</td><td>diagnostic</td><td>${fmt(summary.avgFirstScore)} / ${fmt(summary.avgFirstWickets)} wkts</td><td>Info</td></tr>
+            <tr><td>Avg chase innings score</td><td>diagnostic</td><td>${fmt(summary.avgSecondScore)} / ${fmt(summary.avgSecondWickets)} wkts</td><td>Info</td></tr>
             <tr><td>Center score band 160-199</td><td>45%+</td><td>${pctFmt(summary.centerScorePct)}</td><td>${summary.centerScorePct >= 45 ? "OK" : "⚠️"}</td></tr>
             <tr><td>Comfortable 170+ with ≤2 wickets lost</td><td>≤18%</td><td>${pctFmt(summary.comfortable170Pct)}</td><td>${summary.comfortable170Pct <= 18 ? "OK" : "⚠️"}</td></tr>
             <tr><td>Match total 4s</td><td>roughly 20-30</td><td>${fmt(summary.boundaryMatchFours)}</td><td>${summary.boundaryMatchFours >= 20 && summary.boundaryMatchFours <= 30 ? "OK" : "⚠️"}</td></tr>
@@ -6592,6 +6880,13 @@
       const rrr = inn.target ? getRequiredRate(inn) : null;
       if (rrrWrap) rrrWrap.style.display = rrr === null ? "none" : "inline-flex";
       text("requiredRate", rrr === null ? "—" : rrr.toFixed(2));
+      const chasePressureWrap = document.getElementById("chasePressureWrap");
+      const chasePressure = inn.target ? getChasePressureInfo(inn) : null;
+      if (chasePressureWrap) {
+        chasePressureWrap.style.display = chasePressure ? "inline-flex" : "none";
+        chasePressureWrap.className = `chase-pressure-pill ${chasePressure?.className || "calm"}`;
+      }
+      text("chasePressureBox", chasePressure ? `${chasePressure.label} ${chasePressure.score}` : "—");
       text("inningsLabel", matchState.inningsNo === 1 ? "1st Innings" : "2nd Innings");
       text("formatBox", "T20");
       text("phaseBox", getPhase(inn.balls));
