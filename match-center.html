@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#030712" />
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#030712">
   <title>T20 Skill Match Center - Ultra RPO + Current Over</title>
   <style>
     :root {
@@ -1619,18 +1617,18 @@
 
       <div class="teams-vs">
         <div class="team-pill home">
-          <div class="badge" id="teamABadge">A</div>
+          <div class="badge" id="teamABadge">SX</div>
           <div>
-            <strong id="teamAName">Team A</strong>
-            <span id="teamASub">Captain</span>
+            <strong id="teamAName">Skill XI</strong>
+            <span id="teamASub">Imran Shah</span>
           </div>
         </div>
         <span class="vs-label">vs</span>
         <div class="team-pill away">
-          <div class="badge" id="teamBBadge">B</div>
+          <div class="badge" id="teamBBadge">AX</div>
           <div>
-            <strong id="teamBName">Team B</strong>
-            <span id="teamBSub">Captain</span>
+            <strong id="teamBName">Attribute XI</strong>
+            <span id="teamBSub">Vik Rao</span>
           </div>
         </div>
       </div>
@@ -1642,9 +1640,9 @@
 
     <section class="scorebar">
       <div class="score-team-block">
-        <div class="badge score-badge" id="scoreBattingBadge">BAT</div>
+        <div class="badge score-badge" id="scoreBattingBadge">SX</div>
         <div>
-          <div class="score-team-name" id="scoreBattingName">Batting Team</div>
+          <div class="score-team-name" id="scoreBattingName">Skill XI</div>
           <div class="score-subline" id="inningsLabel">1st Innings</div>
         </div>
       </div>
@@ -1656,42 +1654,42 @@
         </div>
         <div class="score-micro-row">
           <span>CRR: <b id="runRate">0.00</b></span>
-          <span id="rrrWrap">RRR: <b id="requiredRate">—</b></span>
+          <span id="rrrWrap" style="display: none;">RRR: <b id="requiredRate">—</b></span>
           <span id="targetPill">Live prediction</span>
         </div>
       </div>
 
       <div class="score-meta-block">
-        <div class="score-bowling-team"><span>Bowling</span><b id="scoreBowlingName">Team</b></div>
+        <div class="score-bowling-team"><span>Bowling</span><b id="scoreBowlingName">Attribute XI</b></div>
         <div class="score-metrics-inline">
           <span><b id="formatBox">T20</b></span>
           <span id="phaseBox">Powerplay</span>
           <span>Partnership <b id="partnershipBox">0 off 0</b></span>
-          <span class="score-current-over" id="scoreCurrentOverWrap" aria-label="Current over outcome">
+          <span class="score-current-over" id="scoreCurrentOverWrap" aria-label="Current over outcome" style="display: none;">
             <em>This over</em>
             <span class="score-over-chip-row" id="scoreCurrentOverBalls"></span>
           </span>
         </div>
       </div>
 
-      <div class="prediction-row" id="predictionPanel">
+      <div class="prediction-row" id="predictionPanel" style="--team-a-color: #38bdf8; --team-b-color: #f6c453;">
         <div class="prediction-tile prediction-main">
           <div class="prediction-topline">
             <span>Prediction</span>
-            <b id="predictionLeader">Even match</b>
+            <b id="predictionLeader">SX 52%</b>
           </div>
           <div class="prediction-winbar" aria-label="Win probability bar">
-            <i id="predictionUserBar" class="prediction-user-fill"></i>
-            <i id="predictionCompBar" class="prediction-comp-fill"></i>
+            <i id="predictionUserBar" class="prediction-user-fill" style="flex-basis: 52%;"></i>
+            <i id="predictionCompBar" class="prediction-comp-fill" style="flex-basis: 48%;"></i>
           </div>
           <div class="prediction-bar-labels">
-            <small id="predictionBarUserLabel">Team A 50%</small>
-            <small id="predictionBarCompLabel">Team B 50%</small>
+            <small id="predictionBarUserLabel">SX 52%</small>
+            <small id="predictionBarCompLabel">AX 48%</small>
           </div>
-          <em id="predictionNote">Live win chance from score and raw attributes</em>
+          <em id="predictionNote">SX projected score</em>
           <div class="prediction-context-inline">
             <span id="predictionContextLabel">Projected</span>
-            <b id="predictionContext">—</b>
+            <b id="predictionContext">157</b>
           </div>
         </div>
       </div>
@@ -1702,19 +1700,19 @@
         <div class="live-card-top"><div class="label">On Strike</div><div class="strike-star">*</div></div>
         <div class="batter-name-line">
           <div class="batter-name-wrap">
-            <h3 id="strikerName">Opening Batter</h3>
-            <span id="strikerSkillChip" class="batter-skill-chip">Skill 0</span>
+            <h3 id="strikerName">Aarav Khan</h3>
+            <span id="strikerSkillChip" class="batter-skill-chip" style="display: inline-flex;">Skill 85</span>
           </div>
           <div class="batter-mini-bars" aria-label="Batter confidence and fatigue">
-            <span class="batter-mini-meter">CONF<i><b id="strikerConfidenceFill" class="confidence-fill"></b></i></span>
-            <span class="batter-mini-meter">FAT<i><b id="strikerFatigueFill" class="fatigue-fill"></b></i></span>
+            <span class="batter-mini-meter">CONF<i><b id="strikerConfidenceFill" class="confidence-fill" title="Confidence 50%" style="width: 50%;"></b></i></span>
+            <span class="batter-mini-meter">FAT<i><b id="strikerFatigueFill" class="fatigue-fill" title="Fatigue 0%" style="width: 0%;"></b></i></span>
           </div>
         </div>
-        <p id="strikerInfo" class="batter-stat-grid">R 0 • B 0 • 4s 0 • 6s 0 • SR 0.00</p>
-        <div class="batter-intent-control" data-slot="striker">
-          <div class="intent-head"><span>Aggression</span><b id="strikerAggressionLabel">T20 8 • RPO 8.5</b></div>
+        <p id="strikerInfo" class="batter-stat-grid"><span>R<b>0</b></span><span>B<b>0</b></span><span>4s<b>0</b></span><span>6s<b>0</b></span><span>SR<b>0.00</b></span></p>
+        <div class="batter-intent-control" data-slot="striker" aria-hidden="false">
+          <div class="intent-head"><span>Aggression</span><b id="strikerAggressionLabel">Aggressive T20 8 • RPO 8.8</b></div>
           <div class="aggression-scale"><span>0</span><span>10+</span></div>
-          <div id="strikerAggressionMeter" class="compact-intents aggression-pill" data-slot="striker" data-value="8" data-zone="aggressive" role="slider" tabindex="0" aria-label="Striker aggression" aria-valuemin="0" aria-valuemax="10" aria-valuenow="8" onpointerdown="setBatterAggressionFromMeter(event, 'striker')" onkeydown="handleAggressionMeterKey(event, 'striker')">
+          <div id="strikerAggressionMeter" class="compact-intents aggression-pill" data-slot="striker" data-value="8" data-zone="aggressive" role="slider" tabindex="0" aria-label="Striker aggression" aria-valuemin="0" aria-valuemax="10" aria-valuenow="8" onpointerdown="setBatterAggressionFromMeter(event, 'striker')" onkeydown="handleAggressionMeterKey(event, 'striker')" aria-valuetext="Aggressive T20 8 • RPO 8.5" title="Tap or drag across the pill to choose 0-10+ aggression." style="--agg-pct: 80%;">
             <span class="aggression-pill-fill"></span>
             <span class="aggression-pill-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
             <span class="aggression-pill-gloss"></span>
@@ -1727,19 +1725,19 @@
         <div class="live-card-top"><div class="label">Non-Striker</div></div>
         <div class="batter-name-line">
           <div class="batter-name-wrap">
-            <h3 id="nonStrikerName">Opening Batter</h3>
-            <span id="nonStrikerSkillChip" class="batter-skill-chip">Skill 0</span>
+            <h3 id="nonStrikerName">Rayan Malik</h3>
+            <span id="nonStrikerSkillChip" class="batter-skill-chip" style="display: inline-flex;">Skill 80</span>
           </div>
           <div class="batter-mini-bars" aria-label="Batter confidence and fatigue">
-            <span class="batter-mini-meter">CONF<i><b id="nonStrikerConfidenceFill" class="confidence-fill"></b></i></span>
-            <span class="batter-mini-meter">FAT<i><b id="nonStrikerFatigueFill" class="fatigue-fill"></b></i></span>
+            <span class="batter-mini-meter">CONF<i><b id="nonStrikerConfidenceFill" class="confidence-fill" title="Confidence 50%" style="width: 50%;"></b></i></span>
+            <span class="batter-mini-meter">FAT<i><b id="nonStrikerFatigueFill" class="fatigue-fill" title="Fatigue 0%" style="width: 0%;"></b></i></span>
           </div>
         </div>
-        <p id="nonStrikerInfo" class="batter-stat-grid">R 0 • B 0 • 4s 0 • 6s 0 • SR 0.00</p>
-        <div class="batter-intent-control" data-slot="nonStriker">
-          <div class="intent-head"><span>Aggression</span><b id="nonStrikerAggressionLabel">T20 8 • RPO 8.5</b></div>
+        <p id="nonStrikerInfo" class="batter-stat-grid"><span>R<b>0</b></span><span>B<b>0</b></span><span>4s<b>0</b></span><span>6s<b>0</b></span><span>SR<b>0.00</b></span></p>
+        <div class="batter-intent-control" data-slot="nonStriker" aria-hidden="false">
+          <div class="intent-head"><span>Aggression</span><b id="nonStrikerAggressionLabel">Aggressive T20 8 • RPO 8.8</b></div>
           <div class="aggression-scale"><span>0</span><span>10+</span></div>
-          <div id="nonStrikerAggressionMeter" class="compact-intents aggression-pill" data-slot="nonStriker" data-value="8" data-zone="aggressive" role="slider" tabindex="0" aria-label="Non-striker aggression" aria-valuemin="0" aria-valuemax="10" aria-valuenow="8" onpointerdown="setBatterAggressionFromMeter(event, 'nonStriker')" onkeydown="handleAggressionMeterKey(event, 'nonStriker')">
+          <div id="nonStrikerAggressionMeter" class="compact-intents aggression-pill" data-slot="nonStriker" data-value="8" data-zone="aggressive" role="slider" tabindex="0" aria-label="Non-striker aggression" aria-valuemin="0" aria-valuemax="10" aria-valuenow="8" onpointerdown="setBatterAggressionFromMeter(event, 'nonStriker')" onkeydown="handleAggressionMeterKey(event, 'nonStriker')" aria-valuetext="Aggressive T20 8 • RPO 8.5" title="Tap or drag across the pill to choose 0-10+ aggression." style="--agg-pct: 80%;">
             <span class="aggression-pill-fill"></span>
             <span class="aggression-pill-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
             <span class="aggression-pill-gloss"></span>
@@ -1752,31 +1750,31 @@
         <div class="bowler-card-main">
           <div>
             <span>Current Bowler</span>
-            <strong id="currentBowlerName">Bowler</strong>
-            <span id="currentBowlerFigures">0.0-0-0</span>
+            <strong id="currentBowlerName">Rishi Kapoor</strong>
+            <span id="currentBowlerFigures">O 0.0 • R 0 • W 0 • Eco 0.00 • Skill 80</span>
           </div>
-          <button id="changeBowlerBtn" class="secondary small-action-btn" type="button" onclick="openBowlerChangeModal()">Change</button>
+          <button id="changeBowlerBtn" class="secondary small-action-btn" type="button" onclick="openBowlerChangeModal()" disabled="" title="Computer is bowling. Bowler changes are controlled by AI.">AI</button>
         </div>
-        <div class="bowler-meter" title="Bowler stamina"><div class="bowler-meter-fill" id="currentBowlerStaminaFill"></div></div>
+        <div class="bowler-meter" title="Bowler stamina"><div class="bowler-meter-fill" id="currentBowlerStaminaFill" style="width: 83.5%;"></div></div>
         <div class="bowler-small-row">
-          <span id="currentBowlerStamina">Stamina: 100%</span>
+          <span id="currentBowlerStamina">Stamina: 84% • Fatigue 0</span>
           <span id="currentBowlerLimit">Limit: 0.0 / 4.0</span>
         </div>
         <div class="bowler-plan-box">
           <span>Engine Rule</span>
-          <strong id="bowlingPlanText">T20 only • no country boost • raw batter attributes vs bowler attributes</strong>
+          <strong id="bowlingPlanText">Bowl AI: Death-Over Lockdown (A:Rishi Kapoor B:Adil Qureshi C:Taran Mehta D:Manav Jain E:Vik Rao)</strong>
         </div>
       </article>
     </section>
 
     <section class="main-match-grid" id="mainMatchGrid">
-      <article class="card commentary-panel" id="commentaryPanel">
+      <article class="card commentary-panel" id="commentaryPanel" aria-hidden="false">
         <div class="panel-head">
           <h3>Commentary</h3>
           <span id="commentaryOverLabel">Over 0</span>
         </div>
         <div class="commentary-body">
-          <div class="commentary-list" id="commentaryList"></div>
+          <div class="commentary-list" id="commentaryList"><div class="commentary-item note"><strong>AI</strong><p>Attribute XI bowling AI selected: Death-Over Lockdown.</p><small>Bowl AI: Death-Over Lockdown (A:Rishi Kapoor B:Adil Qureshi C:Taran Mehta D:Manav Jain E:Vik Rao)</small></div><div class="commentary-item note"><strong>0.0</strong><p>T20 skill engine ready. This version uses raw attributes only: batter skill vs bowler skill.</p><small>No country boost. No real-world stat shortcut. No hidden team help.</small></div></div>
           <div class="over-timeline" id="overTimeline"></div>
         </div>
       </article>
@@ -1785,15 +1783,15 @@
         <div class="section-title">
           <h3><button id="scoreboardDropdownBtn" class="scoreboard-dropdown-btn" type="button" onclick="openScoreboardHub('scorecard')">Scoreboard ▾</button></h3>
           <div class="scorecard-title-actions">
-            <button id="scoreInnings1Tab" class="innings-tab active" type="button" onclick="selectScorecardInnings(1)"><span id="scoreInnings1TabName">1st Innings</span> <b id="scoreInnings1TabScore">0/0</b></button>
-            <button id="scoreInnings2Tab" class="innings-tab" type="button" onclick="selectScorecardInnings(2)" disabled><span id="scoreInnings2TabName">2nd Innings</span> <b id="scoreInnings2TabScore">—</b></button>
+            <button id="scoreInnings1Tab" class="innings-tab active" type="button" onclick="selectScorecardInnings(1)"><span id="scoreInnings1TabName">SX 1st</span> <b id="scoreInnings1TabScore">0/0</b></button>
+            <button id="scoreInnings2Tab" class="innings-tab" type="button" onclick="selectScorecardInnings(2)" disabled=""><span id="scoreInnings2TabName">2nd Innings</span> <b id="scoreInnings2TabScore">—</b></button>
           </div>
         </div>
         <div class="scorecard-body">
           <div class="scorecard-heading-line">
             <div>
-              <h3 id="scorecardInningsTitle">Innings</h3>
-              <p id="scorecardScoreLine">0/0 (0.0 ov)</p>
+              <h3 id="scorecardInningsTitle">Skill XI Innings</h3>
+              <p id="scorecardScoreLine">0/0 (0.0 ov) vs Attribute XI</p>
             </div>
           </div>
           <table class="score-table">
@@ -1802,22 +1800,132 @@
                 <th>Batter</th><th>R</th><th>B</th><th>4s</th><th>6s</th><th>SR</th>
               </tr>
             </thead>
-            <tbody id="battingTableBody"></tbody>
+            <tbody id="battingTableBody"><tr>
+          <td><strong>Aarav Khan *</strong><br><span style="color:var(--muted);font-size:10px">not out</span></td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>-</td>
+        </tr><tr>
+          <td><strong>Rayan Malik</strong><br><span style="color:var(--muted);font-size:10px">not out</span></td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>-</td>
+        </tr><tr>
+          <td><strong>Samir Das</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>-</td>
+        </tr><tr>
+          <td><strong>Imran Shah</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>-</td>
+        </tr><tr>
+          <td><strong>Zahid Ali</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>-</td>
+        </tr><tr>
+          <td><strong>Kamal Roy</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>-</td>
+        </tr><tr>
+          <td><strong>Nabil Chowdhury</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>-</td>
+        </tr><tr>
+          <td><strong>Farhan Mir</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>-</td>
+        </tr><tr>
+          <td><strong>Rafi Islam</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>-</td>
+        </tr><tr>
+          <td><strong>Sohan Patel</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>-</td>
+        </tr><tr>
+          <td><strong>Arman Gill</strong><br><span style="color:var(--muted);font-size:10px"></span></td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>0</td>
+          <td>-</td>
+        </tr></tbody>
           </table>
           <div class="extras-total-box">
             <div><span>Extras</span><b id="extrasLine">0 (wd 0, nb 0, b 0, lb 0)</b></div>
             <div><span>Total</span><b id="scorecardTotalLine">0/0 (0.0 ov)</b></div>
           </div>
           <div class="bowling-card-block">
-            <h4 id="bowlingCardTitle">Bowling</h4>
+            <h4 id="bowlingCardTitle">Attribute XI Bowling</h4>
             <table class="score-table bowling-table">
               <thead><tr><th>Bowler</th><th>O</th><th>R</th><th>W</th><th>Eco</th></tr></thead>
-              <tbody id="bowlingTableBody"></tbody>
+              <tbody id="bowlingTableBody"><tr>
+            <td>Rishi Kapoor</td>
+            <td>0.0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0.00</td>
+          </tr></tbody>
             </table>
           </div>
           <details class="debug-box">
             <summary>Debug State</summary>
-            <pre id="out">{}</pre>
+            <pre id="out">{
+  "phase": "innings1",
+  "inningsNo": 1,
+  "score": "0/0 (0.0)",
+  "battingAI": null,
+  "bowlingAI": {
+    "type": "bowling",
+    "modelKey": "DEATH_LOCK",
+    "modelName": "Death-Over Lockdown",
+    "description": "Keeps best death skills available for overs 16-20.",
+    "pattern": "CDEABCEDABCDEABCDABE",
+    "slots": {
+      "A": "Rishi_Kapoor",
+      "B": "Adil_Qureshi",
+      "C": "Taran_Mehta",
+      "D": "Manav_Jain",
+      "E": "Vik_Rao"
+    },
+    "names": {
+      "A": "Rishi Kapoor",
+      "B": "Adil Qureshi",
+      "C": "Taran Mehta",
+      "D": "Manav Jain",
+      "E": "Vik Rao"
+    }
+  },
+  "lastBattle": null
+}</pre>
             <button class="secondary small-action-btn" type="button" onclick="runAggressionDebugTests(true)">Run Aggression Tests</button>
             <pre id="aggressionDebugOut">Aggression tests not run yet.</pre>
           </details>
@@ -1830,11 +1938,11 @@
     <div class="ball-buttons">
       <button id="nextBallBtn" type="button" onclick="playNextBall()">▶ <span>Next Ball</span></button>
       <button id="playOverBtn" class="secondary" type="button" onclick="playOver()">⏩ <span>Next Over</span></button>
-      <button id="toggleCommentaryBtn" class="secondary" type="button" onclick="toggleCommentaryPanel()">Hide Commentary</button>
+      <button id="toggleCommentaryBtn" class="secondary" type="button" onclick="toggleCommentaryPanel()" aria-pressed="false">Hide Commentary</button>
       <button id="simInningsBtn" class="secondary" type="button" onclick="simulateCurrentInnings()">Simulate Innings</button>
       <button id="simMatchBtn" class="secondary" type="button" onclick="simulateWholeMatch()">Simulate Match</button>
-      <button id="nextInningsBtn" class="secondary" type="button" onclick="startNextInnings()">Next Innings</button>
-      <button id="saveExitBtn" class="save-exit-btn is-hidden" type="button" onclick="showMatchCompleteModal()">Save & Exit</button>
+      <button id="nextInningsBtn" class="secondary" type="button" onclick="startNextInnings()" disabled="">Next Innings</button>
+      <button id="saveExitBtn" class="save-exit-btn is-hidden" type="button" onclick="showMatchCompleteModal()" disabled="">Save &amp; Exit</button>
       <button class="secondary" type="button" onclick="openStressTestModal()">Stress Test</button>
       <button class="danger" type="button" onclick="resetMatchCenterState()">Reset</button>
     </div>
@@ -1847,7 +1955,7 @@
       <p id="matchCompleteScore">Scoreline</p>
       <div id="matchSummaryCard" class="match-summary-card"></div>
       <div class="player-option-actions" style="display:grid;gap:9px">
-        <button onclick="returnToSummaryPage()">Save & Exit</button>
+        <button onclick="returnToSummaryPage()">Save &amp; Exit</button>
         <button class="secondary" onclick="closeMatchCompleteModal()">Stay on Scorecard</button>
       </div>
     </div>
@@ -5137,22 +5245,56 @@
       return row;
     }
 
-    function runAggressionMatrixTest(matchesPerLevel = 50, options = {}) {
+    function stressPause(ms = 0) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function formatStressElapsed(startedAt) {
+      const seconds = Math.max(0, (Date.now() - startedAt) / 1000);
+      if (seconds < 60) return `${seconds.toFixed(1)}s`;
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.round(seconds % 60).toString().padStart(2, "0");
+      return `${mins}:${secs}`;
+    }
+
+    function renderStressProgress(title, current, total, detail = "", startedAt = Date.now()) {
+      const output = document.getElementById("stressSummary");
+      if (!output) return;
+      const pct = total ? clamp((current / total) * 100, 0, 100) : 0;
+      output.innerHTML = `
+        <div class="stress-grid">
+          <div class="stress-card"><span>Running</span><b>${title}</b></div>
+          <div class="stress-card"><span>Simulated</span><b>${current} / ${total}</b></div>
+          <div class="stress-card"><span>Progress</span><b>${pct.toFixed(1)}%</b></div>
+          <div class="stress-card"><span>Elapsed</span><b>${formatStressElapsed(startedAt)}</b></div>
+        </div>
+        <div style="height:14px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:10px 0 8px;border:1px solid rgba(255,255,255,.10)">
+          <span style="display:block;height:100%;width:${pct}%;background:linear-gradient(90deg,#38bdf8,#22c55e,#f6c453);box-shadow:0 0 18px rgba(56,189,248,.35)"></span>
+        </div>
+        <p class="stress-note"><strong>Status:</strong> ${detail || "Working..."}</p>
+      `;
+    }
+
+    async function runAggressionMatrixTest(matchesPerLevel = 50, options = {}) {
       const equalSkill = !!options.equalSkill;
       const modal = document.getElementById("stressTestModal");
-      const output = document.getElementById("stressSummary");
-      const modeLabel = equalSkill ? "equal-skill aggression matrix" : "real-squad aggression matrix";
+      const modeLabel = equalSkill ? "Equal Skill Aggression Matrix" : "Real Squad Aggression Matrix";
       if (modal) modal.classList.remove("hidden");
-      if (output) output.innerHTML = `<p class="stress-note">Running ${modeLabel}: 11 levels × ${matchesPerLevel} silent matches. This may take a few seconds...</p>`;
 
-      setTimeout(() => {
-        const savedState = matchState ? JSON.stringify(matchState) : null;
-        const savedCache = currentMatchCache;
-        const baseMatch = currentMatchCache || loadCurrentMatch();
-        const currentMatch = equalSkill ? createEqualSkillCurrentMatch(baseMatch) : baseMatch;
-        const matrixRows = [];
-        const detailRows = [];
+      const totalMatches = matchesPerLevel * 11;
+      const startedAt = Date.now();
+      let simulated = 0;
+      renderStressProgress(modeLabel, simulated, totalMatches, `Preparing 11 levels × ${matchesPerLevel} matches...`, startedAt);
+      await stressPause(20);
 
+      const savedState = matchState ? JSON.stringify(matchState) : null;
+      const savedCache = currentMatchCache;
+      const baseMatch = currentMatchCache || loadCurrentMatch();
+      const currentMatch = equalSkill ? createEqualSkillCurrentMatch(baseMatch) : baseMatch;
+      const matrixRows = [];
+      const detailRows = [];
+
+      try {
         for (let level = 0; level <= 10; level += 1) {
           const results = [];
           for (let i = 0; i < matchesPerLevel; i += 1) {
@@ -5160,17 +5302,38 @@
             result.testMode = equalSkill ? "equalSkill" : "realSquad";
             results.push(result);
             detailRows.push(result);
+            simulated += 1;
+
+            if (simulated === 1 || simulated === totalMatches || simulated % 5 === 0) {
+              renderStressProgress(
+                modeLabel,
+                simulated,
+                totalMatches,
+                `Level ${level}/10 • match ${i + 1}/${matchesPerLevel} • ${simulated} matches simulated so far`,
+                startedAt
+              );
+              await stressPause(0);
+            }
           }
           matrixRows.push(summarizeAggressionLevel(level, results, matrixRows[matrixRows.length - 1] || null));
+          renderStressProgress(
+            modeLabel,
+            simulated,
+            totalMatches,
+            `Finished level ${level}/10. Building live summary...`,
+            startedAt
+          );
+          await stressPause(0);
         }
 
         latestAggressionMatrixResults = { summary: matrixRows, details: detailRows, matchesPerLevel, equalSkill };
+        renderAggressionMatrixResults(matrixRows, matchesPerLevel, { equalSkill });
+      } finally {
         isStressTesting = false;
         matchState = savedState ? JSON.parse(savedState) : null;
         currentMatchCache = savedCache;
-        renderAggressionMatrixResults(matrixRows, matchesPerLevel, { equalSkill });
         render();
-      }, 30);
+      }
     }
 
     function renderAggressionMatrixResults(rows, matchesPerLevel, options = {}) {
@@ -5277,46 +5440,58 @@
       return notes.length ? `⚠️ ${notes.join("; ")}` : "OK";
     }
 
-    function runEqualBellCurveBalanceTest(matchCount = 1000) {
+    async function runEqualBellCurveBalanceTest(matchCount = 1000) {
       const modal = document.getElementById("stressTestModal");
-      const output = document.getElementById("stressSummary");
       if (modal) modal.classList.remove("hidden");
-      if (output) output.innerHTML = `<p class="stress-note">Running Equal Bell Curve Balance Test: ${matchCount} equal-skill AI matches with batting order split 50/50. This checks average score, wickets, win split, and score distribution.</p>`;
+      const title = matchCount >= 1000 ? "Equal Bell Curve 1000" : `Equal Bell Curve ${matchCount}`;
+      const startedAt = Date.now();
+      renderStressProgress(title, 0, matchCount, "Preparing equal-skill teams and split batting order...", startedAt);
+      await stressPause(20);
 
-      setTimeout(() => {
-        const savedState = matchState ? JSON.stringify(matchState) : null;
-        const savedCache = currentMatchCache;
-        const savedToss = localStorage.getItem(TOSS_KEY);
-        const baseMatch = currentMatchCache || loadCurrentMatch();
-        const equalBase = createEqualSkillCurrentMatch(baseMatch);
-        const results = [];
-        isStressTesting = true;
+      const savedState = matchState ? JSON.stringify(matchState) : null;
+      const savedCache = currentMatchCache;
+      const savedToss = localStorage.getItem(TOSS_KEY);
+      const baseMatch = currentMatchCache || loadCurrentMatch();
+      const equalBase = createEqualSkillCurrentMatch(baseMatch);
+      const results = [];
+      isStressTesting = true;
 
-        try {
-          localStorage.removeItem(TOSS_KEY);
-          for (let i = 0; i < matchCount; i += 1) {
-            const aBatsFirst = i % 2 === 0;
-            const testMatch = {
-              ...equalBase,
-              toss: {
-                winner: aBatsFirst ? equalBase.userTeam : equalBase.computerTeam,
-                decision: "Bat"
-              }
-            };
-            results.push(runOneStressMatch(testMatch));
+      try {
+        localStorage.removeItem(TOSS_KEY);
+        for (let i = 0; i < matchCount; i += 1) {
+          const aBatsFirst = i % 2 === 0;
+          const testMatch = {
+            ...equalBase,
+            toss: {
+              winner: aBatsFirst ? equalBase.userTeam : equalBase.computerTeam,
+              decision: "Bat"
+            }
+          };
+          results.push(runOneStressMatch(testMatch));
+
+          const simulated = i + 1;
+          if (simulated === 1 || simulated === matchCount || simulated % 10 === 0) {
+            renderStressProgress(
+              title,
+              simulated,
+              matchCount,
+              `${simulated} / ${matchCount} matches simulated so far • batting order split 50/50`,
+              startedAt
+            );
+            await stressPause(0);
           }
-        } finally {
-          isStressTesting = false;
-          if (savedToss !== null) localStorage.setItem(TOSS_KEY, savedToss);
-          else localStorage.removeItem(TOSS_KEY);
-          matchState = savedState ? JSON.parse(savedState) : null;
-          currentMatchCache = savedCache;
         }
+      } finally {
+        isStressTesting = false;
+        if (savedToss !== null) localStorage.setItem(TOSS_KEY, savedToss);
+        else localStorage.removeItem(TOSS_KEY);
+        matchState = savedState ? JSON.parse(savedState) : null;
+        currentMatchCache = savedCache;
+      }
 
-        latestStressResults = results;
-        renderEqualBellCurveResults(results, matchCount);
-        render();
-      }, 30);
+      latestStressResults = results;
+      renderEqualBellCurveResults(results, matchCount);
+      render();
     }
 
     function renderEqualBellCurveResults(results, matchCount) {
@@ -5580,42 +5755,54 @@
       return notes.length ? `⚠️ ${notes.join("; ")}` : "OK";
     }
 
-    function runOutcomeWeightProbe(trialsPerLevelPhase = 5000, options = {}) {
+    async function runOutcomeWeightProbe(trialsPerLevelPhase = 5000, options = {}) {
       const equalSkill = !!options.equalSkill;
       const modal = document.getElementById("stressTestModal");
-      const output = document.getElementById("stressSummary");
-      const modeLabel = equalSkill ? "equal-skill weight probe" : "real-squad weight probe";
+      const modeLabel = equalSkill ? "Equal Skill Weight Probe" : "Real Squad Weight Probe";
       if (modal) modal.classList.remove("hidden");
-      if (output) output.innerHTML = `<p class="stress-note">Running ${modeLabel}: 11 levels × 3 phases × ${trialsPerLevelPhase} ball trials. This isolates outcome weights and may take a few seconds...</p>`;
 
-      setTimeout(() => {
-        const savedState = matchState ? JSON.stringify(matchState) : null;
-        const savedCache = currentMatchCache;
-        const baseMatch = currentMatchCache || loadCurrentMatch();
-        const currentMatch = equalSkill ? createEqualSkillCurrentMatch(baseMatch) : baseMatch;
-        const phases = ["Powerplay", "Middle", "Death"];
-        const rows = [];
+      const phases = ["Powerplay", "Middle", "Death"];
+      const totalTrials = 11 * phases.length * trialsPerLevelPhase;
+      const startedAt = Date.now();
+      let simulatedTrials = 0;
+      renderStressProgress(modeLabel, simulatedTrials, totalTrials, `Preparing 11 levels × 3 phases × ${trialsPerLevelPhase} ball trials...`, startedAt);
+      await stressPause(20);
 
-        isStressTesting = true;
-        try {
-          phases.forEach(phaseName => {
-            let previous = null;
-            for (let level = 0; level <= 10; level += 1) {
-              const row = runOneOutcomeWeightProbeLevel(currentMatch, level, phaseName, trialsPerLevelPhase);
-              row.check = scoreOutcomeWeightProbeRow(row, previous);
-              rows.push(row);
-              previous = row;
-            }
-          });
-        } finally {
-          isStressTesting = false;
-          matchState = savedState ? JSON.parse(savedState) : null;
-          currentMatchCache = savedCache;
-          latestOutcomeWeightProbeResults = { rows, trialsPerLevelPhase, equalSkill };
-          renderOutcomeWeightProbeResults(rows, trialsPerLevelPhase, { equalSkill });
-          render();
+      const savedState = matchState ? JSON.stringify(matchState) : null;
+      const savedCache = currentMatchCache;
+      const baseMatch = currentMatchCache || loadCurrentMatch();
+      const currentMatch = equalSkill ? createEqualSkillCurrentMatch(baseMatch) : baseMatch;
+      const rows = [];
+
+      isStressTesting = true;
+      try {
+        for (const phaseName of phases) {
+          let previous = null;
+          for (let level = 0; level <= 10; level += 1) {
+            const row = runOneOutcomeWeightProbeLevel(currentMatch, level, phaseName, trialsPerLevelPhase);
+            row.check = scoreOutcomeWeightProbeRow(row, previous);
+            rows.push(row);
+            previous = row;
+            simulatedTrials += trialsPerLevelPhase;
+            renderStressProgress(
+              modeLabel,
+              simulatedTrials,
+              totalTrials,
+              `${phaseName} • Level ${level}/10 complete • ${simulatedTrials} ball trials simulated so far`,
+              startedAt
+            );
+            await stressPause(0);
+          }
         }
-      }, 30);
+      } finally {
+        isStressTesting = false;
+        matchState = savedState ? JSON.parse(savedState) : null;
+        currentMatchCache = savedCache;
+      }
+
+      latestOutcomeWeightProbeResults = { rows, trialsPerLevelPhase, equalSkill };
+      renderOutcomeWeightProbeResults(rows, trialsPerLevelPhase, { equalSkill });
+      render();
     }
 
     function renderOutcomeWeightProbeResults(rows, trialsPerLevelPhase, options = {}) {
@@ -6691,5 +6878,6 @@
 
     init();
   </script>
-</body>
-</html>
+
+
+</body></html>
