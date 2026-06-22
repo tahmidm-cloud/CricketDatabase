@@ -295,6 +295,11 @@
       border-color: rgba(248, 113, 113, 0.65);
     }
 
+    .score-over-chip-row.completed-over .ball-chip {
+      opacity: 0.82;
+      filter: saturate(0.92);
+    }
+
     @media (max-width: 640px) {
       .score-current-over {
         margin-left: 0;
@@ -2058,27 +2063,27 @@
       0.76, // 4
       0.93, // 5 ODI default
       1.12, // 6
-      1.35, // 7 controlled T20 aggression, riskier than 6
-      1.72, // 8 T20 default
-      2.45, // 9 heavy attack
-      3.85  // 10+ ultra/death: max danger
+      1.34, // 7 controlled T20 aggression, riskier than 6
+      1.58, // 8 T20 default
+      2.05, // 9 heavy attack
+      2.65  // 10+ ultra/death: high risk, not cartoonish
     ];
 
-    const AGG_WICKET_FLOOR_BY_LEVEL = [0.34, 0.40, 0.47, 0.56, 0.68, 0.84, 1.02, 1.22, 1.58, 2.25, 3.35];
+    const AGG_WICKET_FLOOR_BY_LEVEL = [0.34, 0.40, 0.47, 0.56, 0.68, 0.84, 1.02, 1.20, 1.42, 1.82, 2.35];
 
     // Final wicket-weight guardrails are monotonic. Level 10 must stay dangerous even when a batter is set.
-    const AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL = [0.55, 0.70, 0.90, 1.15, 1.45, 1.85, 2.40, 3.15, 4.70, 9.40, 16.50];
-    const AGG_WICKET_WEIGHT_CAP_BY_LEVEL = [6.0, 6.8, 7.6, 8.6, 9.8, 11.2, 13.0, 15.0, 18.8, 25.5, 34.0];
+    const AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL = [0.55, 0.70, 0.90, 1.15, 1.45, 1.85, 2.40, 3.05, 4.10, 6.40, 9.80];
+    const AGG_WICKET_WEIGHT_CAP_BY_LEVEL = [6.0, 6.8, 7.6, 8.6, 9.8, 11.2, 13.0, 14.4, 16.0, 18.8, 22.5];
 
     // Tempo alignment: this is the scoring side of the aggression bar.
     // Important: at high intent, runs must come from 4/6/W pressure, not safe 1/2/3 rotation.
-    const AGG_RUN_TEMPO_BY_LEVEL = [0.36, 0.42, 0.50, 0.60, 0.70, 0.78, 0.88, 0.98, 1.08, 1.32, 1.55];
-    const AGG_SAFE_ROTATION_TEMPO_BY_LEVEL = [0.36, 0.42, 0.50, 0.58, 0.66, 0.72, 0.78, 0.82, 0.78, 0.62, 0.48];
-    const AGG_TWO_TEMPO_BY_LEVEL = [0.34, 0.40, 0.47, 0.55, 0.62, 0.68, 0.72, 0.74, 0.70, 0.52, 0.36];
-    const AGG_THREE_TEMPO_BY_LEVEL = [0.25, 0.30, 0.36, 0.42, 0.50, 0.56, 0.60, 0.60, 0.56, 0.42, 0.28];
-    const AGG_BOUNDARY_TEMPO_BY_LEVEL = [0.12, 0.18, 0.26, 0.36, 0.50, 0.68, 0.86, 1.03, 1.28, 2.25, 3.85];
-    const AGG_DOT_TEMPO_BY_LEVEL = [2.70, 2.35, 2.05, 1.78, 1.52, 1.30, 1.12, 0.98, 0.88, 0.62, 0.44];
-    const AGG_DOT_CAP_BY_LEVEL = [78, 72, 66, 61, 55, 50, 46, 43, 38, 31, 24];
+    const AGG_RUN_TEMPO_BY_LEVEL = [0.36, 0.42, 0.50, 0.58, 0.68, 0.76, 0.84, 0.92, 0.98, 1.08, 1.16];
+    const AGG_SAFE_ROTATION_TEMPO_BY_LEVEL = [0.36, 0.42, 0.50, 0.58, 0.66, 0.72, 0.76, 0.76, 0.68, 0.56, 0.48];
+    const AGG_TWO_TEMPO_BY_LEVEL = [0.34, 0.40, 0.47, 0.55, 0.62, 0.67, 0.70, 0.68, 0.58, 0.42, 0.34];
+    const AGG_THREE_TEMPO_BY_LEVEL = [0.25, 0.30, 0.36, 0.42, 0.50, 0.55, 0.58, 0.55, 0.48, 0.34, 0.24];
+    const AGG_BOUNDARY_TEMPO_BY_LEVEL = [0.12, 0.18, 0.26, 0.34, 0.48, 0.64, 0.78, 0.92, 1.02, 1.34, 1.72];
+    const AGG_DOT_TEMPO_BY_LEVEL = [2.70, 2.35, 2.05, 1.82, 1.58, 1.36, 1.18, 1.04, 0.96, 0.84, 0.72];
+    const AGG_DOT_CAP_BY_LEVEL = [78, 72, 66, 62, 56, 51, 47, 44, 41, 37, 34];
 
     function getAggressionZone(value) {
       const v = clamp(Math.round(value ?? 8), 0, 10);
@@ -2793,8 +2798,8 @@
       }
 
       if (phase === "Death") {
-        if (wickets <= 3) desired += 0.8;
-        if (wickets >= 6) desired -= 0.9;
+        if (wickets <= 3) desired = Math.max(desired + 0.35, 9.4);
+        if (wickets >= 6) desired = Math.min(desired - 1.1, 8.4);
       }
 
       const pressure = getBatterPressureProfile(batterStat);
@@ -2817,10 +2822,10 @@
 
       // New meter chase logic: required rate is the anchor, phase controls urgency.
       if (phase === "Powerplay") desired = requiredRR <= 7.2 ? requiredRR - 0.5 : requiredRR + 0.1;
-      if (phase === "Middle") desired = requiredRR <= 7.2 ? requiredRR - 0.2 : requiredRR + 0.35;
-      if (phase === "Death") desired = requiredRR + 0.9;
-      if (ballsLeft <= 24) desired = Math.max(desired, requiredRR + 1.2);
-      if (ballsLeft <= 12) desired = Math.max(desired, requiredRR + 1.8);
+      if (phase === "Middle") desired = requiredRR <= 7.2 ? requiredRR - 0.2 : requiredRR + 0.25;
+      if (phase === "Death") desired = requiredRR + 0.45;
+      if (ballsLeft <= 24) desired = Math.max(desired, requiredRR + 0.65);
+      if (ballsLeft <= 12) desired = Math.max(desired, requiredRR + 1.15);
 
       switch (ai?.modelKey) {
         case "WICKET_CHASE":
@@ -2842,8 +2847,8 @@
       if (wicketsLeft <= 3 && ballsLeft > 18) desired -= 1.0;
       else if (wicketsLeft <= 5 && ballsLeft > 30) desired -= 0.45;
       if (need <= 18 && ballsLeft >= 18) desired -= 0.9;
-      if (requiredRR >= 12.0) desired += 0.7;
-      if (requiredRR >= 14.0) desired += 1.0;
+      if (requiredRR >= 12.0) desired += 0.35;
+      if (requiredRR >= 14.0) desired += 0.75;
 
       const pressure = getBatterPressureProfile(batterStat);
       desired += getBatterSloggerFactor(bat) * 0.55;
@@ -2872,8 +2877,11 @@
         if (requiredRR !== null && requiredRR >= 13.0) minLevel = Math.max(minLevel, 9);
       }
 
-      // Level 10 is for true death/required-rate pressure or a set hitter. No casual L10 in middle overs.
-      const canUseTen = phase === "Death" || ballsLeft <= 18 || (requiredRR !== null && requiredRR >= 12.5) || (pressure.settled > 0.75 && getBatterSloggerFactor(bat) > 0.55);
+      // Level 10 is for true required-rate/death-over pressure, not any ordinary death over.
+      const deathNeedTen = phase === "Death" && (Number(desiredRpo || 0) >= 12.4 || (requiredRR !== null && requiredRR >= 12.8) || ballsLeft <= 12);
+      const firstInningsNeedTen = !inn.target && phase === "Death" && wickets <= 3 && ballsLeft <= 18 && Number(desiredRpo || 0) >= 12.2;
+      const setHitterNeedTen = pressure.settled > 0.82 && getBatterSloggerFactor(bat) > 0.65 && Number(desiredRpo || 0) >= 12.2;
+      const canUseTen = deathNeedTen || firstInningsNeedTen || setHitterNeedTen;
       if (!canUseTen) maxLevel = Math.min(maxLevel, 9);
 
       if (pressure.tired > 0.70 && phase !== "Death") maxLevel = Math.min(maxLevel, 8);
@@ -3302,6 +3310,10 @@
         bowlingStats,
         currentOverEvents: [],
         currentOverWickets: 0,
+        lastCompletedOverEvents: [],
+        lastCompletedOverRuns: 0,
+        lastCompletedOverWickets: 0,
+        lastCompletedOverNo: 0,
         overSummaries: [],
         fallOfWickets: [],
         partnerships: [],
@@ -3317,7 +3329,7 @@
       const bowlingXI = getSelectedXI(currentMatch, first.bowlingSide);
 
       const state = {
-        version: "t20-skill-v3-ai-meter-target-chase",
+        version: "t20-skill-v3-ai-weight-balance-both-places",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -3644,21 +3656,21 @@
       // Ultra/death intent: trade safe rotation for explosive/wicket outcomes.
       if (agg >= 9) {
         const ultra = agg >= 10 ? 1 : 0.45;
-        multiply(weights, "one", 0.82 - ultra * 0.14);
-        multiply(weights, "two", 0.76 - ultra * 0.18);
-        multiply(weights, "three", 0.72 - ultra * 0.20);
-        multiply(weights, "four", 1.12 + ultra * 0.16);
-        multiply(weights, "six", 1.22 + ultra * 0.28);
-        multiply(weights, "wicket", 1.08 + ultra * 0.16);
+        multiply(weights, "one", 0.90 - ultra * 0.10);
+        multiply(weights, "two", 0.82 - ultra * 0.16);
+        multiply(weights, "three", 0.78 - ultra * 0.18);
+        multiply(weights, "four", 1.02 + ultra * 0.10);
+        multiply(weights, "six", 1.06 + ultra * 0.16);
+        multiply(weights, "wicket", 1.00 + ultra * 0.08);
       }
 
       if (phase === "Death" && agg >= 9) {
         const ultraDeath = agg >= 10 ? 1 : 0.5;
-        multiply(weights, "one", 0.88 - ultraDeath * 0.10);
-        multiply(weights, "two", 0.82 - ultraDeath * 0.16);
-        multiply(weights, "four", 1.08 + ultraDeath * 0.14);
-        multiply(weights, "six", 1.16 + ultraDeath * 0.24);
-        multiply(weights, "wicket", 1.10 + ultraDeath * 0.18);
+        multiply(weights, "one", 0.94 - ultraDeath * 0.08);
+        multiply(weights, "two", 0.88 - ultraDeath * 0.12);
+        multiply(weights, "four", 1.02 + ultraDeath * 0.08);
+        multiply(weights, "six", 1.06 + ultraDeath * 0.12);
+        multiply(weights, "wicket", 1.03 + ultraDeath * 0.10);
       }
 
       multiply(weights, "wicket", aggressionWicketRisk);
@@ -3691,10 +3703,10 @@
       // Wicket cap is aggression-aware. The old universal cap made level 10 too survivable.
       const wicketFloor = AGG_WICKET_WEIGHT_FLOOR_BY_LEVEL[agg] ?? 1.5;
       const wicketCap = AGG_WICKET_WEIGHT_CAP_BY_LEVEL[agg] ?? 12.0;
-      const fourFloorByLevel = [0.35, 0.55, 0.75, 1.00, 1.40, 1.90, 2.30, 2.80, 3.30, 5.20, 7.20];
-      const sixFloorByLevel = [0.05, 0.08, 0.12, 0.20, 0.35, 0.55, 0.85, 1.10, 1.60, 3.60, 5.80];
-      const fourCapByLevel = [7.5, 8.2, 9.0, 10.0, 11.2, 12.4, 13.4, 14.8, 17.5, 23.5, 30.0];
-      const sixCapByLevel = [2.2, 2.8, 3.5, 4.5, 5.8, 7.2, 8.8, 10.8, 14.5, 23.5, 32.0];
+      const fourFloorByLevel = [0.35, 0.55, 0.75, 1.00, 1.35, 1.80, 2.15, 2.55, 3.00, 4.50, 5.80];
+      const sixFloorByLevel = [0.05, 0.08, 0.12, 0.20, 0.32, 0.50, 0.75, 0.95, 1.35, 2.70, 3.80];
+      const fourCapByLevel = [7.5, 8.2, 9.0, 10.0, 11.0, 12.0, 12.8, 13.6, 14.8, 18.0, 21.0];
+      const sixCapByLevel = [2.2, 2.8, 3.5, 4.5, 5.6, 6.8, 8.0, 9.2, 10.8, 16.0, 20.0];
       weights.wicket = clamp(weights.wicket, wicketFloor, wicketCap);
       weights.six = clamp(weights.six, sixFloorByLevel[agg] ?? 1.2, sixCapByLevel[agg] ?? 12.8);
       weights.four = clamp(weights.four, fourFloorByLevel[agg] ?? 2.8, fourCapByLevel[agg] ?? 14.8);
@@ -3968,6 +3980,17 @@
       ensureScoreboardData(inn);
       const bowlerStat = ensureBowlerStat(inn.currentBowlerKey);
       recordOverSummary(inn);
+
+      // Keep the completed over visible in the top score strip until the next ball starts.
+      // Previously the display disappeared because currentOverEvents was cleared immediately.
+      inn.lastCompletedOverEvents = (inn.currentOverEvents || []).map(ev => ({
+        label: ev.label || "•",
+        type: ev.type || "dot"
+      }));
+      inn.lastCompletedOverRuns = Number(inn.currentOverRuns || 0);
+      inn.lastCompletedOverWickets = Number(inn.currentOverWickets || 0);
+      inn.lastCompletedOverNo = Math.ceil(Number(inn.balls || 0) / 6);
+
       if (inn.currentOverRuns === 0) bowlerStat.maidens += 1;
       bowlerStat.lastOverBowled = Math.floor((inn.balls - 1) / 6);
       inn.previousBowlerKey = inn.currentBowlerKey;
@@ -4528,13 +4551,13 @@
 
       const canRestore =
         saved &&
-        ["t20-skill-v3-outcome-weight-probe", "t20-skill-v3-equal-skill-no-governor", "t20-skill-v3-equal-skill-aggression-test", "t20-skill-v3-ultra-aggression-risk", "t20-skill-v3-all-format-aggression-pill", "t20-skill-v3-scoreboard-hub-hotfix", "t20-skill-v3-scoreboard-hub", "t20-skill-v3-two-color-prediction-bar", "t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
+        ["t20-skill-v3-ai-weight-balance-both-places", "t20-skill-v3-equal-skill-no-governor", "t20-skill-v3-equal-skill-aggression-test", "t20-skill-v3-ultra-aggression-risk", "t20-skill-v3-all-format-aggression-pill", "t20-skill-v3-scoreboard-hub-hotfix", "t20-skill-v3-scoreboard-hub", "t20-skill-v3-two-color-prediction-bar", "t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
         saved.matchIdentity === currentIdentity &&
         saved.phase !== "completed";
 
       matchState = canRestore ? saved : createInitialMatchState(currentMatchCache);
       hydrateScoreboardData(matchState);
-      matchState.version = "t20-skill-v3-outcome-weight-probe";
+      matchState.version = "t20-skill-v3-ai-weight-balance-both-places";
       persist();
       render();
       runAggressionDebugTests(false);
@@ -4684,7 +4707,7 @@
       const first = getStressFirstInningsInfo(currentMatch, teams);
 
       const state = {
-        version: "t20-skill-v3-outcome-weight-probe",
+        version: "t20-skill-v3-ai-weight-balance-both-places",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -5733,9 +5756,13 @@
       if (!Array.isArray(inn.fallOfWickets)) inn.fallOfWickets = [];
       if (!Array.isArray(inn.partnerships)) inn.partnerships = [];
       if (!Array.isArray(inn.currentOverEvents)) inn.currentOverEvents = [];
+      if (!Array.isArray(inn.lastCompletedOverEvents)) inn.lastCompletedOverEvents = [];
       if (!inn.extras) inn.extras = { wides: 0, noBalls: 0, byes: 0, legByes: 0 };
       inn.currentOverRuns = Number(inn.currentOverRuns || 0);
       inn.currentOverWickets = Number(inn.currentOverWickets || 0);
+      inn.lastCompletedOverRuns = Number(inn.lastCompletedOverRuns || 0);
+      inn.lastCompletedOverWickets = Number(inn.lastCompletedOverWickets || 0);
+      inn.lastCompletedOverNo = Number(inn.lastCompletedOverNo || 0);
       inn.partnershipRuns = Number(inn.partnershipRuns || 0);
       inn.partnershipBalls = Number(inn.partnershipBalls || 0);
       return inn;
@@ -6251,16 +6278,29 @@
       const wrap = document.getElementById("scoreCurrentOverWrap");
       const row = document.getElementById("scoreCurrentOverBalls");
       if (!wrap || !row) return;
+      ensureScoreboardData(inn);
 
-      const events = Array.isArray(inn?.currentOverEvents) ? inn.currentOverEvents : [];
+      const liveEvents = Array.isArray(inn?.currentOverEvents) ? inn.currentOverEvents : [];
+      const lastEvents = Array.isArray(inn?.lastCompletedOverEvents) ? inn.lastCompletedOverEvents : [];
+      const showingLive = liveEvents.length > 0;
+      const events = showingLive ? liveEvents : lastEvents;
+      const label = wrap.querySelector("em");
+
       row.innerHTML = "";
+      row.classList.toggle("completed-over", !showingLive && events.length > 0);
 
       if (!events.length) {
         wrap.style.display = "none";
+        if (label) label.textContent = "This over";
         return;
       }
 
       wrap.style.display = "inline-flex";
+      if (label) {
+        label.textContent = showingLive
+          ? "This over"
+          : `Over ${Number(inn?.lastCompletedOverNo || Math.floor((inn?.balls || 0) / 6))}`;
+      }
       events.forEach(ev => {
         const chip = document.createElement("span");
         chip.className = `ball-chip ${ev.type || "dot"}`;
@@ -6285,7 +6325,8 @@
       });
 
       timeline.innerHTML = "";
-      (inn?.currentOverEvents || []).forEach(ev => {
+      const timelineEvents = (inn?.currentOverEvents?.length ? inn.currentOverEvents : inn?.lastCompletedOverEvents) || [];
+      timelineEvents.forEach(ev => {
         const chip = document.createElement("div");
         chip.className = `ball-chip ${ev.type}`;
         chip.textContent = ev.label;
