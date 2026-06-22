@@ -1795,17 +1795,19 @@
   <div id="stressTestModal" class="player-option-modal hidden">
     <div class="player-option-box" style="width:min(880px,94vw)">
       <button class="player-option-close" onclick="closeStressTestModal()">×</button>
-      <h2>T20 Engine Stress Test V3 Fixed</h2>
+      <h2>T20 Engine Stress Test + Aggression Matrix</h2>
       <p>Runs silent AI-vs-AI simulations using the same attribute-vs-attribute ball engine. Your live match is restored after testing.</p>
       <div class="stress-actions">
         <button onclick="runStressTest(50)">Run 50</button>
         <button onclick="runStressTest(200)">Run 200</button>
         <button onclick="runStressTest(1000)">Run 1000</button>
+        <button onclick="runAggressionMatrixTest(50)">Aggression 50 / Level</button>
+        <button class="secondary" onclick="runAggressionMatrixTest(100)">Aggression 100 / Level</button>
         <button class="secondary" onclick="downloadStressSummaryCSV()">Download Summary CSV</button>
         <button class="secondary" onclick="downloadStressCSVChunks()">Download Detail CSV Chunks</button>
       </div>
       <div id="stressSummary" class="stress-output">
-        <p class="stress-note">Run a test to see average score, wickets, chase rate, score bands, and boundary balance.</p>
+        <p class="stress-note">Run a normal match stress test, or run Aggression 50 / Level to force every level from 0 to 10 and check RPO, wickets, all-out rate, and collapse danger.</p>
       </div>
     </div>
   </div>
@@ -2735,6 +2737,24 @@
       return clamp(Math.round(aggression), 0, 10);
     }
 
+    function getForcedAggressionLevel() {
+      const v = Number(matchState?.forcedAggressionLevel);
+      return Number.isFinite(v) ? clamp(Math.round(v), 0, 10) : null;
+    }
+
+    function getActiveAggressionForKey(inn, batterKey) {
+      const forced = getForcedAggressionLevel();
+      if (forced !== null) return forced;
+      return inn?.battingAI ? getComputerAggression(inn, batterKey) : getAggression(batterKey);
+    }
+
+    function setOpeningAggressionForInnings(inn, level = 8) {
+      if (!matchState || !inn) return;
+      const v = clamp(Math.round(level), 0, 10);
+      matchState.aggressionByKey[inn.strikerKey] = v;
+      matchState.aggressionByKey[inn.nonStrikerKey] = v;
+    }
+
     function getAIPlanSummary(inn) {
       const parts = [];
       if (inn?.battingAI) parts.push(`Bat AI: ${inn.battingAI.modelName}`);
@@ -3141,7 +3161,7 @@
       const bowlingXI = getSelectedXI(currentMatch, first.bowlingSide);
 
       const state = {
-        version: "t20-skill-v3-ultra-aggression-risk",
+        version: "t20-skill-v3-aggression-matrix-test",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -3348,7 +3368,7 @@
       const bowler = getCurrentBowler();
       const batterStat = ensureBatterStat(inn.strikerKey);
       const bowlerStat = ensureBowlerStat(inn.currentBowlerKey);
-      const agg = inn.battingAI ? getComputerAggression(inn, inn.strikerKey) : getAggression(inn.strikerKey);
+      const agg = getActiveAggressionForKey(inn, inn.strikerKey);
       matchState.aggressionByKey[inn.strikerKey] = agg;
       const phase = getPhase(inn.balls);
 
@@ -3554,7 +3574,7 @@
       const bowler = getCurrentBowler();
       const batterStat = ensureBatterStat(inn.strikerKey);
       const bowlerStat = ensureBowlerStat(inn.currentBowlerKey);
-      const agg = getAggression(inn.strikerKey);
+      const agg = getActiveAggressionForKey(inn, inn.strikerKey);
 
       const batPhysical = battingSkill(batter).physical;
       const bowlPhysical = bowlingSkill(bowler).physical;
@@ -3737,7 +3757,8 @@
       const nextKey = getPlayerKey(next);
       inn.strikerKey = nextKey;
       ensureBatterStat(nextKey);
-      matchState.aggressionByKey[nextKey] = 8;
+      const forced = getForcedAggressionLevel();
+      matchState.aggressionByKey[nextKey] = forced !== null ? forced : 8;
       inn.nextBatterIndex += 1;
       inn.partnershipRuns = 0;
       inn.partnershipBalls = 0;
@@ -3838,8 +3859,7 @@
       matchState.phase = "innings2";
       scorecardInningsNo = 2;
       const inn = currentInnings();
-      matchState.aggressionByKey[inn.strikerKey] = 8;
-      matchState.aggressionByKey[inn.nonStrikerKey] = 8;
+      setOpeningAggressionForInnings(inn, getForcedAggressionLevel() ?? 8);
       addCommentary(matchState, "0.0", `${battingTeam} begin the chase. Target: ${first.runs + 1}.`, "note", "Second innings started.");
       addInningsAIIntro(matchState, inn);
       persist();
@@ -4299,13 +4319,13 @@
 
       const canRestore =
         saved &&
-        ["t20-skill-v3-all-format-aggression-pill", "t20-skill-v3-scoreboard-hub-hotfix", "t20-skill-v3-scoreboard-hub", "t20-skill-v3-two-color-prediction-bar", "t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
+        ["t20-skill-v3-aggression-matrix-test", "t20-skill-v3-ultra-aggression-risk", "t20-skill-v3-all-format-aggression-pill", "t20-skill-v3-scoreboard-hub-hotfix", "t20-skill-v3-scoreboard-hub", "t20-skill-v3-two-color-prediction-bar", "t20-skill-v3-scorecard-summary-exit", "t20-skill-v3-two-color-prediction-bar-hide-commentary"].includes(saved.version) &&
         saved.matchIdentity === currentIdentity &&
         saved.phase !== "completed";
 
       matchState = canRestore ? saved : createInitialMatchState(currentMatchCache);
       hydrateScoreboardData(matchState);
-      matchState.version = "t20-skill-v3-all-format-aggression-pill";
+      matchState.version = "t20-skill-v3-aggression-matrix-test";
       persist();
       render();
       runAggressionDebugTests(false);
@@ -4351,7 +4371,7 @@
       const first = getStressFirstInningsInfo(currentMatch, teams);
 
       const state = {
-        version: "t20-skill-v3-ultra-aggression-risk",
+        version: "t20-skill-v3-aggression-matrix-test",
         matchIdentity: getMatchIdentity(currentMatch),
         format: "T20",
         maxOvers: 20,
@@ -4424,8 +4444,7 @@
       matchState.phase = "innings2";
       const inn = currentInnings();
       forceAIForInnings(inn);
-      matchState.aggressionByKey[inn.strikerKey] = 8;
-      matchState.aggressionByKey[inn.nonStrikerKey] = 8;
+      setOpeningAggressionForInnings(inn, getForcedAggressionLevel() ?? 8);
     }
 
     function playNextBallSilent() {
@@ -4520,6 +4539,191 @@
         out[key] = (out[key] || 0) + 1;
       });
       return out;
+    }
+
+    function inningsRpo(inn) {
+      if (!inn?.balls) return 0;
+      return Number((Number(inn.runs || 0) / (Number(inn.balls || 0) / 6)).toFixed(2));
+    }
+
+    function inningsScoreAtOver(inn, overLimit = 5) {
+      const summaries = Array.isArray(inn?.overSummaries) ? inn.overSummaries : [];
+      const exact = summaries.filter(row => Number(row.over) <= overLimit).sort((a, b) => Number(a.over) - Number(b.over)).at(-1);
+      if (exact) return { runs: Number(exact.score || 0), wickets: Number(exact.wicketsTotal || 0) };
+      return { runs: Number(inn?.runs || 0), wickets: Number(inn?.wickets || 0) };
+    }
+
+    function runOneAggressionLevelMatch(currentMatch, level) {
+      isStressTesting = true;
+      try {
+        matchState = createStressInitialMatchState(currentMatch);
+        matchState.forcedAggressionLevel = clamp(Math.round(level), 0, 10);
+        const firstInn = currentInnings();
+        if (firstInn) setOpeningAggressionForInnings(firstInn, matchState.forcedAggressionLevel);
+
+        let safety = 600;
+        while (safety-- > 0 && matchState && !matchState.completed) {
+          if (matchState.phase === "break") {
+            startNextInningsSilent();
+            const secondInn = currentInnings();
+            if (secondInn) setOpeningAggressionForInnings(secondInn, matchState.forcedAggressionLevel);
+            continue;
+          }
+          playNextBallSilent();
+        }
+
+        return collectAggressionMatrixMatchResult(matchState, level);
+      } finally {
+        isStressTesting = false;
+      }
+    }
+
+    function collectAggressionMatrixMatchResult(state, level) {
+      const base = collectStressMatchResult(state);
+      const i1 = state?.innings?.[0] || null;
+      const i2 = state?.innings?.[1] || null;
+      const first5 = inningsScoreAtOver(i1, 5);
+      const second5 = inningsScoreAtOver(i2, 5);
+      return {
+        ...base,
+        aggressionLevel: Number(level),
+        zone: getAggressionZone(level),
+        targetRpo: BALANCED_RPO_BY_AGG[clamp(Math.round(level), 0, 10)],
+        firstRpo: inningsRpo(i1),
+        secondRpo: inningsRpo(i2),
+        firstAllOut: Number(i1?.wickets || 0) >= 10,
+        secondAllOut: Number(i2?.wickets || 0) >= 10,
+        first5Runs: first5.runs,
+        first5Wickets: first5.wickets,
+        second5Runs: second5.runs,
+        second5Wickets: second5.wickets
+      };
+    }
+
+    function avgValue(rows, getter) {
+      if (!rows.length) return 0;
+      return rows.reduce((sum, row) => sum + (Number(getter(row)) || 0), 0) / rows.length;
+    }
+
+    function scoreAggressionLevelHealth(row, previousRow = null) {
+      const notes = [];
+      if (row.level === 7 && previousRow && row.avgWickets > previousRow.avgWickets + 0.9) notes.push("L7 too dangerous vs L6");
+      if (row.level === 8 && previousRow && row.avgWickets <= previousRow.avgWickets) notes.push("L8 should be riskier than L7");
+      if (row.level === 9 && row.avgWickets < 5.5) notes.push("L9 may be too safe");
+      if (row.level === 10 && row.avgWickets < 6.8) notes.push("L10 too safe");
+      if (row.level === 10 && row.allOutPct < 25) notes.push("L10 all-out rate low");
+      if (row.level <= 3 && row.avgRpo > 6.2) notes.push("defensive levels scoring too fast");
+      if (row.level >= 8 && row.avgRpo < 6.0 && row.avgWickets < 7) notes.push("attack not rewarding enough");
+      return notes.length ? `⚠️ ${notes.join("; ")}` : "OK";
+    }
+
+    function summarizeAggressionLevel(level, results, previousRow = null) {
+      const inningsRows = results.flatMap(row => [
+        { runs: row.firstRuns, wickets: row.firstWickets, balls: row.firstBalls, rpo: row.firstRpo, allOut: row.firstAllOut, fours: row.firstFours, sixes: row.firstSixes, fiveRuns: row.first5Runs, fiveWickets: row.first5Wickets },
+        { runs: row.secondRuns, wickets: row.secondWickets, balls: row.secondBalls, rpo: row.secondRpo, allOut: row.secondAllOut, fours: row.secondFours, sixes: row.secondSixes, fiveRuns: row.second5Runs, fiveWickets: row.second5Wickets }
+      ].filter(item => Number(item.balls) > 0));
+
+      const firstRows = results.map(row => ({ runs: row.firstRuns, wickets: row.firstWickets, balls: row.firstBalls, rpo: row.firstRpo, allOut: row.firstAllOut, fours: row.firstFours, sixes: row.firstSixes, fiveRuns: row.first5Runs, fiveWickets: row.first5Wickets }));
+      const row = {
+        level,
+        zone: getAggressionZone(level),
+        targetRpo: BALANCED_RPO_BY_AGG[level],
+        matches: results.length,
+        innings: inningsRows.length,
+        avgScore: avgValue(inningsRows, r => r.runs),
+        avgRpo: avgValue(inningsRows, r => r.rpo),
+        avgWickets: avgValue(inningsRows, r => r.wickets),
+        avgBalls: avgValue(inningsRows, r => r.balls),
+        allOutPct: inningsRows.length ? inningsRows.filter(r => r.allOut).length / inningsRows.length * 100 : 0,
+        score200Pct: inningsRows.length ? inningsRows.filter(r => r.runs >= 200).length / inningsRows.length * 100 : 0,
+        under100Pct: inningsRows.length ? inningsRows.filter(r => r.runs < 100).length / inningsRows.length * 100 : 0,
+        avgFours: avgValue(inningsRows, r => r.fours),
+        avgSixes: avgValue(inningsRows, r => r.sixes),
+        avg5OverScore: avgValue(firstRows, r => r.fiveRuns),
+        avg5OverWickets: avgValue(firstRows, r => r.fiveWickets),
+        firstAvgScore: avgValue(firstRows, r => r.runs),
+        firstAvgRpo: avgValue(firstRows, r => r.rpo),
+        firstAvgWickets: avgValue(firstRows, r => r.wickets)
+      };
+      row.health = scoreAggressionLevelHealth(row, previousRow);
+      return row;
+    }
+
+    function runAggressionMatrixTest(matchesPerLevel = 50) {
+      const modal = document.getElementById("stressTestModal");
+      const output = document.getElementById("stressSummary");
+      if (modal) modal.classList.remove("hidden");
+      if (output) output.innerHTML = `<p class="stress-note">Running aggression matrix: 11 levels × ${matchesPerLevel} silent matches. This may take a few seconds...</p>`;
+
+      setTimeout(() => {
+        const savedState = matchState ? JSON.stringify(matchState) : null;
+        const savedCache = currentMatchCache;
+        const currentMatch = currentMatchCache || loadCurrentMatch();
+        const matrixRows = [];
+        const detailRows = [];
+
+        for (let level = 0; level <= 10; level += 1) {
+          const results = [];
+          for (let i = 0; i < matchesPerLevel; i += 1) {
+            const result = runOneAggressionLevelMatch(currentMatch, level);
+            results.push(result);
+            detailRows.push(result);
+          }
+          matrixRows.push(summarizeAggressionLevel(level, results, matrixRows[matrixRows.length - 1] || null));
+        }
+
+        latestAggressionMatrixResults = { summary: matrixRows, details: detailRows, matchesPerLevel };
+        isStressTesting = false;
+        matchState = savedState ? JSON.parse(savedState) : null;
+        currentMatchCache = savedCache;
+        renderAggressionMatrixResults(matrixRows, matchesPerLevel);
+        render();
+      }, 30);
+    }
+
+    function renderAggressionMatrixResults(rows, matchesPerLevel) {
+      const output = document.getElementById("stressSummary");
+      if (!output) return;
+      const format = n => Number(n || 0).toFixed(1);
+      const pctText = n => `${Number(n || 0).toFixed(1)}%`;
+      const trend = rows.map(r => `L${r.level}: ${format(r.avgRpo)} RPO / ${format(r.avgWickets)} wkts`).join(" • ");
+      output.innerHTML = `
+        <div class="stress-grid">
+          <div class="stress-card"><span>Levels Tested</span><b>0-10</b></div>
+          <div class="stress-card"><span>Matches / Level</span><b>${matchesPerLevel}</b></div>
+          <div class="stress-card"><span>Total Matches</span><b>${matchesPerLevel * 11}</b></div>
+          <div class="stress-card"><span>Total Innings</span><b>${matchesPerLevel * 22}</b></div>
+        </div>
+        <table class="stress-table">
+          <thead>
+            <tr>
+              <th>Level</th><th>Zone</th><th>Target RPO</th><th>Avg RPO</th><th>Avg Score</th><th>Avg Wkts</th><th>All out</th><th>200+</th><th>&lt;100</th><th>5 ov score</th><th>5 ov wkts</th><th>4s</th><th>6s</th><th>Check</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(row => `
+              <tr>
+                <td><strong>${row.level}</strong></td>
+                <td>${row.zone}</td>
+                <td>${format(row.targetRpo)}</td>
+                <td>${format(row.avgRpo)}</td>
+                <td>${format(row.avgScore)}</td>
+                <td>${format(row.avgWickets)}</td>
+                <td>${pctText(row.allOutPct)}</td>
+                <td>${pctText(row.score200Pct)}</td>
+                <td>${pctText(row.under100Pct)}</td>
+                <td>${format(row.avg5OverScore)}</td>
+                <td>${format(row.avg5OverWickets)}</td>
+                <td>${format(row.avgFours)}</td>
+                <td>${format(row.avgSixes)}</td>
+                <td style="text-align:left;white-space:normal;min-width:160px">${row.health}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        <p class="stress-note"><strong>How to read this:</strong> Target RPO is the aggression intent curve, not a guaranteed score. Level 10 should show high wickets/all-outs and may have lower actual RPO if collapses happen. Level 7 should be the lowest-risk attacking gear, but not a free survival mode.</p>
+        <p class="stress-note"><strong>Trend:</strong> ${trend}</p>
+      `;
     }
 
     function runStressTest(count = 200) {
